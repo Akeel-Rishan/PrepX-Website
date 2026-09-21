@@ -24,8 +24,8 @@ async function testDatabaseConnection(): Promise<void> {
   loadEnvConfig(process.cwd());
 
   const supabaseUrl = getRequiredEnvironmentVariable('NEXT_PUBLIC_SUPABASE_URL');
-  const serviceRoleKey = getRequiredEnvironmentVariable('SUPABASE_SERVICE_ROLE_KEY');
-  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+  const secretKey = getRequiredEnvironmentVariable('SUPABASE_SECRET_KEY');
+  const supabase = createClient(supabaseUrl, secretKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
