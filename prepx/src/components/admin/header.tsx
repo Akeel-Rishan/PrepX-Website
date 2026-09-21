@@ -1,0 +1,2 @@
+// Admin header placeholder.
+export {};

@@ -1,0 +1,2 @@
+// Admin sidebar placeholder.
+export {};
