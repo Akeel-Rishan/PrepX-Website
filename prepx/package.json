@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:db": "tsx scripts/test-db.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -32,6 +33,7 @@
     "prettier": "^3.9.8",
     "prettier-config-standard": "^7.0.0",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
