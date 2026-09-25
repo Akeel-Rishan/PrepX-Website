@@ -16,10 +16,12 @@ function load(relative) {
   m.filename = filename;
   m.paths = module.paths;
   m.require = (name) => {
+    if (name === 'react') return { ...React, cache: fn => fn };
     if (name === 'server-only') return {};
-    if (name === 'next/cache') return { unstable_noStore() {} };
+    if (name === 'next/cache') return { unstable_noStore() {}, unstable_cache: fn => fn };
     if (name === '@/lib/supabase/server') return { createAdminClient: () => client };
     if (name === '@/lib/utils') return load('src/lib/utils.ts');
+    if (name.startsWith('@/')) return load('src/' + name.slice(2) + '.ts');
     if (name === 'next/link') return { __esModule: true, default: ({ children, ...props }) => React.createElement('a', props, children) };
     return require(name);
   };
@@ -34,6 +36,17 @@ async function main() {
   assert.equal((await data.getStudentsWithPagination({ page: 999 })).currentPage, 3);
   assert.equal(new Set(pages.flatMap(p => p.students.map(s => s.id))).size, 60);
   const examId = pages[0].students[0].examination_id;
+  const exams = load('src/lib/data/examinations.ts');
+  const examinationRows = await exams.getExaminationsWithCounts();
+  assert.ok(examinationRows.length > 0);
+  for (const exam of examinationRows) {
+    const { count, error } = await client.from('students').select('id', { count: 'exact', head: true }).eq('examination_id', exam.id);
+    assert.equal(error, null);
+    assert.equal(exam.studentCount, count, 'Embedded examination counts must match database counts');
+  }
+  const options = await exams.getExaminationOptions();
+  assert.equal(options.length, examinationRows.length);
+  assert.deepEqual(Object.keys(options[0]).sort(), ['id', 'name', 'year']);
   const filtered = await data.getStudentsWithPagination({ search: 'Zahira' });
   assert.ok(filtered.students.length > 0);
   assert.ok(filtered.students.every(s => s.school_name.includes('Zahira')));

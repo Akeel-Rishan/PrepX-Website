@@ -1,11 +1,12 @@
 import 'server-only';
 
-import { unstable_noStore as noStore } from 'next/cache';
+import { cache } from 'react';
+import { unstable_cache, unstable_noStore as noStore } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/server';
 import type { Student, Examination } from '@/types';
 
 export type StudentWithExam = Student & {
-  examination: Pick<Examination, 'id' | 'name' | 'year'> | null;
+  examination: Pick<Examination, 'id' | 'name' | 'year' | 'status'> | null;
 };
 export interface StudentFilters {
   page?: number;
@@ -25,7 +26,7 @@ export interface PaginatedStudents {
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const selection = `id, examination_id, full_name, index_number, nic_number,
   school_name, examination_center, created_at, updated_at,
-  examination:examinations!examination_id(id, name, year)`;
+  examination:examinations!examination_id(id, name, year, status)`;
 
 // Escape LIKE wildcards; quoted OR values also protect PostgREST delimiters.
 function contains(value: string): string {
@@ -94,9 +95,8 @@ export async function getStudentsWithPagination(
   }
 }
 
-export async function getDistinctSchools(examinationId?: string): Promise<string[]> {
-  noStore();
-  try {
+const readDistinctSchools = unstable_cache(
+  async (examinationId: string): Promise<string[]> => {
     const supabase = createAdminClient();
     const schools = new Set<string>();
     // Read all batches so Supabase's row limit cannot truncate the dropdown.
@@ -107,26 +107,38 @@ export async function getDistinctSchools(examinationId?: string): Promise<string
       const { data, error } = await query.order('id').range(from, from + 999);
       if (error) {
         console.error('[Students Schools Error]', { code: error.code });
-        return [];
+        throw new Error('School options query failed');
       }
       const rows: Pick<Student, 'school_name'>[] = data ?? [];
       for (const row of rows) if (row.school_name?.trim()) schools.add(row.school_name);
       if (rows.length < 1000) break;
     }
     return Array.from(schools).sort();
+  },
+  ['student-school-options-v1'],
+  { revalidate: 60, tags: ['student-lookups'] }
+);
+
+export async function getDistinctSchools(examinationId?: string): Promise<string[]> {
+  noStore();
+  try {
+    return await readDistinctSchools(
+      examinationId && uuid.test(examinationId) ? examinationId : ''
+    );
   } catch {
     console.error('[Students Schools Error] Query failed unexpectedly');
     return [];
   }
 }
 
-export async function getStudentById(id: string): Promise<StudentWithExam | null> {
+// Metadata and the page share one lookup during this server render only.
+export const getStudentById = cache(async (id: string): Promise<StudentWithExam | null> => {
   noStore();
   if (!uuid.test(id)) return null;
   try {
     const { data, error } = await createAdminClient()
       .from('students')
-      .select('*, examination:examinations!examination_id(id, name, year)')
+      .select('*, examination:examinations!examination_id(id, name, year, status)')
       .eq('id', id)
       .single();
     if (error) {
@@ -138,4 +150,4 @@ export async function getStudentById(id: string): Promise<StudentWithExam | null
     console.error('[Student Query Error] Query failed unexpectedly');
     return null;
   }
-}
+});

@@ -1,9 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+﻿export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   public: {
     Tables: {
       admin_profiles: {
+        Relationships: [];
         Row: {
           id: string;
           user_id: string;
@@ -21,6 +22,7 @@ export type Database = {
         };
       };
       examinations: {
+        Relationships: [];
         Row: {
           id: string;
           name: string;
@@ -56,6 +58,15 @@ export type Database = {
         };
       };
       students: {
+        Relationships: [
+          {
+            foreignKeyName: 'students_examination_id_fkey';
+            columns: ['examination_id'];
+            isOneToOne: false;
+            referencedRelation: 'examinations';
+            referencedColumns: ['id'];
+          },
+        ];
         Row: {
           id: string;
           examination_id: string;
@@ -91,6 +102,15 @@ export type Database = {
         };
       };
       subjects: {
+        Relationships: [
+          {
+            foreignKeyName: 'subjects_examination_id_fkey';
+            columns: ['examination_id'];
+            isOneToOne: false;
+            referencedRelation: 'examinations';
+            referencedColumns: ['id'];
+          },
+        ];
         Row: {
           id: string;
           examination_id: string;
@@ -126,6 +146,22 @@ export type Database = {
         };
       };
       student_results: {
+        Relationships: [
+          {
+            foreignKeyName: 'student_results_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'students';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'student_results_subject_id_fkey';
+            columns: ['subject_id'];
+            isOneToOne: false;
+            referencedRelation: 'subjects';
+            referencedColumns: ['id'];
+          },
+        ];
         Row: {
           id: string;
           student_id: string;
@@ -152,6 +188,7 @@ export type Database = {
         };
       };
       audit_logs: {
+        Relationships: [];
         Row: {
           id: string;
           admin_id: string | null;
@@ -187,6 +224,7 @@ export type Database = {
         };
       };
     };
+    Views: { [_ in never]: never };
     Functions: {
       is_admin: {
         Args: Record<string, never>;

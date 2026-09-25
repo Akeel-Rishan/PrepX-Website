@@ -10,7 +10,7 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  description?: string;
+  description?: ReactNode;
   children: ReactNode;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -77,9 +77,9 @@ export function Modal({
               {title}
             </h3>
             {description && (
-              <p id={descriptionId} className="mt-0.5 text-sm text-gray-500">
+              <div id={descriptionId} className="mt-0.5 text-sm text-gray-500">
                 {description}
-              </p>
+              </div>
             )}
           </div>
           <button
@@ -103,7 +103,7 @@ interface ConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  description: string;
+  description: ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: 'danger' | 'warning' | 'default';

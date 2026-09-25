@@ -1,35 +1,83 @@
-﻿import Link from 'next/link';
-import { ChevronLeft, Users } from 'lucide-react';
+﻿import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { getStudentById, type StudentWithExam } from '@/lib/data/students';
+import { getExaminationOptions } from '@/lib/data/examinations';
+import { createAdminClient } from '@/lib/supabase/server';
+import { StudentForm } from './_components/student-form';
 
 interface StudentDetailPageProps {
   params: { id: string };
+}
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export async function generateMetadata({ params }: StudentDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  if (id === 'new') return { title: 'Add Student | PrepX Admin' };
+  const student = UUID_REGEX.test(id) ? await getStudentById(id) : null;
+  return { title: student ? student.full_name + ' | PrepX Admin' : 'Student | PrepX Admin' };
 }
 
 export default async function StudentDetailPage({
   params,
 }: StudentDetailPageProps): Promise<JSX.Element> {
   const { id } = await params;
+  const isNew = id === 'new';
+  if (!isNew && !UUID_REGEX.test(id)) notFound();
+  let student: StudentWithExam | null = null;
+  let resultCount = 0;
+  if (!isNew) {
+    student = await getStudentById(id);
+    if (!student) notFound();
+    const { count, error } = await createAdminClient()
+      .from('student_results')
+      .select('id', { count: 'exact', head: true })
+      .eq('student_id', id);
+    // Do not present a misleading zero-grade deletion warning after a failed query.
+    if (error) throw new Error('Unable to load student grade count. Please try again.');
+    resultCount = count ?? 0;
+  }
+  const examinations = isNew ? await getExaminationOptions() : [];
+  const pageTitle = isNew ? 'Create Student' : student!.full_name;
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-6">
-        <Link
-          href="/admin/students"
-          className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-        >
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div className="flex items-center gap-2 text-sm text-gray-500">
+        <Link href="/admin/students" className="flex items-center gap-1 hover:text-gray-700">
           <ChevronLeft aria-hidden="true" className="h-4 w-4" />
-          Back to Students
+          Students
         </Link>
+        <span>/</span>
+        <span className="max-w-[200px] truncate font-medium text-gray-900">{pageTitle}</span>
       </div>
-      <div className="flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-12 text-center">
-        <Users aria-hidden="true" className="mb-3 h-10 w-10 text-gray-300" />
-        <h2 className="mb-2 text-lg font-semibold text-gray-900">
-          {id === 'new' ? 'Add Student' : 'Manage Student'}
-        </h2>
-        <p className="text-sm text-gray-400">
-          Student form for: <code className="break-all rounded bg-gray-100 px-1">{id}</code>
-        </p>
-        <p className="mt-1 text-xs text-gray-400">Full add/edit form built in Step 5.2</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">{pageTitle}</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            {isNew
+              ? 'Enter the student details below.'
+              : 'Index: ' + student!.index_number + ' · School: ' + student!.school_name}
+          </p>
+        </div>
+        {!isNew && resultCount > 0 && (
+          <div className="flex-shrink-0 pt-1">
+            <Badge variant="info">
+              {resultCount} grade {resultCount === 1 ? 'entry' : 'entries'}
+            </Badge>
+          </div>
+        )}
       </div>
+      <StudentForm
+        mode={isNew ? 'create' : 'edit'}
+        student={student}
+        examinations={examinations.map(({ id: examId, name, year }) => ({
+          id: examId,
+          name,
+          year,
+        }))}
+        resultCount={resultCount}
+      />
     </div>
   );
 }

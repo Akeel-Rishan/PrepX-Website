@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { PlusCircle } from 'lucide-react';
 import { getDistinctSchools, getStudentsWithPagination } from '@/lib/data/students';
-import { getExaminationsWithCounts } from '@/lib/data/examinations';
+import { getExaminationOptions } from '@/lib/data/examinations';
 import { Pagination } from '@/components/admin/pagination';
 import { StudentsFilterBar } from './_components/students-filter-bar';
 import { StudentsTable } from './_components/students-table';
@@ -39,7 +39,7 @@ export default async function StudentsPage({
   const school = text(params.school);
   const [result, examinations, schools] = await Promise.all([
     getStudentsWithPagination({ page, search, examinationId: examId, school }),
-    getExaminationsWithCounts(),
+    getExaminationOptions(),
     getDistinctSchools(examId || undefined),
   ]);
   const currentParams: Record<string, string> = {};

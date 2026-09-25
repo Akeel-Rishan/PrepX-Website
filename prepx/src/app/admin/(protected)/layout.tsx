@@ -9,18 +9,20 @@ export default async function AdminLayout({
   children: ReactNode;
 }): Promise<JSX.Element> {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  if (error || !user) redirect('/admin/login');
+  const { data, error } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  if (error || !claims?.sub) redirect('/admin/login');
 
   const { data: profile, error: profileError } = await supabase
     .from('admin_profiles')
     .select('id')
-    .eq('user_id', user.id)
+    .eq('user_id', claims.sub)
     .single();
   if (profileError || !profile) redirect('/admin/login');
 
-  return <AdminShell userEmail={user.email ?? 'Administrator'}>{children}</AdminShell>;
+  return (
+    <AdminShell userEmail={typeof claims.email === 'string' ? claims.email : 'Administrator'}>
+      {children}
+    </AdminShell>
+  );
 }

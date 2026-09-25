@@ -24,10 +24,10 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
   );
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  // Verify the signature against cached public keys; this also refreshes expired
+  // sessions. Never authorize from an unverified getSession() result.
+  const { data, error } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
   const { pathname, search } = request.nextUrl;
   const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
 
@@ -41,11 +41,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     const isLoginPage = pathname === '/admin/login' || pathname === '/admin/login/';
     let isAdmin = false;
 
-    if (user && !error) {
+    if (userId && !error) {
       const { data: profile, error: profileError } = await supabase
         .from('admin_profiles')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .single();
       isAdmin = !profileError && !!profile;
     }
@@ -66,16 +66,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  matcher: [
-    // Always protect admin routes, including paths with file extensions.
-    '/admin/:path*',
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico
-     * - Files with extensions (svg, png, jpg, etc.)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  // Public pages and static assets need no admin session work. Actions still
+  // authorize independently; all admin paths (including extensions) are covered.
+  matcher: ['/admin/:path*'],
 };
