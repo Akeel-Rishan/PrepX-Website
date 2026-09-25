@@ -1,0 +1,125 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowRight, FileCheck2 } from 'lucide-react';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { ExaminationSelector, type ImportExamination } from './_components/examination-selector';
+import { FileDropzone } from './_components/file-dropzone';
+import { ImportInstructions } from './_components/import-instructions';
+import { StepIndicator } from './_components/step-indicator';
+import { TemplateDownloadButton } from './_components/template-download-button';
+import { UpcomingSteps } from './_components/upcoming-steps';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const VALID_MIME_TYPES = new Set([
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv',
+  'application/csv',
+]);
+const STEPS = [
+  { label: 'Select File', description: 'Choose exam and file' },
+  { label: 'Preview', description: 'Validate rows' },
+  { label: 'Confirm', description: 'Review changes' },
+  { label: 'Done', description: 'Import result' },
+];
+
+interface ImportClientProps {
+  examinations: ImportExamination[];
+  hiddenExaminationCount: number;
+}
+
+/** Coordinates Step 1 examination, template, and file-selection state. */
+export function ImportClient({ examinations, hiddenExaminationCount }: ImportClientProps): JSX.Element {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedExaminationId, setSelectedExaminationId] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [templateError, setTemplateError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
+  const [showPlaceholder, setShowPlaceholder] = useState(false);
+
+  useEffect(() => {
+    setIsInstructionsOpen(window.matchMedia('(min-width: 768px)').matches);
+  }, []);
+
+  const selectedExamination = useMemo(
+    () => examinations.find((exam) => exam.id === selectedExaminationId) ?? null,
+    [examinations, selectedExaminationId]
+  );
+
+  function selectExamination(id: string) {
+    setSelectedExaminationId(id);
+    setSelectedFile(null);
+    setFileError(null);
+    setTemplateError(null);
+    setShowPlaceholder(false);
+    setCurrentStep(1);
+  }
+
+  function validateFile(file: File) {
+    const lowerName = file.name.toLowerCase();
+    const validExtension = lowerName.endsWith('.xlsx') || lowerName.endsWith('.csv');
+    if (!validExtension || !VALID_MIME_TYPES.has(file.type)) {
+      setSelectedFile(null);
+      setFileError('Only .xlsx and .csv files are accepted.');
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      setSelectedFile(null);
+      setFileError(`File size must be under 5 MB. Your file is ${(file.size / (1024 * 1024)).toFixed(2)} MB.`);
+      return;
+    }
+    if (file.size === 0) {
+      setSelectedFile(null);
+      setFileError('The selected file is empty.');
+      return;
+    }
+    setSelectedFile(file);
+    setFileError(null);
+    setShowPlaceholder(false);
+  }
+
+  return (
+    <div className="space-y-5">
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+        <StepIndicator steps={STEPS} currentStep={currentStep} />
+      </section>
+
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Step 1 of 4</p><h3 className="mt-1 text-lg font-semibold text-gray-900">Select Examination and File</h3><p className="mt-1 text-sm text-gray-600">Choose an open examination, download its template, then upload the completed file.</p></div>
+        <div className="space-y-5">
+          <ExaminationSelector examinations={examinations} selectedId={selectedExaminationId} onChange={selectExamination} hiddenExaminationCount={hiddenExaminationCount} />
+          <div>
+            <p className="mb-1.5 text-sm font-medium text-gray-800">Results file</p>
+            <FileDropzone
+              selectedFile={selectedFile}
+              error={fileError}
+              disabled={!selectedExaminationId}
+              isDragging={isDragging}
+              onDraggingChange={setIsDragging}
+              onFileCandidate={validateFile}
+              onClear={() => { setSelectedFile(null); setFileError(null); setShowPlaceholder(false); }}
+            />
+          </div>
+          {templateError && <Alert variant="error" onClose={() => setTemplateError(null)}>{templateError}</Alert>}
+          {selectedFile && (
+            <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+              <FileCheck2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-700" />
+              <div><p className="text-sm font-semibold text-blue-900">Ready to Parse</p><p className="mt-0.5 text-sm text-blue-800">The file passed initial checks. Parsing and row validation will be connected in Step 8.2.</p></div>
+            </div>
+          )}
+          {showPlaceholder && <Alert variant="info" onClose={() => setShowPlaceholder(false)}>Parsing will be available in the next step.</Alert>}
+          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 md:flex-row md:items-center md:justify-between">
+            <TemplateDownloadButton examinationId={selectedExamination?.id ?? null} examinationYear={selectedExamination?.year ?? null} onError={(message) => setTemplateError(message || null)} />
+            <Button onClick={() => setShowPlaceholder(true)} disabled={!selectedExaminationId || !selectedFile} className="w-full md:w-auto">Continue to Preview <ArrowRight aria-hidden="true" className="h-4 w-4" /></Button>
+          </div>
+        </div>
+      </section>
+
+      <ImportInstructions isOpen={isInstructionsOpen} onToggle={() => setIsInstructionsOpen((open) => !open)} />
+      <UpcomingSteps />
+    </div>
+  );
+}
