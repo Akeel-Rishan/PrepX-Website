@@ -33,13 +33,15 @@ async function testDatabaseConnection(): Promise<void> {
   });
 
   for (const table of TABLES) {
-    const { count, error } = await supabase.from(table).select('*', {
-      count: 'exact',
-      head: true,
-    });
+    // GET retains PostgREST errors that an empty HEAD response can obscure.
+    // Select only one ID; count still reports the total without exposing row data.
+    const { count, error, status } = await supabase
+      .from(table)
+      .select('id', { count: 'exact' })
+      .limit(1);
 
-    if (error) {
-      throw new Error(`${table}: ${error.message}`);
+    if (error || status >= 400) {
+      throw new Error(`${table}: ${error?.message ?? `HTTP ${status}`}`);
     }
 
     console.log(`✓ ${table}: accessible (${count ?? 0} rows)`);

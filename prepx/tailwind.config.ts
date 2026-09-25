@@ -15,7 +15,7 @@ const config: Config = {
           900: '#1e3a8a',
         },
       },
-      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+      fontFamily: { sans: ['var(--font-inter)', 'system-ui', 'sans-serif'] },
     },
   },
   plugins: [],
