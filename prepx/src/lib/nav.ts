@@ -37,7 +37,7 @@ export const NAV_GROUPS: NavGroup[] = [
     groupLabel: 'Publishing',
     items: [
       { label: 'Import Data', href: '/admin/import', icon: Upload },
-      { label: 'Review', href: '/admin/review', icon: ClipboardCheck },
+      { label: 'Review Incomplete', href: '/admin/review', icon: ClipboardCheck },
       { label: 'Publication', href: '/admin/publication', icon: Send },
     ],
   },

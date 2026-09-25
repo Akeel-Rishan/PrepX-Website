@@ -15,3 +15,26 @@
 /* Print styles — implemented in Phase 12 */
 @media print {
 }
+@keyframes review-sheet-mobile-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.review-grade-sheet {
+  animation: review-sheet-mobile-in 180ms ease-out;
+}
+
+@media (min-width: 768px) {
+  @keyframes review-sheet-desktop-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
+  .review-grade-sheet {
+    animation-name: review-sheet-desktop-in;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-grade-sheet { animation: none; }
+}
