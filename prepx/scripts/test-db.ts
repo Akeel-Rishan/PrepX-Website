@@ -47,6 +47,26 @@ async function testDatabaseConnection(): Promise<void> {
     console.log(`✓ ${table}: accessible (${count ?? 0} rows)`);
   }
 
+  const { data: examination, error: examinationError } = await supabase
+    .from('examinations')
+    .select('id')
+    .limit(1)
+    .maybeSingle();
+  if (examinationError) {
+    throw new Error(`publication validation exam lookup: ${examinationError.message}`);
+  }
+  if (examination) {
+    const { error: joinedResultsError } = await supabase
+      .from('student_results')
+      .select('student_id, subject_id, grade, student:students!inner(examination_id)')
+      .eq('student.examination_id', examination.id)
+      .limit(1);
+    if (joinedResultsError) {
+      throw new Error(`publication validation result join: ${joinedResultsError.message}`);
+    }
+    console.log('✓ publication validation: examination-scoped result join is available');
+  }
+
   const { error: importFunctionError } = await supabase.rpc('import_exam_results', {
     p_admin_id: '00000000-0000-0000-0000-000000000000',
     p_examination_id: '00000000-0000-0000-0000-000000000000',
