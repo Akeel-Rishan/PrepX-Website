@@ -63,14 +63,14 @@ export function validateImportRows(
   rows: RawImportRow[],
   subjects: ImportValidationSubject[],
   existingIndexNumbers: string[],
-  existingNicNumbers: string[]
+  existingNicNumbers: string[],
+  missingRequiredColumns: readonly string[] = [],
+  detectedSubjectNames?: readonly string[]
 ): ValidatedRow[] {
   const expectedSubjectNames = subjects.map((subject) => subject.subject_name);
-  const indexCounts = new Map<string, number>();
-  for (const row of rows) {
-    const index = row.index_number.trim().toUpperCase();
-    if (index) indexCounts.set(index, (indexCounts.get(index) ?? 0) + 1);
-  }
+  const detectedSubjects = new Set(detectedSubjectNames ?? expectedSubjectNames);
+  const seenIndexes = new Map<string, number>();
+  const seenNics = new Map<string, number>();
   const existingIndexes = new Set(existingIndexNumbers.map((value) => value.trim().toUpperCase()));
   const existingNics = new Set(existingNicNumbers.map((value) => value.trim().toUpperCase()).filter(Boolean));
   const knownColumns = new Set<string>([...IMPORT_BASE_COLUMNS, ...expectedSubjectNames]);
@@ -85,24 +85,57 @@ export function validateImportRows(
     const add = (column: string, message: string, severity: CellError['severity']) =>
       cellErrors.push({ column, message, severity });
 
-    if (!index_number) add('index_number', 'Index number is required.', 'error');
-    else {
-      if (index_number.length > 50) add('index_number', 'Index number must be 50 characters or fewer.', 'error');
-      if (!INDEX_NUMBER.test(index_number)) add('index_number', 'Index number must contain only letters and numbers.', 'error');
-      if ((indexCounts.get(index_number) ?? 0) > 1) add('index_number', 'Duplicate index number in this file.', 'error');
-      if (existingIndexes.has(index_number)) add('index_number', 'This index number already exists and will be updated.', 'warning');
+    if (!missingRequiredColumns.includes('index_number')) {
+      if (!index_number) add('index_number', 'Index number is required.', 'error');
+      else {
+        const hasValidLength = index_number.length <= 50;
+        const hasValidFormat = INDEX_NUMBER.test(index_number);
+        if (!hasValidLength) {
+          add('index_number', 'Index number must be 50 characters or fewer.', 'error');
+        }
+        if (!hasValidFormat) {
+          add('index_number', 'Index number must contain only letters and numbers.', 'error');
+        }
+        if (hasValidLength && hasValidFormat) {
+          const firstRow = seenIndexes.get(index_number);
+          if (firstRow !== undefined) {
+            add(
+              'index_number',
+              `Duplicate index number in this file; first used on row ${firstRow}.`,
+              'error'
+            );
+          } else {
+            seenIndexes.set(index_number, row.rowNumber);
+          }
+          if (existingIndexes.has(index_number)) {
+            add('index_number', 'This index number already exists and will be updated.', 'warning');
+          }
+        }
+      }
     }
-    if (!full_name) add('full_name', 'Student name is required.', 'error');
-    else if (full_name.length > 200) add('full_name', 'Student name must be under 200 characters.', 'error');
-    if (!school_name) add('school_name', 'School name is required.', 'error');
-    else if (school_name.length > 200) add('school_name', 'School name must be under 200 characters.', 'error');
+    if (!missingRequiredColumns.includes('full_name')) {
+      if (!full_name) add('full_name', 'Student name is required.', 'error');
+      else if (full_name.length > 200) add('full_name', 'Student name must be under 200 characters.', 'error');
+    }
+    if (!missingRequiredColumns.includes('school_name')) {
+      if (!school_name) add('school_name', 'School name is required.', 'error');
+      else if (school_name.length > 200) add('school_name', 'School name must be under 200 characters.', 'error');
+    }
     if (nic_number) {
       const oldFormat = OLD_NIC.test(nic_number);
       const newFormat = NEW_NIC.test(nic_number);
       if (oldFormat) add('nic_number', 'Old NIC format detected. Verify this is correct.', 'warning');
       else if (!newFormat) add('nic_number', 'Invalid NIC number format.', 'error');
-      if ((oldFormat || newFormat) && existingNics.has(nic_number)) {
-        add('nic_number', 'This NIC number already belongs to a student in this examination. Verify it before importing.', 'warning');
+      if (oldFormat || newFormat) {
+        const firstRow = seenNics.get(nic_number);
+        if (firstRow !== undefined) {
+          add('nic_number', `Duplicate NIC in this file; first used on row ${firstRow}.`, 'error');
+        } else {
+          seenNics.set(nic_number, row.rowNumber);
+        }
+        if (existingNics.has(nic_number)) {
+          add('nic_number', 'This NIC number already belongs to a student in this examination. Verify it before importing.', 'warning');
+        }
       }
     }
     if (examination_center.length > 200) {
@@ -114,6 +147,7 @@ export function validateImportRows(
       const subjectName = subject.subject_name;
       const value = (row.grades[subjectName] ?? '').trim().toUpperCase();
       grades[subjectName] = value;
+      if (!detectedSubjects.has(subjectName)) continue;
       if (!value) {
         if (subject.required) {
           add(
@@ -143,22 +177,25 @@ export function validateImportRows(
       grades,
       cellErrors,
       isValid: !cellErrors.some((issue) => issue.severity === 'error'),
-      isDuplicate: Boolean(index_number && (indexCounts.get(index_number) ?? 0) > 1),
+      isDuplicate: cellErrors.some(
+        (issue) => issue.column === 'index_number' && issue.message.startsWith('Duplicate')
+      ),
     };
   });
 }
 
-/** Summarizes mutually exclusive clean, error, and warning row counts. */
+/** Summarizes importable rows, error rows, and the overlapping warning count. */
 export function summariseValidation(rows: ValidatedRow[]): ImportValidationSummary {
   const errorRows = rows.filter((row) => !row.isValid).length;
-  const warningRows = rows.filter(
-    (row) => row.isValid && row.cellErrors.some((issue) => issue.severity === 'warning')
+  const validRows = rows.filter((row) => row.isValid).length;
+  const warningRows = rows.filter((row) =>
+    row.cellErrors.some((issue) => issue.severity === 'warning')
   ).length;
   return {
     totalRows: rows.length,
-    validRows: rows.length - errorRows - warningRows,
+    validRows,
     errorRows,
     warningRows,
-    hasBlockingErrors: errorRows > 0,
+    hasBlockingErrors: validRows === 0,
   };
 }

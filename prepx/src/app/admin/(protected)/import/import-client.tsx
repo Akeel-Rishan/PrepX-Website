@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { ArrowRight, FileCheck2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, FileCheck2 } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { parseAndValidateImportAction } from '@/lib/actions/import';
@@ -105,6 +105,7 @@ export function ImportClient({
     if (!selectedFile || !selectedExaminationId || isParsing) return;
     setIsParsing(true);
     setParseError(null);
+    setPreviewResult(null);
     const formData = new FormData();
     formData.append('file', selectedFile);
     formData.append('examinationId', selectedExaminationId);
@@ -141,7 +142,7 @@ export function ImportClient({
         <StepIndicator steps={STEPS} currentStep={currentStep} />
       </section>
 
-      {currentStep === 2 && selectedExamination && selectedFile ? (
+      {currentStep > 1 && selectedExamination && selectedFile ? (
         <section className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div><p className="text-sm font-semibold text-gray-900">{selectedExamination.name} {selectedExamination.year}</p><p className="mt-0.5 text-xs text-gray-600">{selectedFile.name}</p></div>
           <Button variant="outline" size="sm" onClick={returnToSelection}>Change file</Button>
@@ -195,6 +196,11 @@ export function ImportClient({
             {templateError && <Alert variant="error" onClose={() => setTemplateError(null)}>{templateError}</Alert>}
             {selectedFile && <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4"><FileCheck2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-700" /><div><p className="text-sm font-semibold text-blue-900">Ready to Parse</p><p className="mt-0.5 text-sm text-blue-800">The file passed initial checks and is ready for server-side validation.</p></div></div>}
             {parseError && <Alert variant="error" onClose={() => setParseError(null)}>{parseError}</Alert>}
+            {isParsing && (
+              <p role="status" className="text-center text-sm text-gray-500 motion-safe:animate-pulse">
+                Parsing and validating the file, please wait…
+              </p>
+            )}
             <div className="flex justify-end border-t border-gray-100 pt-5">
               <Button onClick={parseFile} disabled={!selectedExaminationId || !selectedFile || subjects.length === 0} loading={isParsing} className="w-full md:w-auto">{isParsing ? 'Parsing...' : 'Parse & Preview'} {!isParsing && <ArrowRight aria-hidden="true" className="h-4 w-4" />}</Button>
             </div>
@@ -203,7 +209,42 @@ export function ImportClient({
       )}
 
       {currentStep === 1 && <><ImportInstructions isOpen={isInstructionsOpen} onToggle={() => setIsInstructionsOpen((open) => !open)} />{selectedExaminationId ? <FormatGuide subjects={subjects} /> : null}<UpcomingSteps /></>}
-      {previewResult && <div ref={previewRef}><PreviewSection result={previewResult} onBack={returnToSelection} /></div>}
+      {currentStep === 2 && previewResult && (
+        <div ref={previewRef}>
+          <PreviewSection
+            result={previewResult}
+            fileName={selectedFile?.name ?? ''}
+            examName={
+              selectedExamination
+                ? `${selectedExamination.name} ${selectedExamination.year}`
+                : 'Unknown examination'
+            }
+            onBack={returnToSelection}
+            onProceed={(result) => {
+              setPreviewResult(result);
+              setCurrentStep(3);
+            }}
+          />
+        </div>
+      )}
+      {currentStep === 3 && previewResult && (
+        <section className="flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
+          <CheckCircle2 aria-hidden="true" className="mb-3 h-10 w-10 text-green-500" />
+          <h3 className="font-semibold text-gray-900">Confirm &amp; Import</h3>
+          <p className="mt-1 text-sm text-gray-500">The database write will be implemented in Step 8.3.</p>
+          <p className="mt-2 text-sm font-medium text-green-700">
+            {previewResult.validRows} valid row{previewResult.validRows === 1 ? '' : 's'} ready to import.
+          </p>
+          {previewResult.errorRows > 0 && (
+            <p className="mt-1 text-xs text-gray-500">
+              {previewResult.errorRows} invalid row{previewResult.errorRows === 1 ? '' : 's'} will be excluded.
+            </p>
+          )}
+          <Button variant="secondary" size="sm" className="mt-5" onClick={() => setCurrentStep(2)}>
+            <ArrowLeft aria-hidden="true" className="h-4 w-4" /> Back to Preview
+          </Button>
+        </section>
+      )}
     </div>
   );
 }

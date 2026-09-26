@@ -1,0 +1,4 @@
+index_number,nic_number,full_name,school_name,TML,ENG,MAT,SCI
+OL2026099,200399900099,Test Student 1,Test School,A,B,C,S
+OL2026100,200400000100,Test Student 2,Test School,B,A,S,C
+OL2026101,,Test Student 3,Test School,A,A,A,A

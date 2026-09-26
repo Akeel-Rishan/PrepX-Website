@@ -29,7 +29,7 @@ async function main() {
   const ExcelJS = require('exceljs');
   const { generateCsvTemplate } = load('src/lib/import-template.ts');
   const { parseImportFile } = load('src/lib/import-parser.ts');
-  const { validateFileHeaders, validateImportRows } = load('src/lib/import-validator.ts');
+  const { validateFileHeaders, validateImportRows, summariseValidation } = load('src/lib/import-validator.ts');
   const subjects = [
     { subject_name: 'Mathematics', subject_code: 'MAT', required: true },
     { subject_name: 'English', subject_code: 'ENG', required: false },
@@ -81,7 +81,90 @@ async function main() {
   assert.equal(duplicateResult.valid, false);
   assert.deepEqual(duplicateResult.duplicateColumns, ['index_number']);
 
-  console.log('PASS: CSV/XLSX parsing, templates, optional NIC/center columns, subject-code aliases, row validation, and duplicate-header rejection.');
+  const aliases = await parseImportFile(
+    Buffer.from('Index No,NIC,Student Name,School,Exam Centre,MAT\nALIAS01,,Alias Student,Alias School,Center C,A'),
+    'csv',
+    subjects
+  );
+  assert.deepEqual(aliases.headers.slice(0, 5), [
+    'index_number', 'nic_number', 'full_name', 'school_name', 'examination_center',
+  ]);
+  assert.equal(validateFileHeaders(aliases.headers, subjects.map(s => s.subject_name)).valid, true);
+
+  const fixtureSubjects = [
+    { subject_name: 'Tamil', subject_code: 'TML', required: true },
+    { subject_name: 'English', subject_code: 'ENG', required: true },
+    { subject_name: 'Mathematics', subject_code: 'MAT', required: true },
+    { subject_name: 'Science', subject_code: 'SCI', required: true },
+  ];
+  const validFixture = await parseImportFile(
+    fs.readFileSync(path.join('public', 'test-data', 'valid-import.csv')),
+    'csv',
+    fixtureSubjects
+  );
+  const validRows = validateImportRows(
+    validFixture.rows,
+    fixtureSubjects,
+    [],
+    [],
+    [],
+    fixtureSubjects.map(subject => subject.subject_name)
+  );
+  assert.deepEqual(summariseValidation(validRows), {
+    totalRows: 3,
+    validRows: 3,
+    errorRows: 0,
+    warningRows: 0,
+    hasBlockingErrors: false,
+  });
+
+  const errorFixture = await parseImportFile(
+    fs.readFileSync(path.join('public', 'test-data', 'errors-import.csv')),
+    'csv',
+    [
+      { subject_name: 'Tamil', subject_code: 'TML', required: true },
+      { subject_name: 'English', subject_code: 'ENG', required: true },
+    ]
+  );
+  const errorRows = validateImportRows(
+    errorFixture.rows,
+    [
+      { subject_name: 'Tamil', required: true },
+      { subject_name: 'English', required: true },
+    ],
+    [],
+    [],
+    [],
+    ['Tamil', 'English']
+  );
+  const errorSummary = summariseValidation(errorRows);
+  assert.deepEqual(
+    { total: errorSummary.totalRows, valid: errorSummary.validRows, errors: errorSummary.errorRows },
+    { total: 5, valid: 2, errors: 3 }
+  );
+  assert.equal(errorRows[0].isValid, true, 'the first occurrence remains valid');
+  assert.match(errorRows[2].cellErrors.map(issue => issue.message).join(' '), /Duplicate index/);
+  assert.match(errorRows[2].cellErrors.map(issue => issue.message).join(' '), /Duplicate NIC/);
+  assert.equal(errorRows[3].cellErrors.filter(issue => issue.severity === 'error').length, 2);
+
+  const missingHeader = await parseImportFile(
+    Buffer.from('full_name,school_name,MAT\nMissing Identifier,School,A'),
+    'csv',
+    subjects
+  );
+  const missingResult = validateFileHeaders(missingHeader.headers, subjects.map(s => s.subject_name));
+  assert.deepEqual(missingResult.missingColumns, ['index_number']);
+  const missingRows = validateImportRows(
+    missingHeader.rows,
+    subjects,
+    [],
+    [],
+    missingResult.missingColumns,
+    ['Mathematics']
+  );
+  assert.equal(missingRows[0].isValid, true, 'missing headers are reported once at file level');
+
+  console.log('PASS: CSV/XLSX parsing, field aliases, subject-code aliases, row validation, first-occurrence duplicate handling, sample fixtures, and missing-header reporting.');
 }
 
 main().catch(error => {

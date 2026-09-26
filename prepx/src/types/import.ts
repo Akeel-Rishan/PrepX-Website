@@ -38,6 +38,12 @@ export interface ImportValidationSummary {
 
 export interface ImportPreviewResult extends ImportValidationSummary {
   columns: string[];
+  sourceColumns: string[];
+  detectedBaseColumns: string[];
+  detectedSubjects: string[];
+  missingRequiredColumns: string[];
+  subjectsNotFound: string[];
+  canImport: boolean;
   rows: ValidatedRow[];
   parseError: string | null;
 }

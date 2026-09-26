@@ -4,13 +4,33 @@ import { Readable } from 'node:stream';
 import ExcelJS from 'exceljs';
 import type { RawImportRow } from '@/types/import';
 
-const BASE_COLUMNS = [
-  'index_number',
-  'nic_number',
-  'full_name',
-  'school_name',
-  'examination_center',
-] as const;
+type ImportBaseColumn =
+  | 'index_number'
+  | 'nic_number'
+  | 'full_name'
+  | 'school_name'
+  | 'examination_center';
+
+const FIELD_ALIASES: Record<ImportBaseColumn, string[]> = {
+  index_number: ['index_number', 'index number', 'indexno', 'index no', 'index'],
+  nic_number: ['nic_number', 'nic number', 'nic'],
+  full_name: ['full_name', 'full name', 'name', 'student_name', 'student name', 'student'],
+  school_name: ['school_name', 'school name', 'school'],
+  examination_center: [
+    'examination_center',
+    'examination center',
+    'center',
+    'centre',
+    'exam center',
+    'exam centre',
+  ],
+};
+
+const BASE_ALIAS_TO_COLUMN = new Map(
+  Object.entries(FIELD_ALIASES).flatMap(([column, aliases]) =>
+    aliases.map((alias) => [alias, column] as const)
+  )
+);
 
 export interface ParsedImportFile {
   headers: string[];
@@ -37,7 +57,7 @@ function cellString(value: ExcelJS.CellValue): string {
 function normalizeHeader(header: string, subjects: Map<string, string>): string {
   const trimmed = header.trim();
   const lower = trimmed.toLocaleLowerCase();
-  const base = BASE_COLUMNS.find((column) => column === lower);
+  const base = BASE_ALIAS_TO_COLUMN.get(lower);
   return base ?? subjects.get(lower) ?? trimmed;
 }
 

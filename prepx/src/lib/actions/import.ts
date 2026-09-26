@@ -29,6 +29,12 @@ function emptyPreview(parseError: string): ImportPreviewResult {
     warningRows: 0,
     hasBlockingErrors: true,
     columns: [],
+    sourceColumns: [],
+    detectedBaseColumns: [],
+    detectedSubjects: [],
+    missingRequiredColumns: [],
+    subjectsNotFound: [],
+    canImport: false,
     rows: [],
     parseError,
   };
@@ -150,21 +156,41 @@ export async function parseAndValidateImportAction(formData: FormData): Promise<
       return emptyPreview(error instanceof Error ? error.message : 'Could not read the import file.');
     }
     const headerResult = validateFileHeaders(parsed.headers, subjectNames);
-    if (!headerResult.valid) {
-      if (headerResult.missingColumns.length) {
-        return emptyPreview(`Missing required columns: ${headerResult.missingColumns.join(', ')}`);
-      }
+    if (!parsed.headers.some(Boolean)) return emptyPreview('The file contains no column headers.');
+    if (parsed.rows.length === 0) return emptyPreview('The file has headers but no data rows.');
+    if (headerResult.duplicateColumns.length) {
       return emptyPreview(`Duplicate columns are not allowed: ${headerResult.duplicateColumns.join(', ')}`);
     }
+    const sourceColumnSet = new Set(parsed.headers);
+    const detectedBaseColumns = IMPORT_BASE_COLUMNS.filter((column) =>
+      sourceColumnSet.has(column)
+    );
+    const detectedSubjects = subjectNames.filter((subjectName) =>
+      sourceColumnSet.has(subjectName)
+    );
+    const subjectsNotFound = subjectNames.filter((subjectName) =>
+      !sourceColumnSet.has(subjectName)
+    );
     const rows = validateImportRows(
       parsed.rows,
       subjectDefinitions,
       existingStudents.indexNumbers,
-      existingStudents.nicNumbers
+      existingStudents.nicNumbers,
+      headerResult.missingColumns,
+      detectedSubjects
     );
+    const summary = summariseValidation(rows);
+    const canImport = headerResult.missingColumns.length === 0 && summary.validRows > 0;
     return {
-      ...summariseValidation(rows),
-      columns: [...IMPORT_BASE_COLUMNS, ...subjectNames],
+      ...summary,
+      hasBlockingErrors: !canImport,
+      columns: [...detectedBaseColumns, ...detectedSubjects],
+      sourceColumns: parsed.headers,
+      detectedBaseColumns: [...detectedBaseColumns],
+      detectedSubjects,
+      missingRequiredColumns: headerResult.missingColumns,
+      subjectsNotFound,
+      canImport,
       rows,
       parseError: null,
     };
