@@ -226,6 +226,14 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      import_exam_results: {
+        Args: {
+          p_admin_id: string;
+          p_examination_id: string;
+          p_rows: Json;
+        };
+        Returns: Json;
+      };
       is_admin: {
         Args: Record<string, never>;
         Returns: boolean;

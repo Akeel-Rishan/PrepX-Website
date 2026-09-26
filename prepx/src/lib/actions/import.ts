@@ -1,7 +1,9 @@
 'use server';
 
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/server';
-import { isAdmin } from '@/lib/auth/admin';
+import { getAdminUserId, isAdmin } from '@/lib/auth/admin';
+import { GRADES, isExamEditable } from '@/lib/constants';
 import { parseImportFile } from '@/lib/import-parser';
 import {
   IMPORT_BASE_COLUMNS,
@@ -10,8 +12,33 @@ import {
   validateImportRows,
 } from '@/lib/import-validator';
 import type { ImportPreviewResult } from '@/types/import';
+import type { Json } from '@/types/database';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const INDEX_NUMBER_REGEX = /^[A-Z0-9]+$/;
+const NIC_REGEX = /^([0-9]{9}[VX]|[0-9]{12})$/;
+const VALID_GRADES = new Set<string>(GRADES);
+const MAX_IMPORT_ROWS = 1000;
+
+export interface ImportRow {
+  index_number: string;
+  nic_number: string | null;
+  full_name: string;
+  school_name: string;
+  examination_center: string | null;
+  grades: Record<string, string>;
+}
+
+export interface ImportStats {
+  rowsProcessed: number;
+  gradesWritten: number;
+}
+
+export interface ImportActionResult {
+  success: boolean;
+  error?: string;
+  stats?: ImportStats;
+}
 
 export interface TemplateSubject {
   id: string;
@@ -197,4 +224,239 @@ export async function parseAndValidateImportAction(formData: FormData): Promise<
   } catch {
     return emptyPreview('Failed to load examination data. Please try again.');
   }
+}
+
+function refreshImportViews(): void {
+  revalidateTag('students');
+  revalidateTag('student-lookups');
+  revalidateTag('results');
+  revalidateTag('dashboard');
+  revalidateTag('examinations');
+  revalidatePath('/admin/import');
+  revalidatePath('/admin/students');
+  revalidatePath('/admin/results');
+  revalidatePath('/admin/review');
+  revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/examinations');
+}
+
+/** Atomically imports validated students and grades into an editable examination. */
+export async function runImportAction(params: {
+  examinationId: string;
+  rows: ImportRow[];
+}): Promise<ImportActionResult> {
+  const adminId = await getAdminUserId();
+  if (!adminId) return { success: false, error: 'Authentication required.' };
+  if (!params || !UUID_REGEX.test(params.examinationId)) {
+    return { success: false, error: 'Invalid examination.' };
+  }
+  if (!Array.isArray(params.rows) || params.rows.length === 0) {
+    return { success: false, error: 'No valid rows to import.' };
+  }
+  if (params.rows.length > MAX_IMPORT_ROWS) {
+    return {
+      success: false,
+      error: `Too many rows. Maximum is ${MAX_IMPORT_ROWS} per import.`,
+    };
+  }
+
+  const cleanRows: ImportRow[] = [];
+  const seenIndexes = new Set<string>();
+  const seenNics = new Set<string>();
+  const subjectIds = new Set<string>();
+
+  for (const [rowIndex, candidate] of params.rows.entries()) {
+    const rowNumber = rowIndex + 1;
+    if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) {
+      return { success: false, error: `Row ${rowNumber} has an invalid data format.` };
+    }
+    if (typeof candidate.index_number !== 'string') {
+      return { success: false, error: `Row ${rowNumber} is missing an index number.` };
+    }
+    if (typeof candidate.full_name !== 'string') {
+      return { success: false, error: `Row ${rowNumber} is missing a student name.` };
+    }
+    if (typeof candidate.school_name !== 'string') {
+      return { success: false, error: `Row ${rowNumber} is missing a school name.` };
+    }
+    if (
+      candidate.nic_number !== null &&
+      candidate.nic_number !== undefined &&
+      typeof candidate.nic_number !== 'string'
+    ) {
+      return { success: false, error: `Row ${rowNumber} has an invalid NIC value.` };
+    }
+    if (
+      candidate.examination_center !== null &&
+      candidate.examination_center !== undefined &&
+      typeof candidate.examination_center !== 'string'
+    ) {
+      return {
+        success: false,
+        error: `Row ${rowNumber} has an invalid examination center.`,
+      };
+    }
+    if (
+      !candidate.grades ||
+      typeof candidate.grades !== 'object' ||
+      Array.isArray(candidate.grades)
+    ) {
+      return { success: false, error: `Row ${rowNumber} has an invalid grades object.` };
+    }
+
+    const indexNumber = candidate.index_number.trim().toUpperCase();
+    const nicNumber = candidate.nic_number?.trim().toUpperCase() || null;
+    const fullName = candidate.full_name.trim();
+    const schoolName = candidate.school_name.trim();
+    const examinationCenter = candidate.examination_center?.trim() || null;
+
+    if (!indexNumber || indexNumber.length > 50 || !INDEX_NUMBER_REGEX.test(indexNumber)) {
+      return { success: false, error: `Row ${rowNumber} has an invalid index number.` };
+    }
+    if (seenIndexes.has(indexNumber)) {
+      return { success: false, error: `Duplicate index number in import: ${indexNumber}.` };
+    }
+    seenIndexes.add(indexNumber);
+
+    if (!fullName || fullName.length > 200) {
+      return { success: false, error: `Row ${rowNumber} has an invalid student name.` };
+    }
+    if (!schoolName || schoolName.length > 200) {
+      return { success: false, error: `Row ${rowNumber} has an invalid school name.` };
+    }
+    if (examinationCenter && examinationCenter.length > 200) {
+      return { success: false, error: `Row ${rowNumber} has an invalid examination center.` };
+    }
+    if (nicNumber) {
+      if (!NIC_REGEX.test(nicNumber)) {
+        return { success: false, error: `Row ${rowNumber} has an invalid NIC number.` };
+      }
+      if (seenNics.has(nicNumber)) {
+        return { success: false, error: `Duplicate NIC in import: ${nicNumber}.` };
+      }
+      seenNics.add(nicNumber);
+    }
+
+    const cleanGrades: Record<string, string> = {};
+    const gradeEntries = Object.entries(candidate.grades);
+    if (gradeEntries.length > 100) {
+      return { success: false, error: `Row ${rowNumber} contains too many subjects.` };
+    }
+    for (const [subjectId, gradeValue] of gradeEntries) {
+      if (!UUID_REGEX.test(subjectId)) {
+        return { success: false, error: `Row ${rowNumber} contains an invalid subject.` };
+      }
+      if (typeof gradeValue !== 'string') {
+        return { success: false, error: `Row ${rowNumber} contains an invalid grade.` };
+      }
+      const grade = gradeValue.trim().toUpperCase();
+      if (grade && !VALID_GRADES.has(grade)) {
+        return {
+          success: false,
+          error: `Row ${rowNumber} contains invalid grade “${gradeValue}”.`,
+        };
+      }
+      subjectIds.add(subjectId);
+      cleanGrades[subjectId] = grade;
+    }
+
+    cleanRows.push({
+      index_number: indexNumber,
+      nic_number: nicNumber,
+      full_name: fullName,
+      school_name: schoolName,
+      examination_center: examinationCenter,
+      grades: cleanGrades,
+    });
+  }
+
+  const adminClient = createAdminClient();
+  const examinationPromise = adminClient
+    .from('examinations')
+    .select('status')
+    .eq('id', params.examinationId)
+    .maybeSingle();
+  const subjectIdList = Array.from(subjectIds);
+  const subjectsPromise = subjectIdList.length
+    ? adminClient
+        .from('subjects')
+        .select('id')
+        .eq('examination_id', params.examinationId)
+        .eq('active', true)
+        .in('id', subjectIdList)
+    : Promise.resolve({ data: [] as Array<{ id: string }>, error: null });
+  const [examinationResult, subjectsResult] = await Promise.all([
+    examinationPromise,
+    subjectsPromise,
+  ]);
+
+  if (examinationResult.error || !examinationResult.data) {
+    return { success: false, error: 'Examination not found.' };
+  }
+  if (!isExamEditable(examinationResult.data.status)) {
+    return {
+      success: false,
+      error: 'Published and archived examinations are read-only.',
+    };
+  }
+  if (subjectsResult.error || (subjectsResult.data?.length ?? 0) !== subjectIdList.length) {
+    return {
+      success: false,
+      error: 'One or more subjects are inactive or do not belong to this examination.',
+    };
+  }
+
+  const { data: rpcResult, error: rpcError } = await adminClient.rpc(
+    'import_exam_results',
+    {
+      p_admin_id: adminId,
+      p_examination_id: params.examinationId,
+      p_rows: cleanRows as unknown as Json,
+    }
+  );
+
+  if (rpcError) {
+    console.error('[Import RPC Error]', { code: rpcError.code });
+    const message = rpcError.message.toLocaleLowerCase();
+    if (rpcError.code === '23505' && (message.includes('nic') || message.includes('idx_students_exam_nic'))) {
+      return {
+        success: false,
+        error:
+          'A NIC number in the import file already belongs to a different student in this examination. Check the conflict and try again.',
+      };
+    }
+    if (rpcError.code === '55000' || message.includes('read-only')) {
+      return { success: false, error: 'Published and archived examinations are read-only.' };
+    }
+    if (rpcError.code === 'PGRST202') {
+      return {
+        success: false,
+        error: 'The database import function is not installed. Apply the latest Supabase migrations.',
+      };
+    }
+    return {
+      success: false,
+      error: 'The database rejected the import. No data was changed.',
+    };
+  }
+
+  const result = rpcResult as { rows_processed?: unknown; grades_written?: unknown } | null;
+  const reportedRows = Number(result?.rows_processed);
+  const reportedGrades = Number(result?.grades_written);
+  const rowsProcessed = Number.isInteger(reportedRows) ? reportedRows : cleanRows.length;
+  const gradesWritten = Number.isInteger(reportedGrades)
+    ? reportedGrades
+    : cleanRows.reduce(
+        (total, row) => total + Object.values(row.grades).filter(Boolean).length,
+        0
+      );
+  if (!Number.isInteger(reportedRows) || !Number.isInteger(reportedGrades)) {
+    console.error('[Import RPC Result Error]', { hasResult: Boolean(rpcResult) });
+  }
+
+  refreshImportViews();
+  return {
+    success: true,
+    stats: { rowsProcessed, gradesWritten },
+  };
 }

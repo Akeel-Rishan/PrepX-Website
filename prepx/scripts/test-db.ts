@@ -47,6 +47,18 @@ async function testDatabaseConnection(): Promise<void> {
     console.log(`✓ ${table}: accessible (${count ?? 0} rows)`);
   }
 
+  const { error: importFunctionError } = await supabase.rpc('import_exam_results', {
+    p_admin_id: '00000000-0000-0000-0000-000000000000',
+    p_examination_id: '00000000-0000-0000-0000-000000000000',
+    p_rows: [],
+  });
+  if (!importFunctionError || importFunctionError.code !== '42501') {
+    throw new Error(
+      `import_exam_results: expected authorization rejection, received ${importFunctionError?.code ?? 'success'}`
+    );
+  }
+  console.log('✓ import_exam_results: installed and rejects unknown administrators');
+
   console.log('✓ All tables accessible');
 }
 

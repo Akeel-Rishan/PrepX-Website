@@ -9,7 +9,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "type-check": "tsc --noEmit",
     "test:db": "tsx scripts/test-db.ts",
-    "test:logic": "node scripts/test-import.cjs && node scripts/test-auth-actions.cjs && node scripts/test-student-actions.cjs && node scripts/test-grade-actions.cjs && node scripts/test-examination-actions.cjs && node scripts/test-dashboard.cjs"
+    "test:logic": "node scripts/test-import.cjs && node scripts/test-import-action.cjs && node scripts/test-auth-actions.cjs && node scripts/test-student-actions.cjs && node scripts/test-grade-actions.cjs && node scripts/test-examination-actions.cjs && node scripts/test-dashboard.cjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

@@ -1,6 +1,7 @@
 'use client';
 
-import { LogOut, ShieldCheck, UserCircle } from 'lucide-react';
+import Image from 'next/image';
+import { LogOut, UserCircle } from 'lucide-react';
 import { truncate } from '@/lib/utils';
 import { SidebarNav } from './sidebar-nav';
 
@@ -21,7 +22,15 @@ export function Sidebar({
     <div className="flex h-full min-h-0 flex-col bg-slate-900">
       <div className="border-b border-slate-700/50 bg-slate-950 p-4">
         <div className="flex items-center gap-2">
-          <ShieldCheck aria-hidden="true" className="h-7 w-7 text-blue-400" />
+          <Image
+            src="/brand/prepx-mark.png"
+            alt=""
+            aria-hidden="true"
+            width={28}
+            height={28}
+            className="h-7 w-7 shrink-0 object-contain"
+            priority
+          />
           <span className="text-lg font-bold text-white">PrepX</span>
         </div>
         <p className="mt-1 text-xs text-slate-400">Examination System</p>

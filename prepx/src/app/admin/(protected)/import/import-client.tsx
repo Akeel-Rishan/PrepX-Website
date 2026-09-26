@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, CheckCircle2, FileCheck2 } from 'lucide-react';
+import { ArrowRight, FileCheck2 } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { parseAndValidateImportAction } from '@/lib/actions/import';
@@ -11,6 +11,7 @@ import { ExaminationSelector, type ImportExamination } from './_components/exami
 import { FileDropzone } from './_components/file-dropzone';
 import { FormatGuide, type ImportGuideSubject } from './_components/format-guide';
 import { ImportInstructions } from './_components/import-instructions';
+import { ImportConfirm } from './_components/import-confirm';
 import { PreviewSection } from './_components/preview-section';
 import { StepIndicator } from './_components/step-indicator';
 import { TemplateDownloadButton } from './_components/template-download-button';
@@ -135,6 +136,15 @@ export function ImportClient({
     setPreviewResult(null);
     setCurrentStep(1);
   };
+  const startAnotherImport = () => {
+    setSelectedFile(null);
+    setFileError(null);
+    setTemplateError(null);
+    setPreviewResult(null);
+    setParseError(null);
+    setIsDragging(false);
+    setCurrentStep(1);
+  };
 
   return (
     <div className="space-y-5">
@@ -142,12 +152,13 @@ export function ImportClient({
         <StepIndicator steps={STEPS} currentStep={currentStep} />
       </section>
 
-      {currentStep > 1 && selectedExamination && selectedFile ? (
+      {currentStep > 1 && currentStep < 4 && selectedExamination && selectedFile && (
         <section className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div><p className="text-sm font-semibold text-gray-900">{selectedExamination.name} {selectedExamination.year}</p><p className="mt-0.5 text-xs text-gray-600">{selectedFile.name}</p></div>
           <Button variant="outline" size="sm" onClick={returnToSelection}>Change file</Button>
         </section>
-      ) : (
+      )}
+      {currentStep === 1 && (
         <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Step 1 of 4</p><h3 className="mt-1 text-lg font-semibold text-gray-900">Select Examination and File</h3><p className="mt-1 text-sm text-gray-600">Choose an open examination, download its template, then upload the completed file.</p></div>
           <div className="space-y-6">
@@ -227,23 +238,16 @@ export function ImportClient({
           />
         </div>
       )}
-      {currentStep === 3 && previewResult && (
-        <section className="flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-          <CheckCircle2 aria-hidden="true" className="mb-3 h-10 w-10 text-green-500" />
-          <h3 className="font-semibold text-gray-900">Confirm &amp; Import</h3>
-          <p className="mt-1 text-sm text-gray-500">The database write will be implemented in Step 8.3.</p>
-          <p className="mt-2 text-sm font-medium text-green-700">
-            {previewResult.validRows} valid row{previewResult.validRows === 1 ? '' : 's'} ready to import.
-          </p>
-          {previewResult.errorRows > 0 && (
-            <p className="mt-1 text-xs text-gray-500">
-              {previewResult.errorRows} invalid row{previewResult.errorRows === 1 ? '' : 's'} will be excluded.
-            </p>
-          )}
-          <Button variant="secondary" size="sm" className="mt-5" onClick={() => setCurrentStep(2)}>
-            <ArrowLeft aria-hidden="true" className="h-4 w-4" /> Back to Preview
-          </Button>
-        </section>
+      {currentStep >= 3 && previewResult && selectedExamination && (
+        <ImportConfirm
+          result={previewResult}
+          examinationId={selectedExaminationId}
+          examName={`${selectedExamination.name} ${selectedExamination.year}`}
+          subjects={subjects}
+          onBack={() => setCurrentStep(2)}
+          onComplete={() => setCurrentStep(4)}
+          onImportAnother={startAnotherImport}
+        />
       )}
     </div>
   );
