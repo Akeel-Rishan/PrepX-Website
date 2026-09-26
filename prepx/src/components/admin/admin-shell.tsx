@@ -48,8 +48,8 @@ export function AdminShell({ userEmail, children }: AdminShellProps): React.JSX.
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 transition-colors dark:bg-slate-950">
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-64 lg:flex-col">
+    <div className="min-h-[100dvh] bg-[var(--app-canvas)] transition-colors">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[17rem] lg:flex-col">
         <Sidebar userEmail={userEmail} onLogout={handleLogout} isLoggingOut={isLoggingOut} />
       </div>
       <MobileDrawer
@@ -59,7 +59,7 @@ export function AdminShell({ userEmail, children }: AdminShellProps): React.JSX.
         onLogout={handleLogout}
         isLoggingOut={isLoggingOut}
       />
-      <div className="theme-content flex min-h-screen min-w-0 flex-col text-slate-900 transition-colors dark:text-slate-100 lg:pl-64">
+      <div className="theme-content flex min-h-[100dvh] min-w-0 flex-col text-slate-900 transition-colors dark:text-slate-100 lg:pl-[17rem]">
         <AdminHeader
           userEmail={userEmail}
           onMenuClick={() => setDrawerOpen(true)}
@@ -67,7 +67,7 @@ export function AdminShell({ userEmail, children }: AdminShellProps): React.JSX.
           isLoggingOut={isLoggingOut}
           drawerOpen={drawerOpen}
         />
-        <main className="min-w-0 flex-1 p-4 sm:p-6">
+        <main className="min-w-0 flex-1 p-4 sm:p-6 xl:p-8">
           {logoutError && (
             <Alert variant="error" className="mb-6" onClose={() => setLogoutError(undefined)}>
               {logoutError}

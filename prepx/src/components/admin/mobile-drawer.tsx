@@ -73,13 +73,13 @@ export function MobileDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Admin menu"
-        className="absolute left-0 top-0 flex h-full w-64 max-w-[calc(100vw-2rem)] flex-col bg-slate-900 shadow-2xl"
+        className="absolute left-0 top-0 flex h-full w-[17rem] max-w-[calc(100vw-2rem)] flex-col bg-[#0a1220] shadow-2xl"
       >
         <button
           ref={closeRef}
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 z-10 rounded p-2 text-slate-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          className="absolute right-3 top-3 z-10 rounded-xl p-2 text-slate-400 transition-[background-color,color,transform] active:scale-95 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
         >
           <X aria-hidden="true" className="h-5 w-5" />
           <span className="sr-only">Close menu</span>

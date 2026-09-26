@@ -68,7 +68,7 @@ export function ValidationReport({
                 How student results will be classified when published.
               </p>
             </div>
-            <p className="text-xs text-gray-400">Preview only · no records changed</p>
+            <p className="text-xs text-gray-400">Preview only, no records changed</p>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {distribution.map(({ label, value, icon: Icon, color }) => (

@@ -74,7 +74,7 @@ export function PublicationChecklist({
           <div className="flex items-center gap-3">
             <Globe className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
             <p className="text-sm font-semibold text-green-800 dark:text-green-200">
-              Results are live — students can search their grades now.
+              Results are live. Students can search their grades now.
             </p>
           </div>
           <p className="mt-2 pl-8 text-xs text-green-700 dark:text-green-300">
@@ -98,7 +98,7 @@ export function PublicationChecklist({
             <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
             <div>
               <p className="text-sm font-semibold text-red-800 dark:text-red-200">
-                Cannot publish — {result.blockingErrors.length} issue
+                Cannot publish. {result.blockingErrors.length} issue
                 {result.blockingErrors.length === 1 ? '' : 's'} must be resolved first
               </p>
               <ul className="mt-3 space-y-1.5 text-sm text-red-700 dark:text-red-300">

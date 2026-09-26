@@ -88,7 +88,7 @@ export function PublicationClient({
           >
             {examinations.map((exam) => (
               <option key={exam.id} value={exam.id}>
-                {exam.name} · {exam.year} — {exam.status}
+                {exam.name} {exam.year} ({exam.status})
               </option>
             ))}
           </select>

@@ -43,10 +43,12 @@ export function CycleStatus({ stats, year }: CycleStatusProps): React.JSX.Elemen
   const total = stats.totalExaminations;
 
   return (
-    <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-700/80 dark:bg-slate-900">
+    <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Workflow</p>
-        <h2 className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">{year} cycle status</h2>
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Workflow</p>
+        <h2 className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+          {year} cycle status
+        </h2>
       </div>
       <div className="mt-5 flex h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
         {STATUS_META.map((item) => {
@@ -66,7 +68,9 @@ export function CycleStatus({ stats, year }: CycleStatusProps): React.JSX.Elemen
           <div key={key} className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
             <div className="flex items-center gap-2">
               <span className={cn('h-2 w-2 rounded-full', color)} />
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                {label}
+              </span>
             </div>
             <div className="mt-2 flex items-center justify-between">
               <span className={cn('text-xl font-bold', text)}>{stats[key]}</span>

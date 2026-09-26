@@ -44,7 +44,10 @@ export function Alert({
 }: AlertProps): React.JSX.Element {
   const { classes, icon: Icon } = variants[variant];
   return (
-    <div role="alert" className={cn('rounded-lg border p-4 flex gap-3', classes, className)}>
+    <div
+      role="alert"
+      className={cn('flex gap-3 rounded-xl border p-4 shadow-sm', classes, className)}
+    >
       <Icon aria-hidden="true" className="mt-0.5 h-5 w-5 flex-shrink-0" />
       <div className="min-w-0 flex-1">
         {title && <p className="mb-1 text-sm font-semibold">{title}</p>}

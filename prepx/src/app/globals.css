@@ -10,10 +10,24 @@
   --brand-600: #2563eb;
   --brand-700: #1d4ed8;
   --brand-900: #1e3a8a;
+  --app-canvas: #f5f7fb;
+  --app-surface: #ffffff;
+  --app-surface-muted: #f8fafc;
+  --app-border: #dfe5ee;
+  --app-text: #0f172a;
+  --app-text-muted: #64748b;
+  --app-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 10px 30px rgb(30 64 175 / 0.05);
 }
 
 html.dark {
   color-scheme: dark;
+  --app-canvas: #070b14;
+  --app-surface: #0f172a;
+  --app-surface-muted: #131e2f;
+  --app-border: #263449;
+  --app-text: #f1f5f9;
+  --app-text-muted: #94a3b8;
+  --app-shadow: 0 1px 2px rgb(0 0 0 / 0.18), 0 14px 36px rgb(0 0 0 / 0.2);
 }
 
 html.dark body {
@@ -249,15 +263,40 @@ html.dark body {
 }
 
 @layer base {
-  body {
-    @apply bg-white text-slate-900 transition-colors;
+  * {
+    @apply border-slate-200 dark:border-slate-800;
   }
+
+  html {
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--app-canvas);
+    color: var(--app-text);
+    @apply min-h-[100dvh] antialiased transition-colors;
+  }
+
   .dark body {
-    @apply bg-slate-950 text-slate-100;
+    background: var(--app-canvas);
+    color: var(--app-text);
+  }
+
+  ::selection {
+    background: rgb(37 99 235 / 0.2);
+    color: inherit;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
-/* Print styles — implemented in Phase 12 */
+/* Print styles, implemented in Phase 12 */
 @media print {
 }
 @keyframes review-sheet-mobile-in {

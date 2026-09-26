@@ -19,7 +19,7 @@ export function ReadinessScoreCard({ result }: ReadinessScoreCardProps): React.J
   const message = published
     ? 'Results are live. You may unpublish them to make changes.'
     : result.canPublish
-      ? `${result.warnings} warning${result.warnings === 1 ? '' : 's'} · ${result.checks.length} checks completed`
+      ? `${result.warnings} warning${result.warnings === 1 ? '' : 's'}, ${result.checks.length} checks completed`
       : `${result.blockingFailures} blocking issue${result.blockingFailures === 1 ? '' : 's'} must be resolved`;
   const stats = [
     { label: 'students', value: result.totalStudents, tone: '' },

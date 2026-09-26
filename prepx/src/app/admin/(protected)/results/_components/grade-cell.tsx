@@ -50,7 +50,7 @@ export function GradeCell({
           GRADE_STYLES[value] ?? GRADE_STYLES['']
         )}
       >
-        <option value="">—</option>
+        <option value="">Not entered</option>
         <option value="A">A</option>
         <option value="B">B</option>
         <option value="C">C</option>

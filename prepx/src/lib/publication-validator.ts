@@ -346,7 +346,7 @@ export function buildPublicationValidation(input: {
       'Grade values are valid',
       invalidResults.length ? 'fail' : 'pass',
       invalidResults.length
-        ? 'Invalid grade values detected in the database. This indicates corrupted data—contact support.'
+        ? 'Invalid grade values detected in the database. This indicates corrupted data. Contact support.'
         : 'All stored grade values are valid.',
       invalidResults.map((result) => ({
         label: result.student_id,

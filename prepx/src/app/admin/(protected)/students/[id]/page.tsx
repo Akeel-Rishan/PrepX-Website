@@ -51,7 +51,7 @@ export default async function StudentDetailPage({
           <p className="mt-1 text-sm text-gray-500">
             {isNew
               ? 'Enter the student details below.'
-              : 'Index: ' + student!.index_number + ' · School: ' + student!.school_name}
+              : 'Index: ' + student!.index_number + ', School: ' + student!.school_name}
           </p>
         </div>
         {!isNew && resultCount > 0 && (

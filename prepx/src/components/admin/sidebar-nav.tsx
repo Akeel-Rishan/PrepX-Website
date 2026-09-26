@@ -19,10 +19,8 @@ export function SidebarNav({ onNavClick }: SidebarNavProps): React.JSX.Element {
   return (
     <nav aria-label="Admin navigation">
       {NAV_GROUPS.map((group) => (
-        <div key={group.groupLabel} className="mt-6 first:mt-2">
-          <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
-            {group.groupLabel}
-          </p>
+        <div key={group.groupLabel} className="mt-6 first:mt-2 lg:mt-4 lg:first:mt-1">
+          <p className="mb-2 px-3 text-[11px] font-semibold text-slate-500">{group.groupLabel}</p>
           <div className="space-y-1">
             {group.items.map((item) => {
               const active = isNavItemActive(item.href, pathname);
@@ -52,10 +50,10 @@ export function SidebarNav({ onNavClick }: SidebarNavProps): React.JSX.Element {
                   aria-busy={isPending && pendingHref === item.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
+                    'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-[background-color,color,transform] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 lg:py-2',
                     active
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-950/20'
+                      : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
                   )}
                 >
                   <span aria-hidden="true">

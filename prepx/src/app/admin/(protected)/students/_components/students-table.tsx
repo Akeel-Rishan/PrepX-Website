@@ -61,7 +61,7 @@ export function StudentsTable({ students }: { students: StudentWithExam[] }): Re
                       {maskNIC(student.nic_number)}
                     </span>
                   ) : (
-                    <span className="text-xs text-gray-300">—</span>
+                    <span className="text-xs text-gray-400">Not provided</span>
                   )}
                 </td>
                 <td className="px-6 py-4">
@@ -86,7 +86,7 @@ export function StudentsTable({ students }: { students: StudentWithExam[] }): Re
                       <div className="mt-0.5 text-xs text-gray-400">{student.examination.year}</div>
                     </div>
                   ) : (
-                    <span className="text-xs text-gray-300">—</span>
+                    <span className="text-xs text-gray-400">Not provided</span>
                   )}
                 </td>
                 <td className="px-6 py-4 text-right">

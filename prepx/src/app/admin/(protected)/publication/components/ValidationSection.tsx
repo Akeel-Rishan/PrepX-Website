@@ -65,7 +65,7 @@ export function ValidationSection({
           <div className="min-w-0">
             <h3 className="truncate font-semibold text-gray-900">{category}</h3>
             <p className="text-xs text-gray-500">
-              {checks.length} checks · {summary}
+              {checks.length} checks, {summary}
             </p>
           </div>
         </div>
@@ -118,7 +118,7 @@ export function ValidationSection({
                                   key={`${record.label}-${index}`}
                                   className="text-xs text-gray-600"
                                 >
-                                  <strong className="text-gray-800">{record.label}</strong> —{' '}
+                                  <strong className="text-gray-800">{record.label}</strong>:{' '}
                                   {record.detail}
                                 </p>
                               ))}

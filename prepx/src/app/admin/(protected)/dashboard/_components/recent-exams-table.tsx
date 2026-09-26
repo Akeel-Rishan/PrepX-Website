@@ -14,7 +14,7 @@ export function RecentExamsTable({ examinations, year }: RecentExamsTableProps):
   return (
     <section
       aria-labelledby="recent-exams-title"
-      className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-900"
+      className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900"
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:px-6 dark:border-slate-800">
         <div className="flex items-center gap-3">
@@ -22,10 +22,13 @@ export function RecentExamsTable({ examinations, year }: RecentExamsTableProps):
             <ClipboardList aria-hidden="true" className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
               Latest activity
             </p>
-            <h2 id="recent-exams-title" className="mt-0.5 text-base font-semibold text-slate-900 dark:text-slate-100">
+            <h2
+              id="recent-exams-title"
+              className="mt-0.5 text-base font-semibold text-slate-900 dark:text-slate-100"
+            >
               {year} examinations
             </h2>
           </div>
@@ -40,12 +43,17 @@ export function RecentExamsTable({ examinations, year }: RecentExamsTableProps):
       {examinations.length === 0 ? (
         <div className="px-6 py-14 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
-            <ClipboardList aria-hidden="true" className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+            <ClipboardList
+              aria-hidden="true"
+              className="h-6 w-6 text-slate-400 dark:text-slate-500"
+            />
           </div>
           <p className="mt-4 text-sm font-medium text-slate-700 dark:text-slate-300">
             No examinations found for {year}
           </p>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Create an examination to begin this cycle.</p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Create an examination to begin this cycle.
+          </p>
           <Link
             href="/admin/examinations"
             className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
@@ -74,12 +82,17 @@ export function RecentExamsTable({ examinations, year }: RecentExamsTableProps):
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {examinations.map((exam) => (
-                <tr key={exam.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+                <tr
+                  key={exam.id}
+                  className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/40"
+                >
                   <td className="px-5 py-4">
                     <div className="min-w-32 break-words font-semibold text-slate-900 dark:text-slate-100">
                       {exam.name}
                     </div>
-                    <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{exam.organization_name}</div>
+                    <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      {exam.organization_name}
+                    </div>
                   </td>
                   <td className="px-5 py-4">
                     <Badge variant={getExamStatusBadgeVariant(exam.status)}>
@@ -90,7 +103,7 @@ export function RecentExamsTable({ examinations, year }: RecentExamsTableProps):
                     {exam.publication_date ? (
                       formatDate(exam.publication_date)
                     ) : (
-                      <span className="text-slate-300 dark:text-slate-600">—</span>
+                      <span className="text-slate-300 dark:text-slate-600">Not published</span>
                     )}
                   </td>
                   <td className="px-5 py-4 text-right">

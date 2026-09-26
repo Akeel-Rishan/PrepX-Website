@@ -10,7 +10,7 @@ export function Card({ className, children }: CardProps): React.JSX.Element {
   return (
     <div
       className={cn(
-        'rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900',
+        'rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900',
         className
       )}
     >

@@ -46,9 +46,8 @@ export function PreviewTable({
   const counts = useMemo(
     () => ({
       errors: rows.filter((row) => !row.isValid).length,
-      warnings: rows.filter((row) =>
-        row.cellErrors.some((issue) => issue.severity === 'warning')
-      ).length,
+      warnings: rows.filter((row) => row.cellErrors.some((issue) => issue.severity === 'warning'))
+        .length,
       ready: rows.filter((row) => row.isValid).length,
     }),
     [rows]
@@ -57,10 +56,7 @@ export function PreviewTable({
     const needle = query.trim().toLocaleLowerCase();
     return rows.filter((row) => {
       if (filter === 'errors' && row.isValid) return false;
-      if (
-        filter === 'warnings' &&
-        !row.cellErrors.some((issue) => issue.severity === 'warning')
-      ) {
+      if (filter === 'warnings' && !row.cellErrors.some((issue) => issue.severity === 'warning')) {
         return false;
       }
       if (filter === 'ready' && !row.isValid) return false;
@@ -199,7 +195,7 @@ export function PreviewTable({
                     </td>
                     <td className="px-4 py-3">
                       {row.cellErrors.length === 0 ? (
-                        <span className="text-gray-300">—</span>
+                        <span className="text-gray-400">Not provided</span>
                       ) : (
                         <ul className="space-y-1">
                           {row.cellErrors.map((issue, index) => (
@@ -210,7 +206,9 @@ export function PreviewTable({
                                 issue.severity === 'error' ? 'text-red-700' : 'text-amber-800'
                               )}
                             >
-                              <span aria-hidden="true" className="mt-0.5">•</span>
+                              <span aria-hidden="true" className="mt-0.5">
+                                •
+                              </span>
                               <span>{issue.message}</span>
                             </li>
                           ))}
@@ -228,7 +226,7 @@ export function PreviewTable({
       <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-200 px-4 py-3 sm:flex-row">
         <p className="text-xs text-gray-600">
           {filteredRows.length
-            ? `Showing ${firstVisibleIndex + 1}–${Math.min(firstVisibleIndex + pageSize, filteredRows.length)} of ${filteredRows.length}`
+            ? `Showing ${firstVisibleIndex + 1} to ${Math.min(firstVisibleIndex + pageSize, filteredRows.length)} of ${filteredRows.length}`
             : 'No matching rows'}
         </p>
         <div className="flex items-center gap-1">
@@ -243,7 +241,9 @@ export function PreviewTable({
           <div className="hidden items-center gap-1 md:flex">
             {getPaginationRange(currentPage, totalPages).map((item, index) =>
               item === '…' ? (
-                <span key={`ellipsis-${index}`} className="px-1 text-gray-400">…</span>
+                <span key={`ellipsis-${index}`} className="px-1 text-gray-400">
+                  …
+                </span>
               ) : (
                 <button
                   key={item}

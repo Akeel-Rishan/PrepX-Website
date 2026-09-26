@@ -43,7 +43,7 @@ export function ThemeToggle({
       aria-label={label}
       title={label}
       className={cn(
-        'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+        'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-[background-color,border-color,color,transform] duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
         appearance === 'inverse'
           ? 'border border-white/15 bg-white/10 text-white hover:bg-white/20 focus-visible:ring-offset-slate-950'
           : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900',

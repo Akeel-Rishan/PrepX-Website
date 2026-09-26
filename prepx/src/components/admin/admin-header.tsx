@@ -23,30 +23,30 @@ export function AdminHeader({
 }: AdminHeaderProps): React.JSX.Element {
   const pageTitle = getAdminPageTitle(usePathname());
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 transition-colors dark:border-slate-800 dark:bg-slate-900 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-[4.5rem] shrink-0 items-center justify-between gap-3 border-b border-slate-200/90 bg-white px-4 shadow-[0_1px_0_rgba(15,23,42,0.02)] transition-colors dark:border-slate-800 dark:bg-slate-900 sm:px-6 xl:px-8">
       <div className="flex min-w-0 items-center">
         <button
           type="button"
           onClick={onMenuClick}
           aria-expanded={drawerOpen}
           aria-controls={drawerOpen ? 'admin-mobile-drawer' : undefined}
-          className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 lg:hidden dark:text-slate-400 dark:hover:bg-slate-800"
+          className="rounded-xl p-2.5 text-slate-500 transition-[background-color,color,transform] active:scale-95 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 lg:hidden dark:text-slate-400 dark:hover:bg-slate-800"
         >
           <Menu aria-hidden="true" className="h-5 w-5" />
           <span className="sr-only">Open menu</span>
         </button>
         <h1 className="ml-3 truncate text-lg font-semibold text-gray-900 lg:ml-0 dark:text-slate-100">
           <span className="lg:hidden">
-            PrepX<span className="sr-only"> — {pageTitle}</span>
+            PrepX<span className="sr-only">: {pageTitle}</span>
           </span>
           <span className="hidden lg:inline">{pageTitle}</span>
         </h1>
       </div>
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <ThemeToggle />
         <span
           title={userEmail}
-          className="hidden max-w-[200px] truncate text-sm text-gray-500 sm:block dark:text-slate-400"
+          className="hidden max-w-[220px] truncate rounded-lg bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 sm:block dark:bg-slate-800 dark:text-slate-300"
         >
           {userEmail}
         </span>

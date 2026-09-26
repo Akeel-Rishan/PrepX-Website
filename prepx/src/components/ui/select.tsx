@@ -33,7 +33,7 @@ export function Select({
     <div>
       <label
         htmlFor={id}
-        className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-200"
+        className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
       >
         {label}
       </label>
@@ -43,10 +43,10 @@ export function Select({
         aria-invalid={error ? true : invalid}
         aria-describedby={[describedBy, helpId].filter(Boolean).join(' ') || undefined}
         className={cn(
-          'w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-50 dark:bg-slate-800 dark:text-slate-100 dark:disabled:bg-slate-900 dark:disabled:text-slate-500',
+          'min-h-11 w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-950 shadow-sm transition-[background-color,border-color,box-shadow] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 dark:bg-slate-900 dark:text-slate-100 dark:disabled:bg-slate-950 dark:disabled:text-slate-500',
           error
             ? 'border-red-500 focus:ring-red-500'
-            : 'border-gray-300 focus:ring-blue-500 dark:border-slate-700',
+            : 'border-slate-300 dark:border-slate-700 dark:focus:border-blue-400',
           className
         )}
       >

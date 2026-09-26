@@ -126,9 +126,11 @@ export function StudentIssueTable({ rows }: StudentIssueTableProps): React.JSX.E
             <tbody className="divide-y divide-gray-100">
               {visibleRows.map((row) => (
                 <tr key={row.studentId} className="align-top">
-                  <td className="px-5 py-3 font-medium text-gray-900">{row.indexNumber || '—'}</td>
+                  <td className="px-5 py-3 font-medium text-gray-900">
+                    {row.indexNumber || 'Not provided'}
+                  </td>
                   <td className="px-4 py-3 text-gray-900">{row.fullName}</td>
-                  <td className="px-4 py-3 text-gray-600">{row.schoolName || '—'}</td>
+                  <td className="px-4 py-3 text-gray-600">{row.schoolName || 'Not provided'}</td>
                   <td className="px-4 py-3">
                     <span
                       className={cn(
@@ -157,7 +159,7 @@ export function StudentIssueTable({ rows }: StudentIssueTableProps): React.JSX.E
                         )}
                       </div>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-gray-400">None</span>
                     )}
                   </td>
                 </tr>
@@ -169,7 +171,7 @@ export function StudentIssueTable({ rows }: StudentIssueTableProps): React.JSX.E
       {pageCount > 1 && (
         <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 sm:px-5">
           <p className="text-xs text-gray-500">
-            Page {page} of {pageCount} · {filtered.length} records
+            Page {page} of {pageCount}, {filtered.length} records
           </p>
           <div className="flex gap-2">
             <Button

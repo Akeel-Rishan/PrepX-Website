@@ -100,7 +100,10 @@ export function SubjectsManager({
       )}
       {subjects.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-200 bg-white p-12 text-center dark:border-slate-700 dark:bg-slate-900">
-          <BookOpen aria-hidden="true" className="mx-auto mb-3 h-10 w-10 text-gray-300 dark:text-slate-600" />
+          <BookOpen
+            aria-hidden="true"
+            className="mx-auto mb-3 h-10 w-10 text-gray-300 dark:text-slate-600"
+          />
           <p className="mb-4 text-sm text-gray-400 dark:text-slate-500">
             No subjects yet. Add subjects to start managing grades.
           </p>
@@ -135,7 +138,10 @@ export function SubjectsManager({
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                 {subjects.map((subject, index) => (
-                  <tr key={subject.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-slate-800/40">
+                  <tr
+                    key={subject.id}
+                    className="transition-colors hover:bg-gray-50/50 dark:hover:bg-slate-800/40"
+                  >
                     <td className="w-16 px-4 py-3">
                       <div className="flex flex-col items-start">
                         {(['up', 'down'] as const).map((direction) => {
@@ -171,7 +177,10 @@ export function SubjectsManager({
                         })}
                       </div>
                     </td>
-                    <th scope="row" className="px-4 py-3 text-left font-medium text-gray-900 dark:text-slate-100">
+                    <th
+                      scope="row"
+                      className="px-4 py-3 text-left font-medium text-gray-900 dark:text-slate-100"
+                    >
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="break-words">{subject.subject_name}</span>
                         {subject.subject_code && (
@@ -234,7 +243,10 @@ export function SubjectsManager({
                           aria-label={`Edit ${subject.subject_name}`}
                           title="Edit subject"
                           disabled={busy || isReadOnly}
-                          className={cn(iconButton, 'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400')}
+                          className={cn(
+                            iconButton,
+                            'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400'
+                          )}
                           onClick={() => {
                             setActionError(null);
                             setForm({ mode: 'edit', subject });
@@ -247,7 +259,10 @@ export function SubjectsManager({
                           aria-label={`Delete ${subject.subject_name}`}
                           title="Delete subject"
                           disabled={busy || isReadOnly}
-                          className={cn(iconButton, 'hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400')}
+                          className={cn(
+                            iconButton,
+                            'hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400'
+                          )}
                           onClick={() => {
                             setActionError(null);
                             setDeleteTarget(subject);
@@ -266,8 +281,8 @@ export function SubjectsManager({
             className="border-t border-gray-100 bg-gray-50 px-4 py-2.5 text-xs text-gray-400 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-500"
             role="status"
           >
-            {subjects.length} subject{subjects.length !== 1 ? 's' : ''} ·{' '}
-            {subjects.filter((subject) => subject.active).length} active ·{' '}
+            {subjects.length} subject{subjects.length !== 1 ? 's' : ''},{' '}
+            {subjects.filter((subject) => subject.active).length} active,{' '}
             {subjects.filter((subject) => subject.required).length} required
           </p>
         </div>
