@@ -22,14 +22,16 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps): P
   const examId = params.examId ?? '';
   const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1);
   const search = params.search?.trim() ?? '';
-  const examinations = await getExaminationsWithCounts();
-  let gradeData: GradeGridData | null = null;
-  let selectedExam: Examination | null = null;
-
-  if (examId) {
-    selectedExam = await getExaminationById(examId);
-    if (selectedExam) gradeData = await getGradeGridData({ examinationId: examId, page, search });
-  }
+  const validExamId =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(examId);
+  const [examinations, selectedExam, loadedGradeData] = await Promise.all([
+    getExaminationsWithCounts(),
+    validExamId ? getExaminationById(examId) : Promise.resolve<Examination | null>(null),
+    validExamId
+      ? getGradeGridData({ examinationId: examId, page, search })
+      : Promise.resolve<GradeGridData | null>(null),
+  ]);
+  const gradeData = selectedExam ? loadedGradeData : null;
 
   const isReadOnly = selectedExam ? !isExamEditable(selectedExam.status) : false;
   const currentParams: Record<string, string> = {};

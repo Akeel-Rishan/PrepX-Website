@@ -41,6 +41,10 @@ export function SidebarNav({ onNavClick }: SidebarNavProps): React.JSX.Element {
                     )
                       return;
                     event.preventDefault();
+                    if (active) {
+                      onNavClick?.();
+                      return;
+                    }
                     setPendingHref(item.href);
                     onNavClick?.();
                     startTransition(() => router.push(item.href));

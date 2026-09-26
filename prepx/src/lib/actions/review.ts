@@ -1,9 +1,10 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { createAuditLog } from '@/lib/audit';
 import { getStudentGradesForReviewData, type ReviewSubjectGrade } from '@/lib/data/review';
-import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
+import { getAdminUserId } from '@/lib/auth/admin';
 import type { Grade } from '@/lib/constants';
 import { isExamEditable } from '@/lib/constants';
 
@@ -14,21 +15,6 @@ type SaveReviewGradeResult =
   | { status: 'no_change'; resultId: string; oldGrade: Grade; newGrade: Grade }
   | { status: 'saved'; resultId: string; oldGrade: Grade | null; newGrade: Grade }
   | { status: 'error'; error: string };
-
-async function getAdminUserId(): Promise<string | null> {
-  const client = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await client.auth.getUser();
-  if (error || !user) return null;
-  const { data: profile, error: profileError } = await client
-    .from('admin_profiles')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle();
-  return profile && !profileError ? user.id : null;
-}
 
 /** Returns all active subject grades for an authenticated review request. */
 export async function getStudentGradesForReviewAction(
@@ -163,6 +149,7 @@ export async function saveReviewGradeAction(
       return { status: 'error', error: 'The grade could not be audited, so the save was cancelled.' };
     }
 
+    revalidateTag('results');
     revalidatePath('/admin/review');
     revalidatePath('/admin/results');
     return { status: 'saved', resultId, oldGrade, newGrade };

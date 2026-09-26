@@ -17,12 +17,15 @@ function ImportSkeleton(): React.JSX.Element {
 }
 
 async function ImportPageContent({ examId }: { examId: string }): Promise<React.JSX.Element> {
-  const allExaminations = await getExaminationsWithCounts();
+  const validExamId =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(examId);
+  const [allExaminations, selectedSubjects] = await Promise.all([
+    getExaminationsWithCounts(),
+    validExamId ? getSubjectsByExamination(examId) : Promise.resolve([]),
+  ]);
   const importable = allExaminations.filter(isImportable);
   const selectedExam = importable.find((examination) => examination.id === examId);
-  const subjects = selectedExam
-    ? (await getSubjectsByExamination(selectedExam.id)).filter((subject) => subject.active)
-    : [];
+  const subjects = selectedExam ? selectedSubjects.filter((subject) => subject.active) : [];
   return (
     <ImportClient
       examinations={importable.map(({ id, name, year, status }) => ({ id, name, year, status }))}

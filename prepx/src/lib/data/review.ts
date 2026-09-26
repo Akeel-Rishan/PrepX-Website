@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { unstable_noStore as noStore } from 'next/cache';
+import { unstable_cache, unstable_noStore as noStore } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/server';
 import { computeIncompleteStudents } from '@/lib/review-utils';
 import type { Student, Subject } from '@/types';
@@ -90,14 +90,13 @@ async function loadStudents(examinationId: string): Promise<ReviewStudent[]> {
 }
 
 /** Loads and classifies all active grades, then filters and paginates in memory. */
-export async function getReviewData(filters: {
+async function queryReviewData(filters: {
   examinationId: string;
   statusFilter?: StatusFilter;
   page?: number;
   pageSize?: number;
   search?: string;
 }): Promise<ReviewData> {
-  noStore();
   const pageSize = Math.max(1, Math.min(filters.pageSize ?? 25, 100));
   const requestedPage = Math.max(1, filters.page ?? 1);
   const statusFilter = filters.statusFilter ?? 'needs_attention';
@@ -168,6 +167,35 @@ export async function getReviewData(filters: {
     students: filtered.slice(from, from + pageSize), allSubjects, requiredSubjects, summary,
     totalFiltered, totalPages, currentPage, pageSize,
   };
+}
+
+const readReviewData = unstable_cache(
+  async (
+    examinationId: string,
+    statusFilter: StatusFilter,
+    page: number,
+    pageSize: number,
+    search: string
+  ): Promise<ReviewData> =>
+    queryReviewData({ examinationId, statusFilter, page, pageSize, search }),
+  ['review-data-v1'],
+  { revalidate: 30, tags: ['results', 'students', 'subjects'] }
+);
+
+export async function getReviewData(filters: {
+  examinationId: string;
+  statusFilter?: StatusFilter;
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}): Promise<ReviewData> {
+  return readReviewData(
+    filters.examinationId,
+    filters.statusFilter ?? 'needs_attention',
+    filters.page ?? 1,
+    filters.pageSize ?? 25,
+    filters.search?.trim() ?? ''
+  );
 }
 
 /** Returns the complete/incomplete summary and all students missing active required grades. */

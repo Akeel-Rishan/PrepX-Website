@@ -55,7 +55,7 @@ function harness({ user = true, profile = true, status = 'DRAFT', exists = true 
   const audits = [];
 
   const session = {
-    auth: { getUser: async () => ({ data: { user: user ? { id: 'admin-id' } : null }, error: null }) },
+    auth: { getClaims: async () => ({ data: user ? { claims: { sub: 'admin-id' } } : null, error: null }) },
     from(table) {
       const query = {
         select() { return query; },

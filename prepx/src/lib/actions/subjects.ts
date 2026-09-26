@@ -1,29 +1,15 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
-import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
+import { getAdminUserId } from '@/lib/auth/admin';
 import { subjectSchema, type SubjectFormState } from '@/lib/validations/subject';
 import { createAuditLog } from '@/lib/audit';
 import { isExamEditable } from '@/lib/constants';
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 type ActionResult = { error?: string };
-
-async function getAdminUserId(): Promise<string | null> {
-  const client = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await client.auth.getUser();
-  if (error || !user) return null;
-  const { data: profile, error: profileError } = await client
-    .from('admin_profiles')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
-  return !profileError && profile ? user.id : null;
-}
 
 async function examinationError(client: AdminClient, id: string): Promise<string | null> {
   const { data, error } = await client.from('examinations').select('status').eq('id', id).single();
@@ -34,6 +20,7 @@ async function examinationError(client: AdminClient, id: string): Promise<string
 }
 
 function refreshSubjects() {
+  revalidateTag('subjects');
   revalidatePath('/admin/subjects');
   revalidatePath('/admin/results');
   revalidatePath('/admin/review');

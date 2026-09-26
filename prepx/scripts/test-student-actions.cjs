@@ -34,7 +34,7 @@ function harness({ user = true, profile = true, existing = { id, examination_id:
   let writes = 0;
   const audits = [];
   const client = {
-    auth: { getUser: async () => ({ data: { user: user ? { id: 'admin-id' } : null }, error: null }) },
+    auth: { getClaims: async () => ({ data: user ? { claims: { sub: 'admin-id' } } : null, error: null }) },
     from(table) {
       let operation;
       const q = {

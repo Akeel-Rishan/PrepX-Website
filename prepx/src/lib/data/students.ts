@@ -1,13 +1,14 @@
 import 'server-only';
 
 import { cache } from 'react';
-import { unstable_cache, unstable_noStore as noStore } from 'next/cache';
+import { unstable_cache } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/server';
 import type { Student, Examination } from '@/types';
 
 export type StudentWithExam = Student & {
   examination: Pick<Examination, 'id' | 'name' | 'year' | 'status'> | null;
 };
+export type StudentDetail = StudentWithExam & { resultCount: number };
 export interface StudentFilters {
   page?: number;
   pageSize?: number;
@@ -33,10 +34,9 @@ function contains(value: string): string {
   return `%${value.replace(/[\\%_*]/g, '\\$&')}%`;
 }
 
-export async function getStudentsWithPagination(
+async function queryStudentsWithPagination(
   filters: StudentFilters = {}
 ): Promise<PaginatedStudents> {
-  noStore();
   const pageSize =
     Number.isSafeInteger(filters.pageSize) && filters.pageSize! > 0
       ? Math.min(filters.pageSize!, 1000)
@@ -68,7 +68,7 @@ export async function getStudentsWithPagination(
       if (!countError) {
         const lastPage = Math.max(1, Math.ceil((matchingCount ?? 0) / pageSize));
         if (lastPage < page) {
-          return getStudentsWithPagination({ ...filters, page: lastPage, pageSize });
+          return queryStudentsWithPagination({ ...filters, page: lastPage, pageSize });
         }
       }
     }
@@ -80,7 +80,7 @@ export async function getStudentsWithPagination(
     const totalPages = Math.ceil(totalCount / pageSize);
     const currentPage = Math.min(page, Math.max(1, totalPages));
     if (currentPage !== page && totalCount > 0) {
-      return getStudentsWithPagination({ ...filters, page: currentPage, pageSize });
+      return queryStudentsWithPagination({ ...filters, page: currentPage, pageSize });
     }
     return {
       students: (data as unknown as StudentWithExam[]) ?? [],
@@ -93,6 +93,31 @@ export async function getStudentsWithPagination(
     console.error('[Students Query Error] Query failed unexpectedly');
     return empty;
   }
+}
+
+const readStudentsWithPagination = unstable_cache(
+  async (
+    page: number,
+    pageSize: number,
+    search: string,
+    examinationId: string,
+    school: string
+  ): Promise<PaginatedStudents> =>
+    queryStudentsWithPagination({ page, pageSize, search, examinationId, school }),
+  ['students-with-pagination-v1'],
+  { revalidate: 30, tags: ['students'] }
+);
+
+export async function getStudentsWithPagination(
+  filters: StudentFilters = {}
+): Promise<PaginatedStudents> {
+  return readStudentsWithPagination(
+    filters.page ?? 1,
+    filters.pageSize ?? 25,
+    filters.search?.trim() ?? '',
+    filters.examinationId && uuid.test(filters.examinationId) ? filters.examinationId : '',
+    filters.school?.trim() ?? ''
+  );
 }
 
 const readDistinctSchools = unstable_cache(
@@ -120,7 +145,6 @@ const readDistinctSchools = unstable_cache(
 );
 
 export async function getDistinctSchools(examinationId?: string): Promise<string[]> {
-  noStore();
   try {
     return await readDistinctSchools(
       examinationId && uuid.test(examinationId) ? examinationId : ''
@@ -131,23 +155,36 @@ export async function getDistinctSchools(examinationId?: string): Promise<string
   }
 }
 
-// Metadata and the page share one lookup during this server render only.
-export const getStudentById = cache(async (id: string): Promise<StudentWithExam | null> => {
-  noStore();
-  if (!uuid.test(id)) return null;
+const readStudentById = unstable_cache(
+  async (id: string): Promise<StudentDetail | null> => {
   try {
     const { data, error } = await createAdminClient()
       .from('students')
-      .select('*, examination:examinations!examination_id(id, name, year, status)')
+      .select(
+        '*, examination:examinations!examination_id(id, name, year, status), student_results(count)'
+      )
       .eq('id', id)
       .single();
     if (error) {
       console.error('[Student Query Error]', { code: error.code });
       return null;
     }
-    return data as unknown as StudentWithExam;
+    const row = data as unknown as StudentWithExam & {
+      student_results: Array<{ count: number }>;
+    };
+    const { student_results: results, ...student } = row;
+    return { ...student, resultCount: results[0]?.count ?? 0 };
   } catch {
     console.error('[Student Query Error] Query failed unexpectedly');
     return null;
   }
+  },
+  ['student-by-id-v1'],
+  { revalidate: 30, tags: ['students', 'results'] }
+);
+
+// Metadata and the page share one lookup during this server render only.
+export const getStudentById = cache(async (id: string): Promise<StudentDetail | null> => {
+  if (!uuid.test(id)) return null;
+  return readStudentById(id);
 });

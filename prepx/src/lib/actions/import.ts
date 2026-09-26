@@ -1,6 +1,7 @@
 'use server';
 
-import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/auth/admin';
 import { parseImportFile } from '@/lib/import-parser';
 import {
   IMPORT_BASE_COLUMNS,
@@ -18,21 +19,6 @@ export interface TemplateSubject {
   subject_code: string | null;
   required: boolean;
   display_order: number;
-}
-
-async function isAdmin(): Promise<boolean> {
-  const client = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await client.auth.getUser();
-  if (error || !user) return false;
-  const { data, error: profileError } = await client
-    .from('admin_profiles')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle();
-  return Boolean(data && !profileError);
 }
 
 function emptyPreview(parseError: string): ImportPreviewResult {

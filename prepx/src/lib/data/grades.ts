@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { unstable_noStore as noStore } from 'next/cache';
+import { unstable_cache } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/server';
 import type { Subject } from '@/types';
 
@@ -80,13 +80,12 @@ async function loadActiveGrades(
 }
 
 /** Loads a paginated grade grid plus an exact whole-examination completion summary. */
-export async function getGradeGridData(filters: {
+async function queryGradeGridData(filters: {
   examinationId: string;
   page?: number;
   pageSize?: number;
   search?: string;
 }): Promise<GradeGridData> {
-  noStore();
   const pageSize = Math.max(1, Math.min(filters.pageSize ?? 25, 100));
   const requestedPage = Math.max(1, filters.page ?? 1);
   if (!UUID_REGEX.test(filters.examinationId)) return emptyGrid(1, pageSize);
@@ -169,4 +168,30 @@ export async function getGradeGridData(filters: {
     });
     return emptyGrid(requestedPage, pageSize);
   }
+}
+
+const readGradeGridData = unstable_cache(
+  async (
+    examinationId: string,
+    page: number,
+    pageSize: number,
+    search: string
+  ): Promise<GradeGridData> =>
+    queryGradeGridData({ examinationId, page, pageSize, search }),
+  ['grade-grid-data-v1'],
+  { revalidate: 30, tags: ['results', 'students', 'subjects'] }
+);
+
+export async function getGradeGridData(filters: {
+  examinationId: string;
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}): Promise<GradeGridData> {
+  return readGradeGridData(
+    filters.examinationId,
+    filters.page ?? 1,
+    filters.pageSize ?? 25,
+    filters.search?.trim() ?? ''
+  );
 }

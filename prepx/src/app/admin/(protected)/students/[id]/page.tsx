@@ -3,10 +3,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { getStudentById, type StudentWithExam } from '@/lib/data/students';
+import { getStudentById, type StudentDetail } from '@/lib/data/students';
 import { getEditableExaminationOptions } from '@/lib/data/examinations';
 import { isExamEditable } from '@/lib/constants';
-import { createAdminClient } from '@/lib/supabase/server';
 import { StudentForm } from './_components/student-form';
 
 interface StudentDetailPageProps {
@@ -27,18 +26,12 @@ export default async function StudentDetailPage({
   const { id } = await params;
   const isNew = id === 'new';
   if (!isNew && !UUID_REGEX.test(id)) notFound();
-  let student: StudentWithExam | null = null;
+  let student: StudentDetail | null = null;
   let resultCount = 0;
   if (!isNew) {
     student = await getStudentById(id);
     if (!student) notFound();
-    const { count, error } = await createAdminClient()
-      .from('student_results')
-      .select('id', { count: 'exact', head: true })
-      .eq('student_id', id);
-    // Do not present a misleading zero-grade deletion warning after a failed query.
-    if (error) throw new Error('Unable to load student grade count. Please try again.');
-    resultCount = count ?? 0;
+    resultCount = student.resultCount;
   }
   const examinations = isNew ? await getEditableExaminationOptions() : [];
   const pageTitle = isNew ? 'Create Student' : student!.full_name;

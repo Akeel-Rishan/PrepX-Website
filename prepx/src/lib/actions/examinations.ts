@@ -4,27 +4,13 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { createAuditLog } from '@/lib/audit';
-import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
+import { getAdminUserId } from '@/lib/auth/admin';
 import {
   examinationSchema,
   type ExaminationFormState,
 } from '@/lib/validations/examination';
 import type { Json } from '@/types/database';
-
-async function getAdminUserId(): Promise<string | null> {
-  const client = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await client.auth.getUser();
-  if (error || !user) return null;
-  const { data: profile, error: profileError } = await client
-    .from('admin_profiles')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle();
-  return profile && !profileError ? user.id : null;
-}
 
 function refreshExamination(id: string): void {
   revalidateTag('examinations');

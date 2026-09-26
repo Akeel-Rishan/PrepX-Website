@@ -1,28 +1,20 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { createAuditLog } from '@/lib/audit';
 import type { GradeChange } from '@/lib/data/grades';
-import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
+import { getAdminUserId } from '@/lib/auth/admin';
 import type { Json } from '@/types/database';
 import { isExamEditable } from '@/lib/constants';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const VALID_GRADES = new Set(['A', 'B', 'C', 'S', 'W', 'AB']);
 
-async function getAdminUserId(): Promise<string | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  if (error || !user) return null;
-  const { data: profile, error: profileError } = await supabase
-    .from('admin_profiles')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
-  return profile && !profileError ? user.id : null;
+function refreshGradeViews(): void {
+  revalidateTag('results');
+  revalidatePath('/admin/results');
+  revalidatePath('/admin/review');
 }
 
 export async function saveGradesAction(
@@ -102,7 +94,7 @@ export async function saveGradesAction(
     else deleted += 1;
   }
   if (deleted !== toDelete.length) {
-    revalidatePath('/admin/results');
+    refreshGradeViews();
     return { error: 'Some grades were saved, but one or more removals failed. Refresh and try again.' };
   }
 
@@ -119,11 +111,10 @@ export async function saveGradesAction(
       } as Json,
     });
   } catch {
-    revalidatePath('/admin/results');
+    refreshGradeViews();
     return { error: 'Grades were saved, but the audit log failed. Refresh to confirm the changes.' };
   }
 
-  revalidatePath('/admin/results');
-  revalidatePath('/admin/review');
+  refreshGradeViews();
   return { savedCount: normalized.length };
 }

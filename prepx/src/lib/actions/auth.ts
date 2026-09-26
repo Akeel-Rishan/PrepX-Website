@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { isAuthRetryableFetchError } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { getSafeRedirect } from '@/lib/auth/redirect';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
@@ -13,6 +14,9 @@ const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+
+const pause = (milliseconds: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 
 export async function loginAction(
   prevState: LoginActionState,
@@ -28,7 +32,19 @@ export async function loginAction(
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+  let { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+  // A dropped connection during sign-in is safe to retry once. This avoids a
+  // transient DNS/TLS failure being presented as an incorrect password.
+  if (isAuthRetryableFetchError(error)) {
+    await pause(250);
+    ({ data, error } = await supabase.auth.signInWithPassword(parsed.data));
+  }
+  if (isAuthRetryableFetchError(error)) {
+    return { error: 'Unable to reach the authentication service. Check your connection and try again.' };
+  }
+  if (error?.status === 429) {
+    return { error: 'Too many sign-in attempts. Wait a moment and try again.' };
+  }
   if (error || !data.user) {
     return { error: 'Invalid email or password.' };
   }

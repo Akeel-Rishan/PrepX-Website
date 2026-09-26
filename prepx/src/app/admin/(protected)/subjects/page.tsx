@@ -3,9 +3,8 @@ import { BookOpen } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { getExaminationOptions, getExaminationById } from '@/lib/data/examinations';
-import { getSubjectsByExamination, getSubjectResultCounts } from '@/lib/data/subjects';
+import { getSubjectsWithResultCounts } from '@/lib/data/subjects';
 import { getExamStatusBadgeVariant, getExamStatusLabel } from '@/lib/exam-utils';
-import type { Subject } from '@/types';
 import { isExamEditable } from '@/lib/constants';
 import { ExamSelectorBar } from './_components/exam-selector-bar';
 import { SubjectsManager } from './_components/subjects-manager';
@@ -23,21 +22,20 @@ export default async function SubjectsPage({
   const params = await searchParams;
   const examId = typeof params.examId === 'string' ? params.examId.trim() : '';
   const validId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(examId);
-  const [examinations, selectedExam] = await Promise.all([
+  const subjectsPromise = validId
+    ? getSubjectsWithResultCounts(examId).then(
+        (data) => ({ data, error: false }),
+        () => ({ data: [], error: true })
+      )
+    : Promise.resolve({ data: [], error: false });
+  const [examinations, selectedExam, subjectsResult] = await Promise.all([
     getExaminationOptions(),
     validId ? getExaminationById(examId) : Promise.resolve(null),
+    subjectsPromise,
   ]);
-  let subjects: Subject[] = [];
-  let resultCounts = new Map<string, number>();
-  let loadError = false;
-  if (selectedExam) {
-    try {
-      subjects = await getSubjectsByExamination(examId);
-      resultCounts = await getSubjectResultCounts(subjects.map((subject) => subject.id));
-    } catch {
-      loadError = true;
-    }
-  }
+  const subjects = selectedExam ? subjectsResult.data : [];
+  const resultCounts = new Map(subjects.map((subject) => [subject.id, subject.resultCount]));
+  const loadError = Boolean(selectedExam && subjectsResult.error);
   // A newly created examination may not yet be in the short-lived option cache.
   const options =
     selectedExam && !examinations.some((exam) => exam.id === selectedExam.id)

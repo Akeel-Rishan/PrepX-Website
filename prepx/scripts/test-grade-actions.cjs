@@ -29,9 +29,9 @@ function harness({ status = 'DRAFT', subjectActive = true } = {}) {
   let writes = 0;
   const audits = [];
   const session = {
-    auth: { getUser: async () => ({ data: { user: { id: 'admin-id' } }, error: null }) },
+    auth: { getClaims: async () => ({ data: { claims: { sub: 'admin-id' } }, error: null }) },
     from() {
-      const q = { select() { return q; }, eq() { return q; }, async single() { return { data: { id: 'profile-id' }, error: null }; } };
+      const q = { select() { return q; }, eq() { return q; }, async maybeSingle() { return { data: { id: 'profile-id' }, error: null }; } };
       return q;
     },
   };
@@ -63,7 +63,7 @@ function harness({ status = 'DRAFT', subjectActive = true } = {}) {
   const actions = load('src/lib/actions/grades.ts', {
     '@/lib/supabase/server': { createClient: async () => session, createAdminClient: () => admin },
     '@/lib/audit': { createAuditLog: async entry => audits.push(entry) },
-    'next/cache': { revalidatePath() {} },
+    'next/cache': { revalidatePath() {}, revalidateTag() {} },
   });
   return { ...actions, writes: () => writes, audits };
 }

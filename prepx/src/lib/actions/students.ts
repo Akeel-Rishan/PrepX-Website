@@ -3,27 +3,13 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
-import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
+import { getAdminUserId } from '@/lib/auth/admin';
 import { studentSchema, type StudentFormState } from '@/lib/validations/student';
 import { createAuditLog } from '@/lib/audit';
 import { isExamEditable } from '@/lib/constants';
 
 type AdminClient = ReturnType<typeof createAdminClient>;
-
-async function getAdminUserId(): Promise<string | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  if (error || !user) return null;
-  const { data: profile, error: profileError } = await supabase
-    .from('admin_profiles')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
-  return profile && !profileError ? user.id : null;
-}
 
 function handleDatabaseError(error: { code?: string; message?: string }): StudentFormState {
   if (error.code === '23505') {
@@ -55,6 +41,9 @@ function handleDatabaseError(error: { code?: string; message?: string }): Studen
 
 function revalidateStudent(id: string) {
   revalidateTag('student-lookups');
+  revalidateTag('students');
+  revalidateTag('examinations');
+  revalidateTag('dashboard');
   revalidatePath('/admin/students');
   revalidatePath(`/admin/students/${id}`);
   revalidatePath('/admin/dashboard');

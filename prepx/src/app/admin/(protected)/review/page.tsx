@@ -49,28 +49,23 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
     ? (params.status as StatusFilter)
     : 'needs_attention';
 
-  const examinations = await getExaminationsWithCounts();
-  let selectedExam = null;
-  let reviewData: ReviewData | null = null;
-  let loadError = false;
-
-  if (examId) {
-    selectedExam = await getExaminationById(examId);
-
-    if (selectedExam) {
-      try {
-        reviewData = await getReviewData({
-          examinationId: examId,
-          statusFilter: status,
-          search,
-          page,
-        });
-      } catch (error) {
-        console.error('Unable to load review data', error);
-        loadError = true;
-      }
-    }
-  }
+  const validExamId =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(examId);
+  const reviewPromise: Promise<{ data: ReviewData | null; error: boolean }> = validExamId
+    ? getReviewData({ examinationId: examId, statusFilter: status, search, page })
+        .then((data) => ({ data, error: false }))
+        .catch((error: unknown) => {
+          console.error('Unable to load review data', error);
+          return { data: null, error: true };
+        })
+    : Promise.resolve({ data: null, error: false });
+  const [examinations, selectedExam, reviewResult] = await Promise.all([
+    getExaminationsWithCounts(),
+    validExamId ? getExaminationById(examId) : Promise.resolve(null),
+    reviewPromise,
+  ]);
+  const reviewData = selectedExam ? reviewResult.data : null;
+  const loadError = Boolean(selectedExam && reviewResult.error);
 
   const isReadOnly = selectedExam ? !isExamEditable(selectedExam.status) : false;
   const currentParams: Record<string, string> = { examId };
