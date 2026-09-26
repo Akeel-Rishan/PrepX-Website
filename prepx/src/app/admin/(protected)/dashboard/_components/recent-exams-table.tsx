@@ -7,9 +7,10 @@ import { formatDate } from '@/lib/utils';
 
 interface RecentExamsTableProps {
   examinations: RecentExamination[];
+  year: number;
 }
 
-export function RecentExamsTable({ examinations }: RecentExamsTableProps): React.JSX.Element {
+export function RecentExamsTable({ examinations, year }: RecentExamsTableProps): React.JSX.Element {
   return (
     <section
       aria-labelledby="recent-exams-title"
@@ -17,7 +18,7 @@ export function RecentExamsTable({ examinations }: RecentExamsTableProps): React
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h3 id="recent-exams-title" className="text-base font-semibold text-gray-900">
-          Recent Examinations
+          {year} Examinations
         </h3>
         <Link href="/admin/examinations" className="text-sm text-blue-600 hover:text-blue-700">
           View all →
@@ -26,7 +27,7 @@ export function RecentExamsTable({ examinations }: RecentExamsTableProps): React
       {examinations.length === 0 ? (
         <div className="py-10 text-center">
           <ClipboardList aria-hidden="true" className="mx-auto mb-3 h-10 w-10 text-gray-300" />
-          <p className="text-sm text-gray-400">No examinations yet.</p>
+          <p className="text-sm text-gray-400">No examinations found for {year}.</p>
           <Link
             href="/admin/examinations"
             className="mt-2 inline-block text-sm text-blue-600 hover:text-blue-700"
@@ -37,10 +38,10 @@ export function RecentExamsTable({ examinations }: RecentExamsTableProps): React
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <caption className="sr-only">Five most recently created examinations</caption>
+            <caption className="sr-only">Five most recently created examinations for {year}</caption>
             <thead>
               <tr className="border-b border-gray-100">
-                {['Examination', 'Year', 'Status', 'Published', 'Action'].map((heading) => (
+                {['Examination', 'Status', 'Published', 'Action'].map((heading) => (
                   <th
                     key={heading}
                     scope="col"
@@ -60,7 +61,6 @@ export function RecentExamsTable({ examinations }: RecentExamsTableProps): React
                     </div>
                     <div className="text-xs text-gray-400">{exam.organization_name}</div>
                   </td>
-                  <td className="py-3 pr-4 text-gray-600">{exam.year}</td>
                   <td className="py-3 pr-4">
                     <Badge variant={getExamStatusBadgeVariant(exam.status)}>
                       {getExamStatusLabel(exam.status)}

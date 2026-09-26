@@ -138,6 +138,7 @@ export function ConfirmModal({
           variant={variant === 'danger' ? 'destructive' : 'primary'}
           onClick={onConfirm}
           loading={isLoading}
+          className={variant === 'warning' ? 'bg-amber-600 hover:bg-amber-700 focus-visible:ring-amber-500' : undefined}
         >
           {confirmLabel}
         </Button>

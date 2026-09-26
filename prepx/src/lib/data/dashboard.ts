@@ -23,6 +23,12 @@ export interface RecentExamination {
   created_at: string;
 }
 
+interface DashboardExamination {
+  id: string;
+  year: number;
+  status: ExamStatus;
+}
+
 interface QueryResult<T> {
   data: T | null;
   count?: number | null;
@@ -49,26 +55,49 @@ async function safeQuery<T>(
   return { data: null, count: null };
 }
 
-async function loadAllExaminationStatuses(
+async function loadAllExaminations(
   supabase: ReturnType<typeof createAdminClient>
-): Promise<ExamStatus[]> {
-  const statuses: ExamStatus[] = [];
+): Promise<DashboardExamination[]> {
+  const examinations: DashboardExamination[] = [];
   for (let from = 0; ; from += 1000) {
     const { data, error } = await supabase
       .from('examinations')
-      .select('status')
+      .select('id, year, status')
       .order('id')
       .range(from, from + 999);
-    if (error) throw new Error(`status-query:${error.code}`);
-    statuses.push(...(data ?? []).map((exam) => exam.status));
+    if (error) throw new Error(`examination-query:${error.code}`);
+    examinations.push(...(data ?? []));
     if ((data?.length ?? 0) < 1000) break;
   }
-  return statuses;
+  return examinations;
 }
 
-export async function getDashboardData(): Promise<{
+async function loadStudentCount(
+  supabase: ReturnType<typeof createAdminClient>,
+  examinationIds: string[]
+): Promise<number> {
+  let count = 0;
+  for (let start = 0; start < examinationIds.length; start += 100) {
+    const { count: batchCount, error } = await supabase
+      .from('students')
+      .select('id', { count: 'exact', head: true })
+      .in('examination_id', examinationIds.slice(start, start + 100));
+    if (error) throw new Error(`student-query:${error.code}`);
+    count += batchCount ?? 0;
+  }
+  return count;
+}
+
+function requestedYearOrNull(value?: string | number): number | null {
+  const year = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
+  return Number.isInteger(year) && year >= 2000 && year <= 2100 ? year : null;
+}
+
+export async function getDashboardData(requestedYear?: string | number): Promise<{
   stats: DashboardStats;
   recentExaminations: RecentExamination[];
+  availableYears: number[];
+  selectedYear: number;
 }> {
   noStore();
   const emptyStats: DashboardStats = {
@@ -85,38 +114,60 @@ export async function getDashboardData(): Promise<{
     supabase = createAdminClient();
   } catch {
     console.error('[dashboard] Database client initialization failed');
-    return { stats: emptyStats, recentExaminations: [] };
+    return {
+      stats: emptyStats,
+      recentExaminations: [],
+      availableYears: [],
+      selectedYear: requestedYearOrNull(requestedYear) ?? new Date().getUTCFullYear(),
+    };
   }
 
-  const [examsResult, studentsResult, recentResult] = await Promise.all([
-    loadAllExaminationStatuses(supabase).catch((error) => {
+  let allExaminations: DashboardExamination[] = [];
+  try {
+    allExaminations = await loadAllExaminations(supabase);
+  } catch (error) {
       console.error('[dashboard] Examination statistics failed', {
         code: error instanceof Error ? error.message.split(':', 2)[1] ?? 'unknown' : 'unknown',
       });
-      return [];
+  }
+  const availableYears = Array.from(new Set(allExaminations.map((exam) => exam.year)))
+    .sort((a, b) => b - a);
+  const requested = requestedYearOrNull(requestedYear);
+  const selectedYear = requested && availableYears.includes(requested)
+    ? requested
+    : availableYears[0] ?? requested ?? new Date().getUTCFullYear();
+  const selectedExaminations = allExaminations.filter((exam) => exam.year === selectedYear);
+  const examinationIds = selectedExaminations.map((exam) => exam.id);
+
+  const [studentsResult, recentResult] = await Promise.all([
+    loadStudentCount(supabase, examinationIds).catch((error) => {
+      console.error('[dashboard] Student count failed', {
+        code: error instanceof Error ? error.message.split(':', 2)[1] ?? 'unknown' : 'unknown',
+      });
+      return 0;
     }),
-    safeQuery<unknown>('Student count', () =>
-      supabase.from('students').select('*', { count: 'exact', head: true })
-    ),
     safeQuery<RecentExamination[]>('Recent examinations', () =>
       supabase
         .from('examinations')
         .select('id, name, year, organization_name, status, publication_date, created_at')
+        .eq('year', selectedYear)
         .order('created_at', { ascending: false })
         .limit(5)
     ),
   ]);
 
-  const allExams = examsResult;
+  const statuses = selectedExaminations.map((exam) => exam.status);
   return {
     stats: {
-      totalExaminations: allExams.length,
-      totalStudents: studentsResult.count ?? 0,
-      draftExaminations: allExams.filter((status) => status === 'DRAFT').length,
-      readyExaminations: allExams.filter((status) => status === 'READY').length,
-      publishedExaminations: allExams.filter((status) => status === 'PUBLISHED').length,
-      archivedExaminations: allExams.filter((status) => status === 'ARCHIVED').length,
+      totalExaminations: selectedExaminations.length,
+      totalStudents: studentsResult,
+      draftExaminations: statuses.filter((status) => status === 'DRAFT').length,
+      readyExaminations: statuses.filter((status) => status === 'READY').length,
+      publishedExaminations: statuses.filter((status) => status === 'PUBLISHED').length,
+      archivedExaminations: statuses.filter((status) => status === 'ARCHIVED').length,
     },
     recentExaminations: recentResult.data ?? [],
+    availableYears,
+    selectedYear,
   };
 }
