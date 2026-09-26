@@ -48,7 +48,7 @@ export function AdminShell({ userEmail, children }: AdminShellProps): React.JSX.
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 transition-colors dark:bg-slate-950">
       <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-64 lg:flex-col">
         <Sidebar userEmail={userEmail} onLogout={handleLogout} isLoggingOut={isLoggingOut} />
       </div>
@@ -59,7 +59,7 @@ export function AdminShell({ userEmail, children }: AdminShellProps): React.JSX.
         onLogout={handleLogout}
         isLoggingOut={isLoggingOut}
       />
-      <div className="flex min-h-screen min-w-0 flex-col lg:pl-64">
+      <div className="theme-content flex min-h-screen min-w-0 flex-col text-slate-900 transition-colors dark:text-slate-100 lg:pl-64">
         <AdminHeader
           userEmail={userEmail}
           onMenuClick={() => setDrawerOpen(true)}

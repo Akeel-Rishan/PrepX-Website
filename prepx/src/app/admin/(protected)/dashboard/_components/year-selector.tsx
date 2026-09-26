@@ -15,9 +15,14 @@ export function YearSelector({ years, selectedYear }: YearSelectorProps): React.
   const [isPending, startTransition] = useTransition();
 
   return (
-    <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-      <CalendarDays aria-hidden="true" className="h-4 w-4 text-gray-400" />
-      <span>Dashboard year</span>
+    <label className="flex min-w-48 items-center gap-3 rounded-xl border border-white/15 bg-white/10 p-2 pl-3 text-white shadow-sm backdrop-blur-sm">
+      <CalendarDays aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-300" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-200/70">
+          Reporting year
+        </span>
+        <span className="block text-sm font-medium">{isPending ? 'Updating…' : selectedYear}</span>
+      </span>
       <select
         aria-label="Dashboard year"
         value={selectedYear}
@@ -26,12 +31,16 @@ export function YearSelector({ years, selectedYear }: YearSelectorProps): React.
           const year = event.target.value;
           startTransition(() => router.push(`${pathname}?year=${encodeURIComponent(year)}`));
         }}
-        className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-50"
+        className="h-9 max-w-24 rounded-lg border border-white/10 bg-slate-800 px-2 text-sm font-semibold text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/30 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {years.length === 0 ? (
           <option value={selectedYear}>{selectedYear}</option>
         ) : (
-          years.map((year) => <option key={year} value={year}>{year}</option>)
+          years.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))
         )}
       </select>
     </label>

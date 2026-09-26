@@ -23,7 +23,10 @@ export function Input({
   const helpId = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-gray-700">
+      <label
+        htmlFor={id}
+        className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-200"
+      >
         {label}
       </label>
       <div className="relative">
@@ -33,8 +36,10 @@ export function Input({
           aria-invalid={error ? true : invalid}
           aria-describedby={[describedBy, helpId].filter(Boolean).join(' ') || undefined}
           className={cn(
-            'w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors',
-            error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500',
+            'w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:disabled:bg-slate-900 dark:disabled:text-slate-500',
+            error
+              ? 'border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:ring-blue-500 dark:border-slate-700',
             rightElement && 'pr-10',
             className
           )}
@@ -49,7 +54,7 @@ export function Input({
         </p>
       )}
       {!error && hint && (
-        <p id={helpId} className="mt-1 text-sm text-gray-500">
+        <p id={helpId} className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           {hint}
         </p>
       )}

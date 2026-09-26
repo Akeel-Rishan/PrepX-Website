@@ -16,7 +16,7 @@ function SubmitButton(): React.JSX.Element {
       size="lg"
       loading={pending}
       type="submit"
-      className="w-full bg-slate-950 shadow-lg shadow-slate-950/10 hover:bg-slate-800 focus-visible:ring-slate-900"
+      className="w-full bg-slate-950 shadow-lg shadow-slate-950/10 hover:bg-slate-800 focus-visible:ring-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus-visible:ring-blue-500"
     >
       {pending ? (
         'Verifying access...'
@@ -44,8 +44,10 @@ export function LoginForm({ redirectTo }: LoginFormProps): React.JSX.Element {
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-600">
           Admin portal
         </p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">Welcome back</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+        <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
+          Welcome back
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
           Sign in with your administrator account to continue to PrepX.
         </p>
       </div>
@@ -61,7 +63,7 @@ export function LoginForm({ redirectTo }: LoginFormProps): React.JSX.Element {
           required
           autoFocus
           placeholder="admin@example.com"
-          className="h-12 rounded-xl border-slate-300 bg-slate-50/60 pl-4 focus:bg-white"
+          className="h-12 rounded-xl border-slate-300 bg-slate-50/60 pl-4 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:focus:bg-slate-800"
         />
         <Input
           id="password"
@@ -71,7 +73,7 @@ export function LoginForm({ redirectTo }: LoginFormProps): React.JSX.Element {
           autoComplete="current-password"
           required
           placeholder="Enter your password"
-          className="h-12 rounded-xl border-slate-300 bg-slate-50/60 pl-4 focus:bg-white"
+          className="h-12 rounded-xl border-slate-300 bg-slate-50/60 pl-4 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:focus:bg-slate-800"
           rightElement={
             <button
               type="button"
@@ -79,7 +81,7 @@ export function LoginForm({ redirectTo }: LoginFormProps): React.JSX.Element {
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               aria-pressed={showPassword}
               aria-controls="password"
-              className="rounded-md p-1 text-slate-400 transition-colors hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="rounded-md p-1 text-slate-400 transition-colors hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:hover:text-white"
             >
               {showPassword ? (
                 <EyeOff aria-hidden="true" className="h-5 w-5" />
@@ -91,7 +93,7 @@ export function LoginForm({ redirectTo }: LoginFormProps): React.JSX.Element {
         />
       </div>
       <SubmitButton />
-      <p className="flex items-center justify-center gap-2 text-xs text-slate-500">
+      <p className="flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
         <ShieldCheck aria-hidden="true" className="h-4 w-4 text-emerald-600" />
         Secure, encrypted administrator sign-in
       </p>

@@ -8,7 +8,12 @@ interface CardProps {
 
 export function Card({ className, children }: CardProps): React.JSX.Element {
   return (
-    <div className={cn('bg-white rounded-xl shadow-sm border border-gray-200 p-6', className)}>
+    <div
+      className={cn(
+        'rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900',
+        className
+      )}
+    >
       {children}
     </div>
   );
@@ -23,5 +28,9 @@ export function CardContent({ className, children }: CardProps): React.JSX.Eleme
 }
 
 export function CardFooter({ className, children }: CardProps): React.JSX.Element {
-  return <div className={cn('mt-6 pt-4 border-t border-gray-100', className)}>{children}</div>;
+  return (
+    <div className={cn('mt-6 border-t border-gray-100 pt-4 dark:border-slate-800', className)}>
+      {children}
+    </div>
+  );
 }

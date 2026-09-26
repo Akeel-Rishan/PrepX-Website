@@ -65,19 +65,19 @@ export function Modal({
     >
       <div
         className={cn(
-          'flex max-h-full w-full flex-col overflow-hidden rounded-2xl bg-white shadow-2xl',
+          'theme-content flex max-h-full w-full flex-col overflow-hidden rounded-2xl bg-white text-gray-900 shadow-2xl dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/50',
           size === 'sm' && 'max-w-sm',
           size === 'md' && 'max-w-md',
           size === 'lg' && 'max-w-lg'
         )}
       >
-        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-gray-100 p-6">
+        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-gray-100 p-6 dark:border-slate-800">
           <div className="min-w-0">
-            <h3 id={titleId} className="text-base font-semibold text-gray-900">
+            <h3 id={titleId} className="text-base font-semibold text-gray-900 dark:text-slate-100">
               {title}
             </h3>
             {description && (
-              <div id={descriptionId} className="mt-0.5 text-sm text-gray-500">
+              <div id={descriptionId} className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">
                 {description}
               </div>
             )}
@@ -86,7 +86,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="shrink-0 rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="shrink-0 rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
           >
             <X aria-hidden="true" className="h-5 w-5" />
           </button>
@@ -138,7 +138,11 @@ export function ConfirmModal({
           variant={variant === 'danger' ? 'destructive' : 'primary'}
           onClick={onConfirm}
           loading={isLoading}
-          className={variant === 'warning' ? 'bg-amber-600 hover:bg-amber-700 focus-visible:ring-amber-500' : undefined}
+          className={
+            variant === 'warning'
+              ? 'bg-amber-600 hover:bg-amber-700 focus-visible:ring-amber-500'
+              : undefined
+          }
         >
           {confirmLabel}
         </Button>

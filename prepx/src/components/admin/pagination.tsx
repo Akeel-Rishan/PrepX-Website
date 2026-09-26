@@ -47,28 +47,28 @@ export function Pagination({
     totalCount === 0
       ? 'No results'
       : `Showing ${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalCount)} of ${totalCount}`;
-  const control = 'rounded-lg border border-gray-200 px-3 py-1.5 text-sm';
+  const control = 'rounded-lg border px-3 py-1.5 text-sm transition-colors';
   const href = (target: number) => buildPageUrl(target, basePath, currentParams);
   return (
-    <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 px-1 py-3 sm:flex-row">
-      <p className="order-2 text-xs text-gray-500 sm:order-1">{summary}</p>
+    <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 px-1 py-3 sm:flex-row dark:border-slate-800">
+      <p className="order-2 text-xs text-gray-500 sm:order-1 dark:text-slate-400">{summary}</p>
       {totalPages > 1 && (
         <nav
           aria-label="Pagination"
           className="order-1 flex flex-wrap items-center justify-center gap-1 sm:order-2"
         >
           {page === 1 ? (
-            <span aria-disabled="true" className={cn(control, 'cursor-not-allowed text-gray-300')}>
+            <span aria-disabled="true" className={cn(control, 'cursor-not-allowed border-gray-200 text-gray-300 dark:border-slate-700 dark:text-slate-600')}>
               ← Prev
             </span>
           ) : (
-            <Link href={href(page - 1)} className={cn(control, 'text-gray-600 hover:bg-gray-100')}>
+            <Link href={href(page - 1)} className={cn(control, 'border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800')}>
               ← Prev
             </Link>
           )}
           {getPaginationRange(page, totalPages).map((p, i) =>
             p === '…' ? (
-              <span key={`ellipsis-${i}`} className="px-2 text-sm text-gray-400">
+              <span key={`ellipsis-${i}`} className="px-2 text-sm text-gray-400 dark:text-slate-500">
                 …
               </span>
             ) : (
@@ -81,7 +81,7 @@ export function Pagination({
                   'flex h-8 w-8 items-center justify-center rounded-lg border text-sm transition-colors',
                   p === page
                     ? 'border-blue-600 bg-blue-600 font-medium text-white'
-                    : 'border-gray-200 text-gray-600 hover:bg-gray-100'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
                 )}
               >
                 {p}
@@ -89,11 +89,11 @@ export function Pagination({
             )
           )}
           {page === totalPages ? (
-            <span aria-disabled="true" className={cn(control, 'cursor-not-allowed text-gray-300')}>
+            <span aria-disabled="true" className={cn(control, 'cursor-not-allowed border-gray-200 text-gray-300 dark:border-slate-700 dark:text-slate-600')}>
               Next →
             </span>
           ) : (
-            <Link href={href(page + 1)} className={cn(control, 'text-gray-600 hover:bg-gray-100')}>
+            <Link href={href(page + 1)} className={cn(control, 'border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800')}>
               Next →
             </Link>
           )}

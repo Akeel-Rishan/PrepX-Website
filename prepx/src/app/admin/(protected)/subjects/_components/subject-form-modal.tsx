@@ -83,7 +83,7 @@ function Fields({
           >
             <span
               className={cn(
-                'inline-block h-4 w-4 rounded-full bg-white shadow transition-transform',
+                'theme-keep-white inline-block h-4 w-4 rounded-full bg-white shadow transition-transform',
                 required ? 'translate-x-6' : 'translate-x-1'
               )}
             />

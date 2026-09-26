@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { getAdminPageTitle } from '@/lib/nav';
 
 interface AdminHeaderProps {
@@ -22,19 +23,19 @@ export function AdminHeader({
 }: AdminHeaderProps): React.JSX.Element {
   const pageTitle = getAdminPageTitle(usePathname());
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 transition-colors dark:border-slate-800 dark:bg-slate-900 sm:px-6">
       <div className="flex min-w-0 items-center">
         <button
           type="button"
           onClick={onMenuClick}
           aria-expanded={drawerOpen}
           aria-controls={drawerOpen ? 'admin-mobile-drawer' : undefined}
-          className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 lg:hidden"
+          className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 lg:hidden dark:text-slate-400 dark:hover:bg-slate-800"
         >
           <Menu aria-hidden="true" className="h-5 w-5" />
           <span className="sr-only">Open menu</span>
         </button>
-        <h1 className="ml-3 truncate text-lg font-semibold text-gray-900 lg:ml-0">
+        <h1 className="ml-3 truncate text-lg font-semibold text-gray-900 lg:ml-0 dark:text-slate-100">
           <span className="lg:hidden">
             PrepX<span className="sr-only"> — {pageTitle}</span>
           </span>
@@ -42,9 +43,10 @@ export function AdminHeader({
         </h1>
       </div>
       <div className="flex min-w-0 items-center gap-3">
+        <ThemeToggle />
         <span
           title={userEmail}
-          className="hidden max-w-[200px] truncate text-sm text-gray-500 sm:block"
+          className="hidden max-w-[200px] truncate text-sm text-gray-500 sm:block dark:text-slate-400"
         >
           {userEmail}
         </span>

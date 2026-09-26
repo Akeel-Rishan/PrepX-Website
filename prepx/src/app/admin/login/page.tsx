@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { BarChart3, LockKeyhole, ShieldCheck } from 'lucide-react';
 import { LoginForm } from './_components/login-form';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export const metadata: Metadata = {
   title: 'Admin Login | PrepX',
@@ -38,6 +39,9 @@ export default async function AdminLoginPage({
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#071426] text-white">
+      <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6">
+        <ThemeToggle appearance="inverse" />
+      </div>
       <div
         aria-hidden="true"
         className="absolute inset-0 opacity-30"
@@ -118,7 +122,7 @@ export default async function AdminLoginPage({
             </div>
           </div>
 
-          <div className="flex items-center bg-white p-6 text-slate-900 sm:p-10 lg:p-14 xl:p-16">
+          <div className="flex items-center bg-white p-6 text-slate-900 transition-colors dark:bg-slate-900 dark:text-slate-100 sm:p-10 lg:p-14 xl:p-16">
             <div className="mx-auto w-full max-w-md">
               <div className="mb-9 flex items-center gap-3 lg:hidden">
                 <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-slate-900 p-1.5 shadow-md">
@@ -133,15 +137,19 @@ export default async function AdminLoginPage({
                   />
                 </div>
                 <div>
-                  <p className="text-xl font-bold tracking-tight text-slate-950">PrepX</p>
-                  <p className="text-xs font-medium text-slate-500">Examination Result System</p>
+                  <p className="text-xl font-bold tracking-tight text-slate-950 dark:text-white">
+                    PrepX
+                  </p>
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Examination Result System
+                  </p>
                 </div>
               </div>
 
               <LoginForm redirectTo={redirectTo} />
 
-              <div className="mt-8 border-t border-slate-200 pt-6 text-center">
-                <p className="text-xs leading-5 text-slate-500">
+              <div className="mt-8 border-t border-slate-200 pt-6 text-center dark:border-slate-700">
+                <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
                   PrepX Examination Management System
                   <br />
                   Authorized administrative access only
