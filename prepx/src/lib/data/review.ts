@@ -69,15 +69,16 @@ export interface ReviewSubjectGrade {
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+type ReviewStudent = Pick<Student, 'id' | 'full_name' | 'index_number' | 'school_name'>;
 
 /** Loads all rows in bounded batches so review counts are not truncated by the API row limit. */
-async function loadStudents(examinationId: string): Promise<Student[]> {
+async function loadStudents(examinationId: string): Promise<ReviewStudent[]> {
   const client = createAdminClient();
-  const students: Student[] = [];
+  const students: ReviewStudent[] = [];
   for (let from = 0; ; from += 1000) {
     const { data, error } = await client
       .from('students')
-      .select('*')
+      .select('id, full_name, index_number, school_name')
       .eq('examination_id', examinationId)
       .order('index_number', { ascending: true })
       .range(from, from + 999);

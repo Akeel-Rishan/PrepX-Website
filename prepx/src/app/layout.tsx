@@ -18,9 +18,9 @@ export const metadata: Metadata = {
   description: 'O/L Model Examination Results Portal',
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>): JSX.Element {
+export default function RootLayout({ children }: Readonly<{ children: ReactNode }>): React.JSX.Element {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans`}>{children}</body>
     </html>
   );

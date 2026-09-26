@@ -11,7 +11,7 @@ interface DeleteButtonProps {
   studentId: string;
   studentName: string;
   resultCount: number;
-  isPublished: boolean;
+  isReadOnly: boolean;
   disabled?: boolean;
   onPendingChange?: (pending: boolean) => void;
 }
@@ -20,10 +20,10 @@ export function DeleteButton({
   studentId,
   studentName,
   resultCount,
-  isPublished,
+  isReadOnly,
   disabled,
   onPendingChange,
-}: DeleteButtonProps): JSX.Element {
+}: DeleteButtonProps): React.JSX.Element {
   const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
@@ -51,14 +51,14 @@ export function DeleteButton({
     }
   }
 
-  if (isPublished)
+  if (isReadOnly)
     return (
       <div className="flex flex-col gap-1">
         <Button variant="outline" size="sm" disabled className="border-gray-200 text-gray-400">
           <Trash2 aria-hidden="true" className="h-4 w-4" />
           Delete Student
         </Button>
-        <p className="text-xs text-gray-400">Cannot delete from a published exam.</p>
+        <p className="text-xs text-gray-400">Cannot delete from a published or archived exam.</p>
       </div>
     );
 

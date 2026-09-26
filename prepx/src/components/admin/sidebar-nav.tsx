@@ -11,7 +11,7 @@ interface SidebarNavProps {
   onNavClick?: () => void;
 }
 
-export function SidebarNav({ onNavClick }: SidebarNavProps): JSX.Element {
+export function SidebarNav({ onNavClick }: SidebarNavProps): React.JSX.Element {
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

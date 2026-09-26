@@ -29,7 +29,7 @@ export function FileDropzone({
   onDraggingChange,
   onFileCandidate,
   onClear,
-}: FileDropzoneProps): JSX.Element {
+}: FileDropzoneProps): React.JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
   const dragDepth = useRef(0);
 
@@ -104,7 +104,7 @@ export function FileDropzone({
             {disabled ? 'Select an examination to enable upload' : isDragging ? 'Drop to upload' : 'Drag and drop your file here'}
           </p>
           {!disabled && !isDragging && <p className="mt-1 text-sm text-gray-600">or click to browse</p>}
-          <p className="mt-3 text-xs text-gray-500">Accepted: .xlsx, .csv — Max 5 MB</p>
+          <p className="mt-3 text-xs text-gray-500">Accepted: .xlsx, .csv — Max 10 MB</p>
         </button>
       </div>
       {error && <p role="alert" className="mt-2 text-sm font-medium text-red-700">{error}</p>}

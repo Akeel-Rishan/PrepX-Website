@@ -1,4 +1,4 @@
-export default function PublicationPage(): JSX.Element {
+export default function PublicationPage(): React.JSX.Element {
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-6">

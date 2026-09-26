@@ -4,6 +4,7 @@ export interface RawImportRow {
   nic_number: string;
   full_name: string;
   school_name: string;
+  examination_center: string;
   grades: Record<string, string>;
   rawValues: Record<string, string>;
 }
@@ -20,6 +21,7 @@ export interface ValidatedRow {
   nic_number: string;
   full_name: string;
   school_name: string;
+  examination_center: string;
   grades: Record<string, string>;
   cellErrors: CellError[];
   isValid: boolean;

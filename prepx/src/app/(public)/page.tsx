@@ -1,4 +1,4 @@
-export default function HomePage(): JSX.Element {
+export default function HomePage(): React.JSX.Element {
   return (
     <div>
       <h1>PrepX — Examination Results Portal</h1>

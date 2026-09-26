@@ -1,4 +1,4 @@
-export default function AdminLoading(): JSX.Element {
+export default function AdminLoading(): React.JSX.Element {
   return (
     <div role="status" aria-live="polite" className="mx-auto max-w-7xl space-y-5">
       <span className="sr-only">Loading page…</span>

@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import type { CellError, ValidatedRow } from '@/types/import';
 
 type RowFilter = 'all' | 'errors' | 'warnings' | 'valid';
-const BASE_COLUMNS = ['index_number', 'full_name', 'nic_number', 'school_name'];
+const BASE_COLUMNS = ['index_number', 'full_name', 'nic_number', 'school_name', 'examination_center'];
 const GRADE_STYLES: Record<string, string> = {
   A: 'bg-green-100 text-green-800', B: 'bg-blue-100 text-blue-800',
   C: 'bg-indigo-100 text-indigo-800', S: 'bg-yellow-100 text-yellow-800',
@@ -31,6 +31,7 @@ function valueFor(row: ValidatedRow, column: string): string {
   if (column === 'full_name') return row.full_name;
   if (column === 'nic_number') return row.nic_number;
   if (column === 'school_name') return row.school_name;
+  if (column === 'examination_center') return row.examination_center;
   return row.grades[column] ?? '';
 }
 
@@ -38,7 +39,7 @@ function issuesFor(row: ValidatedRow, column: string): CellError[] {
   return row.cellErrors.filter((issue) => issue.column === column);
 }
 
-function DataCell({ row, column, isGrade }: { row: ValidatedRow; column: string; isGrade: boolean }): JSX.Element {
+function DataCell({ row, column, isGrade }: { row: ValidatedRow; column: string; isGrade: boolean }): React.JSX.Element {
   const value = valueFor(row, column);
   const issues = issuesFor(row, column);
   const severity = issues.some((issue) => issue.severity === 'error') ? 'error' : issues.length ? 'warning' : null;
@@ -60,7 +61,7 @@ function DataCell({ row, column, isGrade }: { row: ValidatedRow; column: string;
 }
 
 /** Renders filterable, paginated import rows with cell-level validation details. */
-export function PreviewTable({ rows, columns, pageSize = 20 }: PreviewTableProps): JSX.Element {
+export function PreviewTable({ rows, columns, pageSize = 20 }: PreviewTableProps): React.JSX.Element {
   const [filter, setFilter] = useState<RowFilter>('all');
   const [page, setPage] = useState(1);
   const orderedColumns = useMemo(() => [...BASE_COLUMNS, ...columns.filter((column) => !BASE_COLUMNS.includes(column))], [columns]);

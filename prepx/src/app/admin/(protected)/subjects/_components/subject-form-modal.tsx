@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,7 @@ function Fields({
   subject?: Subject | null;
   onClose: () => void;
   onPendingChange: (pending: boolean) => void;
-}): JSX.Element {
+}): React.JSX.Element {
   const { pending } = useFormStatus();
   const [required, setRequired] = useState(subject?.required ?? true);
   useEffect(() => onPendingChange(pending), [pending, onPendingChange]);
@@ -115,8 +115,8 @@ export function SubjectFormModal({
   mode,
   subject,
   examinationId,
-}: SubjectFormModalProps): JSX.Element {
-  const [state, formAction] = useFormState(saveSubjectAction, {});
+}: SubjectFormModalProps): React.JSX.Element {
+  const [state, formAction] = useActionState(saveSubjectAction, {});
   const [pending, setPending] = useState(false);
   useEffect(() => {
     if (state.success) {

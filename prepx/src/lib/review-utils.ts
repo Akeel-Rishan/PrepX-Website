@@ -1,8 +1,6 @@
-import type { Student } from '@/types';
-
 /** Computes missing required subjects for each incomplete student without database access. */
 export function computeIncompleteStudents(
-  students: Student[],
+  students: Array<{ id: string }>,
   requiredSubjectIds: string[],
   existingResults: Array<{ studentId: string; subjectId: string }>
 ): Array<{ studentId: string; missingSubjectIds: string[] }> {

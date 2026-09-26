@@ -13,7 +13,7 @@ export function ExamSelectorBar({
   examinations,
   selectedExamId,
   basePath = '/admin/subjects',
-}: ExamSelectorBarProps): JSX.Element {
+}: ExamSelectorBarProps): React.JSX.Element {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   return (

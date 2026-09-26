@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ interface StudentFormProps {
   student?: StudentWithExam | null;
   examinations: Array<{ id: string; name: string; year: number }>;
   resultCount?: number;
+  isReadOnly?: boolean;
 }
 
 function FormFields({
@@ -26,14 +27,20 @@ function FormFields({
   student,
   examinations,
   resultCount = 0,
+  isReadOnly = false,
   state,
-}: StudentFormProps & { state: StudentFormState }): JSX.Element {
+}: StudentFormProps & { state: StudentFormState }): React.JSX.Element {
   const { pending } = useFormStatus();
   const [deleting, setDeleting] = useState(false);
   const busy = pending || deleting;
   return (
     <>
-      <fieldset disabled={busy} className="min-w-0 space-y-5">
+      {isReadOnly && (
+        <Alert variant="info">
+          Published and archived examinations are read-only. Student details cannot be changed.
+        </Alert>
+      )}
+      <fieldset disabled={busy || isReadOnly} className="min-w-0 space-y-5">
         <section
           className="space-y-4 rounded-xl border border-gray-200 bg-white p-6"
           aria-labelledby="examination-heading"
@@ -164,7 +171,7 @@ function FormFields({
               studentId={student.id}
               studentName={student.full_name}
               resultCount={resultCount}
-              isPublished={student.examination?.status === 'PUBLISHED'}
+              isReadOnly={isReadOnly}
               disabled={pending}
               onPendingChange={setDeleting}
             />
@@ -191,7 +198,7 @@ function FormFields({
             size="sm"
             type="submit"
             loading={pending}
-            disabled={deleting || (mode === 'create' && examinations.length === 0)}
+            disabled={isReadOnly || deleting || (mode === 'create' && examinations.length === 0)}
           >
             {pending
               ? mode === 'create'
@@ -207,8 +214,8 @@ function FormFields({
   );
 }
 
-export function StudentForm(props: StudentFormProps): JSX.Element {
-  const [state, formAction] = useFormState(saveStudentAction, {});
+export function StudentForm(props: StudentFormProps): React.JSX.Element {
+  const [state, formAction] = useActionState(saveStudentAction, {});
   const [showSuccess, setShowSuccess] = useState(false);
   useEffect(() => {
     setShowSuccess(!!state.success);

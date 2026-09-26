@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { loginAction } from '@/lib/actions/auth';
 
-function SubmitButton(): JSX.Element {
+function SubmitButton(): React.JSX.Element {
   const { pending } = useFormStatus();
   return (
     <Button variant="primary" size="lg" loading={pending} type="submit" className="w-full">
@@ -21,8 +21,8 @@ interface LoginFormProps {
   redirectTo?: string;
 }
 
-export function LoginForm({ redirectTo }: LoginFormProps): JSX.Element {
-  const [state, formAction] = useFormState(loginAction, {});
+export function LoginForm({ redirectTo }: LoginFormProps): React.JSX.Element {
+  const [state, formAction] = useActionState(loginAction, {});
   const [showPassword, setShowPassword] = useState(false);
 
   return (

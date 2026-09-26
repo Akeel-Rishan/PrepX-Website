@@ -7,7 +7,7 @@ const UPCOMING = [
 ];
 
 /** Shows the future workflow stages that become available in Steps 8.2 and 8.3. */
-export function UpcomingSteps(): JSX.Element {
+export function UpcomingSteps(): React.JSX.Element {
   return (
     <div className="grid gap-3 sm:grid-cols-3">
       {UPCOMING.map(({ title, description, icon: Icon }, index) => (

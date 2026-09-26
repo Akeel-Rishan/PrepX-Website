@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { Lock, PenLine } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +7,7 @@ import { getExamStatusBadgeVariant, getExamStatusLabel } from '@/lib/exam-utils'
 import { getExaminationById, getExaminationsWithCounts } from '@/lib/data/examinations';
 import { getGradeGridData, type GradeGridData } from '@/lib/data/grades';
 import type { Examination } from '@/types';
+import { isExamEditable } from '@/lib/constants';
 import { GradeGrid } from './_components/grade-grid';
 import { ResultsFilterBar } from './_components/results-filter-bar';
 
@@ -15,7 +17,7 @@ interface ResultsPageProps {
   searchParams: Promise<{ examId?: string; page?: string; search?: string }>;
 }
 
-export default async function ResultsPage({ searchParams }: ResultsPageProps): Promise<JSX.Element> {
+export default async function ResultsPage({ searchParams }: ResultsPageProps): Promise<React.JSX.Element> {
   const params = await searchParams;
   const examId = params.examId ?? '';
   const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1);
@@ -29,10 +31,15 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps): P
     if (selectedExam) gradeData = await getGradeGridData({ examinationId: examId, page, search });
   }
 
-  const isPublished = selectedExam?.status === 'PUBLISHED';
+  const isReadOnly = selectedExam ? !isExamEditable(selectedExam.status) : false;
   const currentParams: Record<string, string> = {};
   if (examId) currentParams.examId = examId;
   if (search) currentParams.search = search;
+  if (gradeData && gradeData.currentPage !== page) {
+    const normalized = new URLSearchParams(currentParams);
+    normalized.set('page', String(gradeData.currentPage));
+    redirect(`/admin/results?${normalized.toString()}`);
+  }
   const summary = gradeData?.completeSummary;
 
   return (
@@ -46,7 +53,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps): P
         </div>
         {selectedExam && (
           <Badge variant={getExamStatusBadgeVariant(selectedExam.status)}>
-            {isPublished && <Lock aria-hidden="true" className="mr-1 h-3 w-3" />}
+            {isReadOnly && <Lock aria-hidden="true" className="mr-1 h-3 w-3" />}
             {getExamStatusLabel(selectedExam.status)}
           </Badge>
         )}
@@ -89,7 +96,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps): P
         <GradeGrid
           data={gradeData}
           examinationId={examId}
-          isPublished={isPublished}
+          isReadOnly={isReadOnly}
           currentParams={currentParams}
         />
       )}

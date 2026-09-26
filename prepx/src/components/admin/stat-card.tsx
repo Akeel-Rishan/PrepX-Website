@@ -20,7 +20,7 @@ export function StatCard({
   iconColor,
   iconBg,
   href,
-}: StatCardProps): JSX.Element {
+}: StatCardProps): React.JSX.Element {
   const card = (
     <div className="h-full rounded-xl border border-gray-200 bg-white p-5 transition-shadow duration-200 hover:shadow-md">
       <div className="flex flex-wrap items-start justify-between gap-3">

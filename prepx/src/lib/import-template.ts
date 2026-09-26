@@ -12,6 +12,7 @@ export function generateCsvTemplate(subjects: Array<{ subject_name: string }>): 
     'nic_number',
     'full_name',
     'school_name',
+    'examination_center',
     ...subjects.map((subject) => subject.subject_name),
   ];
   const example = [
@@ -19,6 +20,7 @@ export function generateCsvTemplate(subjects: Array<{ subject_name: string }>): 
     '200312345678',
     'Student Full Name',
     'School Name',
+    '',
     ...subjects.map((_, index) => EXAMPLE_GRADES[index % EXAMPLE_GRADES.length]),
   ];
   return [COMMENT, columns.map(escapeCsv).join(','), example.map(escapeCsv).join(',')].join('\r\n');

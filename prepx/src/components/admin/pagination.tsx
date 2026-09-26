@@ -41,7 +41,7 @@ export function Pagination({
   pageSize,
   basePath,
   currentParams,
-}: PaginationProps): JSX.Element {
+}: PaginationProps): React.JSX.Element {
   const page = Math.max(1, Math.min(currentPage, totalPages || 1));
   const summary =
     totalCount === 0

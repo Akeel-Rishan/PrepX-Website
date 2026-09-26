@@ -22,7 +22,7 @@ export function Modal({
   description,
   children,
   size = 'md',
-}: ModalProps): JSX.Element | null {
+}: ModalProps): React.JSX.Element | null {
   const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -120,7 +120,7 @@ export function ConfirmModal({
   cancelLabel = 'Cancel',
   variant = 'default',
   isLoading = false,
-}: ConfirmModalProps): JSX.Element {
+}: ConfirmModalProps): React.JSX.Element {
   return (
     <Modal
       isOpen={isOpen}

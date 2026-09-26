@@ -3,7 +3,7 @@
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { parseImportFile } from '@/lib/import-parser';
 import {
-  IMPORT_REQUIRED_COLUMNS,
+  IMPORT_BASE_COLUMNS,
   summariseValidation,
   validateFileHeaders,
   validateImportRows,
@@ -15,6 +15,8 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 export interface TemplateSubject {
   id: string;
   subject_name: string;
+  subject_code: string | null;
+  required: boolean;
   display_order: number;
 }
 
@@ -91,7 +93,7 @@ export async function getSubjectsForTemplateAction(
     }
     const { data, error } = await client
       .from('subjects')
-      .select('id, subject_name, display_order')
+      .select('id, subject_name, subject_code, required, display_order')
       .eq('examination_id', examinationId)
       .eq('active', true)
       .order('display_order', { ascending: true })
@@ -100,6 +102,7 @@ export async function getSubjectsForTemplateAction(
       console.error('[Import Template Subjects Error]', { code: error.code });
       return { error: 'Failed to load template subjects.' };
     }
+    if (!data?.length) return { error: 'Add at least one active subject before downloading a template.' };
     return { data: data ?? [] };
   } catch {
     return { error: 'Failed to generate the template. Please try again.' };
@@ -115,7 +118,7 @@ export async function parseAndValidateImportAction(formData: FormData): Promise<
     return emptyPreview('Select a valid examination.');
   }
   if (!(file instanceof File) || file.size === 0) return emptyPreview('Select a non-empty import file.');
-  if (file.size > 5 * 1024 * 1024) return emptyPreview('File size must be under 5 MB.');
+  if (file.size > 10 * 1024 * 1024) return emptyPreview('File size must be under 10 MB.');
   const lowerName = file.name.toLocaleLowerCase();
   const fileType = lowerName.endsWith('.xlsx') ? 'xlsx' : lowerName.endsWith('.csv') ? 'csv' : null;
   if (!fileType) return emptyPreview('Only .xlsx and .csv files are accepted.');
@@ -134,7 +137,7 @@ export async function parseAndValidateImportAction(formData: FormData): Promise<
     const [subjectsResult, existingStudents] = await Promise.all([
       client
         .from('subjects')
-        .select('subject_name')
+        .select('subject_name, subject_code, required')
         .eq('examination_id', examinationId)
         .eq('active', true)
         .order('display_order', { ascending: true })
@@ -145,26 +148,37 @@ export async function parseAndValidateImportAction(formData: FormData): Promise<
       console.error('[Import Subjects Error]', { code: subjectsResult.error.code });
       return emptyPreview('Failed to load examination data. Please try again.');
     }
-    const subjectNames = (subjectsResult.data ?? []).map((subject) => subject.subject_name);
+    const subjectDefinitions = subjectsResult.data ?? [];
+    if (subjectDefinitions.length === 0) {
+      return emptyPreview('This examination has no active subjects. Add subjects before importing results.');
+    }
+    const subjectNames = subjectDefinitions.map((subject) => subject.subject_name);
     let parsed;
     try {
-      parsed = parseImportFile(Buffer.from(await file.arrayBuffer()), fileType, subjectNames);
+      parsed = await parseImportFile(
+        Buffer.from(await file.arrayBuffer()),
+        fileType,
+        subjectDefinitions
+      );
     } catch (error) {
       return emptyPreview(error instanceof Error ? error.message : 'Could not read the import file.');
     }
     const headerResult = validateFileHeaders(parsed.headers, subjectNames);
     if (!headerResult.valid) {
-      return emptyPreview(`Missing required columns: ${headerResult.missingColumns.join(', ')}`);
+      if (headerResult.missingColumns.length) {
+        return emptyPreview(`Missing required columns: ${headerResult.missingColumns.join(', ')}`);
+      }
+      return emptyPreview(`Duplicate columns are not allowed: ${headerResult.duplicateColumns.join(', ')}`);
     }
     const rows = validateImportRows(
       parsed.rows,
-      subjectNames,
+      subjectDefinitions,
       existingStudents.indexNumbers,
       existingStudents.nicNumbers
     );
     return {
       ...summariseValidation(rows),
-      columns: [...IMPORT_REQUIRED_COLUMNS, ...subjectNames],
+      columns: [...IMPORT_BASE_COLUMNS, ...subjectNames],
       rows,
       parseError: null,
     };

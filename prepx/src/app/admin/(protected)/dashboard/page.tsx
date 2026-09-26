@@ -8,7 +8,7 @@ import { QuickActions } from './_components/quick-actions';
 export const metadata: Metadata = { title: 'Dashboard | PrepX Admin' };
 export const dynamic = 'force-dynamic';
 
-export default async function DashboardPage(): Promise<JSX.Element> {
+export default async function DashboardPage(): Promise<React.JSX.Element> {
   const { stats, recentExaminations } = await getDashboardData();
   return (
     <div className="mx-auto max-w-7xl space-y-6">

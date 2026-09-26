@@ -21,13 +21,13 @@ import { GradeCell } from './grade-cell';
 interface GradeGridProps {
   data: GradeGridData;
   examinationId: string;
-  isPublished: boolean;
+  isReadOnly: boolean;
   currentParams: Record<string, string>;
 }
 
 type StudentStatus = 'complete' | 'incomplete' | 'empty';
 
-function StatusBadge({ status }: { status: StudentStatus }): JSX.Element {
+function StatusBadge({ status }: { status: StudentStatus }): React.JSX.Element {
   if (status === 'complete') {
     return (
       <span className="flex items-center gap-1 text-xs text-green-700">
@@ -52,15 +52,15 @@ function StatusBadge({ status }: { status: StudentStatus }): JSX.Element {
 export function GradeGrid({
   data,
   examinationId,
-  isPublished,
+  isReadOnly,
   currentParams,
-}: GradeGridProps): JSX.Element {
+}: GradeGridProps): React.JSX.Element {
   const router = useRouter();
   const [dirtyGrades, setDirtyGrades] = useState<Map<string, string | null>>(new Map());
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const successTimer = useRef<ReturnType<typeof setTimeout>>();
+  const successTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const initialGradesMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -98,7 +98,7 @@ export function GradeGrid({
   }
 
   function handleGradeChange(studentId: string, subjectId: string, newValue: string) {
-    if (isPublished) return;
+    if (isReadOnly) return;
     const key = `${studentId}|${subjectId}`;
     const original = initialGradesMap.get(key) ?? '';
     setSaveError(null);
@@ -112,7 +112,7 @@ export function GradeGrid({
   }
 
   async function handleSave() {
-    if (dirtyGrades.size === 0 || isSaving || isPublished) return;
+    if (dirtyGrades.size === 0 || isSaving || isReadOnly) return;
     const changes: GradeChange[] = [];
     dirtyGrades.forEach((grade, key) => {
       const [studentId, subjectId] = key.split('|');
@@ -141,7 +141,7 @@ export function GradeGrid({
 
   return (
     <div className="space-y-4">
-      {!isPublished && dirtyGrades.size > 0 && (
+      {!isReadOnly && dirtyGrades.size > 0 && (
         <div className="flex items-center justify-between gap-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-orange-400" />
@@ -161,11 +161,11 @@ export function GradeGrid({
         </Alert>
       )}
       {saveSuccess && <Alert variant="success">Grades saved successfully.</Alert>}
-      {isPublished && (
+      {isReadOnly && (
         <Alert variant="info">
           <span className="flex items-center gap-2">
             <Lock aria-hidden="true" className="h-4 w-4" />
-            This examination is published. Grades are read-only.
+            Published and archived examination grades are read-only.
           </span>
         </Alert>
       )}
@@ -223,7 +223,7 @@ export function GradeGrid({
                           subjectId={subject.id}
                           value={getCurrentGrade(student.id, subject.id)}
                           isDirty={dirtyGrades.has(`${student.id}|${subject.id}`)}
-                          disabled={isPublished || isSaving}
+                          disabled={isReadOnly || isSaving}
                           onChange={handleGradeChange}
                         />
                       </td>

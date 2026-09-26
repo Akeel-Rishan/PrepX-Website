@@ -9,7 +9,7 @@ interface RecentExamsTableProps {
   examinations: RecentExamination[];
 }
 
-export function RecentExamsTable({ examinations }: RecentExamsTableProps): JSX.Element {
+export function RecentExamsTable({ examinations }: RecentExamsTableProps): React.JSX.Element {
   return (
     <section
       aria-labelledby="recent-exams-title"

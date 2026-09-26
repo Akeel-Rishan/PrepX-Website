@@ -5,6 +5,7 @@ import { createAuditLog } from '@/lib/audit';
 import { getStudentGradesForReviewData, type ReviewSubjectGrade } from '@/lib/data/review';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import type { Grade } from '@/lib/constants';
+import { isExamEditable } from '@/lib/constants';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const VALID_GRADES = new Set<string>(['A', 'B', 'C', 'S', 'W', 'AB']);
@@ -88,8 +89,8 @@ export async function saveReviewGradeAction(
     if (subjectResult.error || !subjectResult.data || !subjectResult.data.active) {
       return { status: 'error', error: 'This subject is not active for the examination.' };
     }
-    if (examResult.data.status === 'PUBLISHED') {
-      return { status: 'error', error: 'Published examinations are read-only.' };
+    if (!isExamEditable(examResult.data.status)) {
+      return { status: 'error', error: 'Published and archived examinations are read-only.' };
     }
 
     const { data: existing, error: existingError } = await client

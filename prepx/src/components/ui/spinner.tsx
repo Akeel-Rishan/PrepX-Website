@@ -9,7 +9,7 @@ interface SpinnerProps {
 
 const sizes = { sm: 'w-4 h-4', md: 'w-6 h-6', lg: 'w-8 h-8' };
 
-export function Spinner({ size = 'md', className }: SpinnerProps): JSX.Element {
+export function Spinner({ size = 'md', className }: SpinnerProps): React.JSX.Element {
   return (
     <svg
       viewBox="0 0 24 24"

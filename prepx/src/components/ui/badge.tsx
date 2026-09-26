@@ -16,7 +16,7 @@ const variants = {
   neutral: 'bg-gray-50 text-gray-600 border border-gray-200',
 };
 
-export function Badge({ variant, children, className }: BadgeProps): JSX.Element {
+export function Badge({ variant, children, className }: BadgeProps): React.JSX.Element {
   return (
     <span
       className={cn(

@@ -8,20 +8,24 @@ import { generateCsvTemplate } from '@/lib/import-template';
 
 interface TemplateDownloadButtonProps {
   examinationId: string | null;
+  examinationName: string | null;
   examinationYear: number | null;
+  disabled?: boolean;
   onError: (message: string) => void;
 }
 
 /** Fetches subject columns and downloads a generated CSV import template. */
 export function TemplateDownloadButton({
   examinationId,
+  examinationName,
   examinationYear,
+  disabled = false,
   onError,
-}: TemplateDownloadButtonProps): JSX.Element {
+}: TemplateDownloadButtonProps): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
 
   async function downloadTemplate() {
-    if (!examinationId || !examinationYear || isLoading) return;
+    if (!examinationId || !examinationYear || disabled || isLoading) return;
     setIsLoading(true);
     onError('');
     try {
@@ -34,7 +38,11 @@ export function TemplateDownloadButton({
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = `import_template_${examinationYear}.csv`;
+      const examSlug = (examinationName ?? 'examination')
+        .trim()
+        .replace(/[^a-z0-9]+/gi, '-')
+        .replace(/^-|-$/g, '');
+      anchor.download = `import-template-${examSlug}-${examinationYear}.csv`;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
@@ -47,8 +55,8 @@ export function TemplateDownloadButton({
   }
 
   return (
-    <span className="block w-full md:inline-block md:w-auto" title={!examinationId ? 'Select an examination to generate a template.' : undefined}>
-      <Button variant="outline" onClick={downloadTemplate} disabled={!examinationId} loading={isLoading} className="w-full md:w-auto">
+    <span className="block w-full md:inline-block md:w-auto" title={!examinationId ? 'Select an examination to generate a template.' : disabled ? 'Add active subjects before downloading a template.' : undefined}>
+      <Button variant="outline" onClick={downloadTemplate} disabled={!examinationId || disabled} loading={isLoading} className="w-full md:w-auto">
         <Download aria-hidden="true" className="h-4 w-4" /> Download Template (.csv)
       </Button>
     </span>

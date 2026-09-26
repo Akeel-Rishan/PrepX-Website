@@ -30,7 +30,7 @@ export function ExaminationsTable({
   currentStatus = null,
   sort = 'year',
   direction = 'desc',
-}: ExaminationsTableProps): JSX.Element {
+}: ExaminationsTableProps): React.JSX.Element {
   if (examinations.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-gray-200 bg-white">

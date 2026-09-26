@@ -1,62 +1,111 @@
-import * as XLSX from 'xlsx';
+import 'server-only';
+
+import { Readable } from 'node:stream';
+import ExcelJS from 'exceljs';
 import type { RawImportRow } from '@/types/import';
 
-const REQUIRED_COLUMNS = ['index_number', 'nic_number', 'full_name', 'school_name'] as const;
+const BASE_COLUMNS = [
+  'index_number',
+  'nic_number',
+  'full_name',
+  'school_name',
+  'examination_center',
+] as const;
 
 export interface ParsedImportFile {
   headers: string[];
   rows: RawImportRow[];
 }
 
-function cellString(value: unknown): string {
+export interface ImportSubjectHeader {
+  subject_name: string;
+  subject_code: string | null;
+}
+
+function cellString(value: ExcelJS.CellValue): string {
   if (value === null || value === undefined) return '';
-  return String(value).trim();
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value).trim();
+  }
+  if (value instanceof Date) return value.toISOString();
+  if ('result' in value) return cellString(value.result ?? null);
+  if ('richText' in value) return value.richText.map((part) => part.text).join('').trim();
+  if ('text' in value) return value.text.trim();
+  return '';
 }
 
 function normalizeHeader(header: string, subjects: Map<string, string>): string {
   const trimmed = header.trim();
   const lower = trimmed.toLocaleLowerCase();
-  const required = REQUIRED_COLUMNS.find((column) => column === lower);
-  return required ?? subjects.get(lower) ?? trimmed;
+  const base = BASE_COLUMNS.find((column) => column === lower);
+  return base ?? subjects.get(lower) ?? trimmed;
+}
+
+function stripLeadingCsvComments(source: string): string {
+  const lines = source.replace(/^\uFEFF/, '').split(/\r?\n/);
+  while (lines.length && (!lines[0].trim() || lines[0].trimStart().startsWith('#'))) {
+    lines.shift();
+  }
+  return lines.join('\n');
+}
+
+async function readMatrix(fileBuffer: Buffer, fileType: 'xlsx' | 'csv'): Promise<ExcelJS.CellValue[][]> {
+  const workbook = new ExcelJS.Workbook();
+  let worksheet: ExcelJS.Worksheet | undefined;
+  if (fileType === 'xlsx') {
+    const workbookBytes = fileBuffer.buffer.slice(
+      fileBuffer.byteOffset,
+      fileBuffer.byteOffset + fileBuffer.byteLength
+    ) as ArrayBuffer;
+    await workbook.xlsx.load(workbookBytes);
+    worksheet = workbook.worksheets[0];
+  } else {
+    const source = stripLeadingCsvComments(fileBuffer.toString('utf8'));
+    worksheet = await workbook.csv.read(Readable.from([source]), {
+      parserOptions: { ignoreEmpty: true, trim: false },
+    });
+  }
+  if (!worksheet) throw new Error('No worksheet');
+  if (worksheet.columnCount > 250) {
+    throw new Error('Import file contains too many columns (max 250).');
+  }
+  if (worksheet.actualRowCount > 1100) {
+    throw new Error('Import file contains too many rows (max 1000 data rows).');
+  }
+
+  const matrix: ExcelJS.CellValue[][] = [];
+  worksheet.eachRow({ includeEmpty: false }, (row) => {
+    const values: ExcelJS.CellValue[] = [];
+    for (let column = 1; column <= worksheet!.columnCount; column += 1) {
+      values.push(row.getCell(column).value);
+    }
+    matrix.push(values);
+  });
+  return matrix;
 }
 
 /** Parses the first XLSX/CSV sheet into normalized rows without database access. */
-export function parseImportFile(
+export async function parseImportFile(
   fileBuffer: Buffer,
   fileType: 'xlsx' | 'csv',
-  expectedSubjectNames: string[]
-): ParsedImportFile {
+  expectedSubjects: ImportSubjectHeader[]
+): Promise<ParsedImportFile> {
   try {
-    let source: Buffer | string = fileBuffer;
-    if (fileType === 'csv') {
-      source = fileBuffer
-        .toString('utf8')
-        .replace(/^\uFEFF/, '')
-        .split(/\r?\n/)
-        .filter((line, index, lines) => {
-          const firstContentLine = lines.slice(0, index).every((prior) => !prior.trim() || prior.trimStart().startsWith('#'));
-          return !(firstContentLine && line.trimStart().startsWith('#'));
-        })
-        .join('\n');
-    }
-    const workbook = XLSX.read(source, { type: fileType === 'csv' ? 'string' : 'buffer', raw: false });
-    const firstSheetName = workbook.SheetNames[0];
-    if (!firstSheetName) throw new Error('No worksheet');
-    const matrix = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets[firstSheetName], {
-      header: 1,
-      // Numeric XLSX identifiers must use their underlying value; formatted
-      // "General" cells can otherwise become scientific notation.
-      raw: fileType === 'xlsx',
-      defval: '',
-      blankrows: false,
-    });
+    const matrix = await readMatrix(fileBuffer, fileType);
     while (matrix.length && matrix[0].every((cell) => !cellString(cell))) matrix.shift();
-    while (matrix.length && cellString(matrix[0][0]).startsWith('#')) matrix.shift();
     if (!matrix.length) return { headers: [], rows: [] };
 
-    const subjectMap = new Map(expectedSubjectNames.map((name) => [name.trim().toLocaleLowerCase(), name]));
+    const subjectMap = new Map<string, string>();
+    for (const subject of expectedSubjects) {
+      subjectMap.set(subject.subject_name.trim().toLocaleLowerCase(), subject.subject_name);
+      if (subject.subject_code?.trim()) {
+        subjectMap.set(subject.subject_code.trim().toLocaleLowerCase(), subject.subject_name);
+      }
+    }
+    const expectedSubjectNames = expectedSubjects.map((subject) => subject.subject_name);
     const headers = matrix[0].map((cell) => normalizeHeader(cellString(cell), subjectMap));
     const rows: RawImportRow[] = [];
+
     for (const values of matrix.slice(1)) {
       if (values.every((cell) => !cellString(cell))) continue;
       if (rows.length >= 1000) {
@@ -67,20 +116,25 @@ export function parseImportFile(
         if (header) rawValues[header] = cellString(values[index]);
       });
       const grades: Record<string, string> = {};
-      for (const subjectName of expectedSubjectNames) grades[subjectName] = rawValues[subjectName] ?? '';
+      for (const subjectName of expectedSubjectNames) {
+        grades[subjectName] = rawValues[subjectName] ?? '';
+      }
       rows.push({
         rowNumber: rows.length + 1,
         index_number: rawValues.index_number ?? '',
         nic_number: rawValues.nic_number ?? '',
         full_name: rawValues.full_name ?? '',
         school_name: rawValues.school_name ?? '',
+        examination_center: rawValues.examination_center ?? '',
         grades,
         rawValues,
       });
     }
     return { headers, rows };
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith('Import file contains too many rows')) throw error;
+    if (error instanceof Error && error.message.startsWith('Import file contains too many')) {
+      throw error;
+    }
     throw new Error('Could not read the file. Ensure it is a valid .xlsx or .csv file.');
   }
 }

@@ -29,7 +29,7 @@ const actions = [
   },
 ];
 
-export function QuickActions(): JSX.Element {
+export function QuickActions(): React.JSX.Element {
   return (
     <section
       aria-labelledby="quick-actions-title"

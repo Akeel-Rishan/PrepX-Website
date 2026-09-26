@@ -9,7 +9,7 @@ const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
 const { createClient } = require('@supabase/supabase-js');
 require('@next/env').loadEnvConfig(process.cwd());
-const client = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, { auth: { persistSession: false } });
+const client = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, { auth: { autoRefreshToken: false, persistSession: false } });
 function load(relative) {
   const filename = path.resolve(relative);
   const m = new Module(filename, module);

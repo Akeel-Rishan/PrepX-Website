@@ -22,7 +22,7 @@ interface StudentGradeEditorModalProps {
 const GRADE_TEXT: Record<string, string> = { A: 'text-green-700', B: 'text-emerald-700', C: 'text-yellow-700', S: 'text-blue-700', W: 'text-red-700', AB: 'text-gray-700', '': 'text-gray-400' };
 
 /** Edits all active grades for one student and saves only changed cells. */
-export function StudentGradeEditorModal({ isOpen, onClose, onSuccess, student, allSubjects, examinationId }: StudentGradeEditorModalProps): JSX.Element | null {
+export function StudentGradeEditorModal({ isOpen, onClose, onSuccess, student, allSubjects, examinationId }: StudentGradeEditorModalProps): React.JSX.Element | null {
   const [modalGrades, setModalGrades] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

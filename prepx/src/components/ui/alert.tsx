@@ -19,7 +19,7 @@ const variants = {
   info: { classes: 'bg-blue-50 border-blue-200 text-blue-800', icon: Info },
 };
 
-export function Alert({ variant, title, children, className, onClose }: AlertProps): JSX.Element {
+export function Alert({ variant, title, children, className, onClose }: AlertProps): React.JSX.Element {
   const { classes, icon: Icon } = variants[variant];
   return (
     <div role="alert" className={cn('rounded-lg border p-4 flex gap-3', classes, className)}>

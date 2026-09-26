@@ -33,7 +33,7 @@ export function Button({
   children,
   type = 'button',
   ...rest
-}: ButtonProps): JSX.Element {
+}: ButtonProps): React.JSX.Element {
   return (
     <button
       {...rest}

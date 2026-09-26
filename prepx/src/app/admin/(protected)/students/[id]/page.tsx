@@ -1,15 +1,16 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getStudentById, type StudentWithExam } from '@/lib/data/students';
-import { getExaminationOptions } from '@/lib/data/examinations';
+import { getEditableExaminationOptions } from '@/lib/data/examinations';
+import { isExamEditable } from '@/lib/constants';
 import { createAdminClient } from '@/lib/supabase/server';
 import { StudentForm } from './_components/student-form';
 
 interface StudentDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: StudentDetailPageProps): Prom
 
 export default async function StudentDetailPage({
   params,
-}: StudentDetailPageProps): Promise<JSX.Element> {
+}: StudentDetailPageProps): Promise<React.JSX.Element> {
   const { id } = await params;
   const isNew = id === 'new';
   if (!isNew && !UUID_REGEX.test(id)) notFound();
@@ -39,7 +40,7 @@ export default async function StudentDetailPage({
     if (error) throw new Error('Unable to load student grade count. Please try again.');
     resultCount = count ?? 0;
   }
-  const examinations = isNew ? await getExaminationOptions() : [];
+  const examinations = isNew ? await getEditableExaminationOptions() : [];
   const pageTitle = isNew ? 'Create Student' : student!.full_name;
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -77,6 +78,7 @@ export default async function StudentDetailPage({
           year,
         }))}
         resultCount={resultCount}
+        isReadOnly={Boolean(student?.examination && !isExamEditable(student.examination.status))}
       />
     </div>
   );

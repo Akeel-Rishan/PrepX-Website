@@ -8,7 +8,7 @@ interface ImportInstructionsProps {
 }
 
 /** Collapsible instructions for preparing an import workbook. */
-export function ImportInstructions({ isOpen, onToggle }: ImportInstructionsProps): JSX.Element {
+export function ImportInstructions({ isOpen, onToggle }: ImportInstructionsProps): React.JSX.Element {
   return (
     <section className="overflow-hidden rounded-xl border border-blue-200 bg-blue-50/50">
       <button type="button" onClick={onToggle} aria-expanded={isOpen} aria-controls="import-instructions" className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500">
@@ -21,7 +21,7 @@ export function ImportInstructions({ isOpen, onToggle }: ImportInstructionsProps
           <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-gray-700">
             <li>Select the examination you want to import results for.</li>
             <li>Download the CSV template using the button below.</li>
-            <li>Fill in student index numbers, NIC numbers, names, schools, and grades.</li>
+            <li>Fill in student index numbers, names, schools, and grades. NIC numbers and examination centers are optional.</li>
             <li>Valid grades are: A, B, C, S, W, AB — do not use other values.</li>
             <li>Save the file as .xlsx or .csv and upload it here.</li>
             <li>Review the validation preview before confirming the import.</li>

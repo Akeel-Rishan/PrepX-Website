@@ -19,7 +19,7 @@ export function Input({
   'aria-describedby': describedBy,
   'aria-invalid': invalid,
   ...rest
-}: InputProps): JSX.Element {
+}: InputProps): React.JSX.Element {
   const helpId = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
     <div>

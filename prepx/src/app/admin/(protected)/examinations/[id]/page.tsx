@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { ChevronLeft, ClipboardList } from 'lucide-react';
 
 interface ExaminationDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default function ExaminationDetailPage({ params }: ExaminationDetailPageProps): JSX.Element {
+export default async function ExaminationDetailPage({ params }: ExaminationDetailPageProps): Promise<React.JSX.Element> {
+  const { id } = await params;
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-center gap-3">
@@ -21,7 +22,7 @@ export default function ExaminationDetailPage({ params }: ExaminationDetailPageP
         <ClipboardList aria-hidden="true" className="mb-3 h-10 w-10 text-gray-300" />
         <p className="text-sm text-gray-400">
           Examination form for:{' '}
-          <code className="break-all rounded bg-gray-100 px-1">{params.id}</code>
+          <code className="break-all rounded bg-gray-100 px-1">{id}</code>
         </p>
         <p className="mt-1 text-xs text-gray-400">Full create/edit form built in Step 4.2</p>
       </div>

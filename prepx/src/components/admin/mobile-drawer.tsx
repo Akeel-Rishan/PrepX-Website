@@ -18,7 +18,7 @@ export function MobileDrawer({
   userEmail,
   onLogout,
   isLoggingOut,
-}: MobileDrawerProps): JSX.Element | null {
+}: MobileDrawerProps): React.JSX.Element | null {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 

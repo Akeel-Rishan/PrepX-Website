@@ -14,7 +14,7 @@ const CARDS = [
 ] as const;
 
 /** Displays validation counts and whether the import may proceed. */
-export function ValidationSummary({ summary }: ValidationSummaryProps): JSX.Element {
+export function ValidationSummary({ summary }: ValidationSummaryProps): React.JSX.Element {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

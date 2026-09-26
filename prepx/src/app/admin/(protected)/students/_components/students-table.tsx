@@ -1,9 +1,9 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import { PlusCircle, Users } from 'lucide-react';
 import type { StudentWithExam } from '@/lib/data/students';
 import { maskNIC } from '@/lib/utils';
 
-export function StudentsTable({ students }: { students: StudentWithExam[] }): JSX.Element {
+export function StudentsTable({ students }: { students: StudentWithExam[] }): React.JSX.Element {
   if (students.length === 0)
     return (
       <div className="rounded-xl border border-dashed border-gray-200 bg-white">

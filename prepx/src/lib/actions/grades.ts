@@ -5,6 +5,7 @@ import { createAuditLog } from '@/lib/audit';
 import type { GradeChange } from '@/lib/data/grades';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import type { Json } from '@/types/database';
+import { isExamEditable } from '@/lib/constants';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const VALID_GRADES = new Set(['A', 'B', 'C', 'S', 'W', 'AB']);
@@ -53,17 +54,22 @@ export async function saveGradesAction(
   const [examResult, studentsResult, subjectsResult] = await Promise.all([
     adminClient.from('examinations').select('status').eq('id', examinationId).maybeSingle(),
     adminClient.from('students').select('id').eq('examination_id', examinationId).in('id', studentIds),
-    adminClient.from('subjects').select('id').eq('examination_id', examinationId).in('id', subjectIds),
+    adminClient
+      .from('subjects')
+      .select('id')
+      .eq('examination_id', examinationId)
+      .eq('active', true)
+      .in('id', subjectIds),
   ]);
   if (examResult.error || !examResult.data) return { error: 'Examination not found.' };
-  if (examResult.data.status === 'PUBLISHED') {
-    return { error: 'Published examinations are read-only.' };
+  if (!isExamEditable(examResult.data.status)) {
+    return { error: 'Published and archived examinations are read-only.' };
   }
   if (studentsResult.error || subjectsResult.error) {
     return { error: 'Unable to validate grade changes. Please try again.' };
   }
   if ((studentsResult.data?.length ?? 0) !== studentIds.length || (subjectsResult.data?.length ?? 0) !== subjectIds.length) {
-    return { error: 'One or more students or subjects do not belong to this examination.' };
+    return { error: 'One or more students or active subjects do not belong to this examination.' };
   }
 
   const toUpsert = normalized

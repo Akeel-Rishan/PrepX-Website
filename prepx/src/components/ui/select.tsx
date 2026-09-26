@@ -17,7 +17,7 @@ export function Select({
   error,
   className,
   ...rest
-}: SelectProps): JSX.Element {
+}: SelectProps): React.JSX.Element {
   return (
     <div>
       <label htmlFor={id} className="mb-1 block text-sm font-medium text-gray-700">

@@ -14,11 +14,11 @@ export function ResultsFilterBar({
   examinations,
   selectedExamId,
   initialSearch,
-}: ResultsFilterBarProps): JSX.Element {
+}: ResultsFilterBarProps): React.JSX.Element {
   const router = useRouter();
   const pathname = usePathname();
   const [searchValue, setSearchValue] = useState(initialSearch);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     setSearchValue(initialSearch);

@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { PlusCircle } from 'lucide-react';
@@ -12,17 +12,17 @@ export const metadata: Metadata = { title: 'Students | PrepX Admin' };
 export const dynamic = 'force-dynamic';
 
 interface StudentsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string | string[];
     search?: string | string[];
     examId?: string | string[];
     school?: string | string[];
-  };
+  }>;
 }
 
 export default async function StudentsPage({
   searchParams,
-}: StudentsPageProps): Promise<JSX.Element> {
+}: StudentsPageProps): Promise<React.JSX.Element> {
   const params = await searchParams;
   const text = (value: string | string[] | undefined) =>
     typeof value === 'string' ? value.trim() : '';

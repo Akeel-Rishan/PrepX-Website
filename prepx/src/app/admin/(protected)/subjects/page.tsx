@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { BookOpen } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +6,7 @@ import { getExaminationOptions, getExaminationById } from '@/lib/data/examinatio
 import { getSubjectsByExamination, getSubjectResultCounts } from '@/lib/data/subjects';
 import { getExamStatusBadgeVariant, getExamStatusLabel } from '@/lib/exam-utils';
 import type { Subject } from '@/types';
+import { isExamEditable } from '@/lib/constants';
 import { ExamSelectorBar } from './_components/exam-selector-bar';
 import { SubjectsManager } from './_components/subjects-manager';
 
@@ -13,12 +14,12 @@ export const metadata: Metadata = { title: 'Subjects | PrepX Admin' };
 export const dynamic = 'force-dynamic';
 
 interface SubjectsPageProps {
-  searchParams: { examId?: string | string[] };
+  searchParams: Promise<{ examId?: string | string[] }>;
 }
 
 export default async function SubjectsPage({
   searchParams,
-}: SubjectsPageProps): Promise<JSX.Element> {
+}: SubjectsPageProps): Promise<React.JSX.Element> {
   const params = await searchParams;
   const examId = typeof params.examId === 'string' ? params.examId.trim() : '';
   const validId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(examId);
@@ -84,7 +85,7 @@ export default async function SubjectsPage({
           subjects={subjects}
           examinationId={selectedExam.id}
           resultCounts={resultCounts}
-          isPublished={selectedExam.status === 'PUBLISHED'}
+          isReadOnly={!isExamEditable(selectedExam.status)}
         />
       )}
     </div>

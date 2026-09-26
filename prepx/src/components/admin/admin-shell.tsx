@@ -13,7 +13,7 @@ interface AdminShellProps {
   children: ReactNode;
 }
 
-export function AdminShell({ userEmail, children }: AdminShellProps): JSX.Element {
+export function AdminShell({ userEmail, children }: AdminShellProps): React.JSX.Element {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isSubmitting, setIsSubmitting] = useState(false);

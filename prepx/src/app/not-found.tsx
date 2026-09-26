@@ -1,3 +1,3 @@
-export default function GlobalNotFoundPage(): JSX.Element {
+export default function GlobalNotFoundPage(): React.JSX.Element {
   return <p>Page not found.</p>;
 }

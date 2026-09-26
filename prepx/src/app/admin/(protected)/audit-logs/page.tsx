@@ -1,4 +1,4 @@
-export default function AuditLogsPage(): JSX.Element {
+export default function AuditLogsPage(): React.JSX.Element {
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-6">

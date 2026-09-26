@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
@@ -17,11 +17,11 @@ export function StudentsFilterBar({
   initialSearch,
   initialExamId,
   initialSchool,
-}: StudentsFilterBarProps): JSX.Element {
+}: StudentsFilterBarProps): React.JSX.Element {
   const router = useRouter();
   const pathname = usePathname();
   const [searchValue, setSearchValue] = useState(initialSearch);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const filters = useRef({ search: initialSearch, examId: initialExamId, school: initialSchool });
   useEffect(() => () => clearTimeout(timer.current), []);
 

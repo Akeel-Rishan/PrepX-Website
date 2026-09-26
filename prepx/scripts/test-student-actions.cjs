@@ -44,9 +44,11 @@ function harness({ user = true, profile = true, existing = { id, examination_id:
         delete() { writes++; operation = 'delete'; return q; },
         async single() {
           if (table === 'admin_profiles') return { data: profile ? { id: 'profile-id' } : null, error: null };
+          if (table === 'examinations') return { data: { status }, error: null };
           if (operation) return { data: databaseError ? null : { id }, error: databaseError };
           return { data: existing ? { ...existing, examination: { status } } : null, error: null };
         },
+        async maybeSingle() { return q.single(); },
       };
       return q;
     },
@@ -77,8 +79,12 @@ async function main() {
   assert.equal((await missing.saveStudentAction({}, form({ ...valid, id }))).error, 'Student not found.');
   assert.equal(missing.writes(), 0);
   const published = harness({ status: 'PUBLISHED' });
-  assert.match((await published.deleteStudentAction(id)).error, /published examination/);
+  assert.match((await published.deleteStudentAction(id)).error, /published or archived examinations/);
   assert.equal(published.writes(), 0);
+  assert.match((await published.saveStudentAction({}, form({ ...valid, id }))).error, /read-only/);
+  const archived = harness({ status: 'ARCHIVED' });
+  assert.match((await archived.deleteStudentAction(id)).error, /published or archived examinations/);
+  assert.match((await archived.saveStudentAction({}, form({ ...valid, id }))).error, /read-only/);
   for (const [constraint, field] of [['students_examination_id_index_number_key', 'index_number'], ['idx_students_exam_nic_unique', 'nic_number']]) {
     const h = harness({ databaseError: { code: '23505', message: constraint } });
     assert.match((await h.saveStudentAction({}, form(valid))).fieldErrors[field][0], /already registered/);

@@ -49,6 +49,23 @@ async function safeQuery<T>(
   return { data: null, count: null };
 }
 
+async function loadAllExaminationStatuses(
+  supabase: ReturnType<typeof createAdminClient>
+): Promise<ExamStatus[]> {
+  const statuses: ExamStatus[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from('examinations')
+      .select('status')
+      .order('id')
+      .range(from, from + 999);
+    if (error) throw new Error(`status-query:${error.code}`);
+    statuses.push(...(data ?? []).map((exam) => exam.status));
+    if ((data?.length ?? 0) < 1000) break;
+  }
+  return statuses;
+}
+
 export async function getDashboardData(): Promise<{
   stats: DashboardStats;
   recentExaminations: RecentExamination[];
@@ -72,9 +89,12 @@ export async function getDashboardData(): Promise<{
   }
 
   const [examsResult, studentsResult, recentResult] = await Promise.all([
-    safeQuery<{ status: ExamStatus }[]>('Examination statistics', () =>
-      supabase.from('examinations').select('status')
-    ),
+    loadAllExaminationStatuses(supabase).catch((error) => {
+      console.error('[dashboard] Examination statistics failed', {
+        code: error instanceof Error ? error.message.split(':', 2)[1] ?? 'unknown' : 'unknown',
+      });
+      return [];
+    }),
     safeQuery<unknown>('Student count', () =>
       supabase.from('students').select('*', { count: 'exact', head: true })
     ),
@@ -87,15 +107,15 @@ export async function getDashboardData(): Promise<{
     ),
   ]);
 
-  const allExams = examsResult.data ?? [];
+  const allExams = examsResult;
   return {
     stats: {
       totalExaminations: allExams.length,
       totalStudents: studentsResult.count ?? 0,
-      draftExaminations: allExams.filter((exam) => exam.status === 'DRAFT').length,
-      readyExaminations: allExams.filter((exam) => exam.status === 'READY').length,
-      publishedExaminations: allExams.filter((exam) => exam.status === 'PUBLISHED').length,
-      archivedExaminations: allExams.filter((exam) => exam.status === 'ARCHIVED').length,
+      draftExaminations: allExams.filter((status) => status === 'DRAFT').length,
+      readyExaminations: allExams.filter((status) => status === 'READY').length,
+      publishedExaminations: allExams.filter((status) => status === 'PUBLISHED').length,
+      archivedExaminations: allExams.filter((status) => status === 'ARCHIVED').length,
     },
     recentExaminations: recentResult.data ?? [],
   };

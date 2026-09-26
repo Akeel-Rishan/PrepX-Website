@@ -16,7 +16,7 @@ export function Sidebar({
   onNavClick,
   onLogout,
   isLoggingOut = false,
-}: SidebarProps): JSX.Element {
+}: SidebarProps): React.JSX.Element {
   return (
     <div className="flex h-full min-h-0 flex-col bg-slate-900">
       <div className="border-b border-slate-700/50 bg-slate-950 p-4">

@@ -9,12 +9,13 @@ export const metadata: Metadata = {
 };
 
 interface LoginPageProps {
-  searchParams: { redirectTo?: string | string[] };
+  searchParams: Promise<{ redirectTo?: string | string[] }>;
 }
 
-export default function AdminLoginPage({ searchParams }: LoginPageProps): JSX.Element {
+export default async function AdminLoginPage({ searchParams }: LoginPageProps): Promise<React.JSX.Element> {
+  const params = await searchParams;
   const redirectTo =
-    typeof searchParams.redirectTo === 'string' ? searchParams.redirectTo : undefined;
+    typeof params.redirectTo === 'string' ? params.redirectTo : undefined;
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-950 to-blue-800 p-4 py-10">
       <div className="mx-auto w-full max-w-md">

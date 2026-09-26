@@ -28,7 +28,7 @@ export function GradeCell({
   isDirty,
   disabled,
   onChange,
-}: GradeCellProps): JSX.Element {
+}: GradeCellProps): React.JSX.Element {
   return (
     <div className="relative inline-block">
       {isDirty && (

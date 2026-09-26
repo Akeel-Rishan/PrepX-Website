@@ -19,7 +19,7 @@ export function AdminHeader({
   onLogout,
   isLoggingOut = false,
   drawerOpen = false,
-}: AdminHeaderProps): JSX.Element {
+}: AdminHeaderProps): React.JSX.Element {
   const pageTitle = getAdminPageTitle(usePathname());
   return (
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 sm:px-6">

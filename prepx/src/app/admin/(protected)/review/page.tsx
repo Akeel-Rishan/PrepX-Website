@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { ClipboardCheck, PenLine } from 'lucide-react';
 
 import { ExamSelectorBar } from '@/app/admin/(protected)/subjects/_components/exam-selector-bar';
@@ -15,6 +16,7 @@ import {
 } from '@/lib/data/review';
 import { getExamStatusBadgeVariant, getExamStatusLabel } from '@/lib/exam-utils';
 import { cn } from '@/lib/utils';
+import { isExamEditable } from '@/lib/constants';
 
 export const metadata: Metadata = {
   title: 'Review | PrepX Admin',
@@ -70,10 +72,15 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
     }
   }
 
-  const isPublished = selectedExam?.status === 'PUBLISHED';
+  const isReadOnly = selectedExam ? !isExamEditable(selectedExam.status) : false;
   const currentParams: Record<string, string> = { examId };
   if (status !== 'needs_attention') currentParams.status = status;
   if (search) currentParams.search = search;
+  if (reviewData && reviewData.currentPage !== page) {
+    const normalized = new URLSearchParams(currentParams);
+    normalized.set('page', String(reviewData.currentPage));
+    redirect(`/admin/review?${normalized.toString()}`);
+  }
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
@@ -102,7 +109,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
                 'inline-flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors',
                 'hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               )}
-              href={`/admin/grades?examId=${encodeURIComponent(selectedExam.id)}`}
+              href={`/admin/results?examId=${encodeURIComponent(selectedExam.id)}`}
             >
               <PenLine aria-hidden="true" className="h-4 w-4" />
               Grade grid
@@ -138,9 +145,9 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
         </Alert>
       ) : (
         <div className="space-y-6">
-          {isPublished ? (
-            <Alert variant="warning" title="Published results are read-only">
-              You can review these results, but grades cannot be changed after publication.
+          {isReadOnly ? (
+            <Alert variant="warning" title="Results are read-only">
+              Published and archived examination grades cannot be changed.
             </Alert>
           ) : null}
 
@@ -152,7 +159,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
             examinationId={selectedExam.id}
             initialSearch={search}
             initialStatusFilter={status}
-            isPublished={isPublished}
+            isReadOnly={isReadOnly}
           />
         </div>
       )}

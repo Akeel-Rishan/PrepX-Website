@@ -10,7 +10,7 @@ interface StatusFilterProps {
 }
 const OPTIONS = [{ label: 'All', value: null }, ...EXAM_STATUS_OPTIONS];
 
-export function StatusFilter({ currentStatus }: StatusFilterProps): JSX.Element {
+export function StatusFilter({ currentStatus }: StatusFilterProps): React.JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
   function handleFilter(value: string | null): void {

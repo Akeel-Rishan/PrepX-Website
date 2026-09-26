@@ -6,6 +6,9 @@ import { z } from 'zod';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { studentSchema, type StudentFormState } from '@/lib/validations/student';
 import { createAuditLog } from '@/lib/audit';
+import { isExamEditable } from '@/lib/constants';
+
+type AdminClient = ReturnType<typeof createAdminClient>;
 
 async function getAdminUserId(): Promise<string | null> {
   const supabase = await createClient();
@@ -58,6 +61,21 @@ function revalidateStudent(id: string) {
   revalidatePath('/admin/examinations');
 }
 
+async function examinationMutationError(
+  client: AdminClient,
+  examinationId: string
+): Promise<string | null> {
+  const { data, error } = await client
+    .from('examinations')
+    .select('status')
+    .eq('id', examinationId)
+    .maybeSingle();
+  if (error || !data) return 'Examination not found. Please select a valid examination.';
+  return isExamEditable(data.status)
+    ? null
+    : 'Published and archived examinations are read-only.';
+}
+
 export async function saveStudentAction(
   _prevState: StudentFormState,
   formData: FormData
@@ -95,6 +113,8 @@ export async function saveStudentAction(
       if (fetchError || !existing) return { error: 'Student not found.' };
       if (existing.examination_id !== examination_id)
         return { error: 'The student’s examination cannot be changed.' };
+      const locked = await examinationMutationError(admin, existing.examination_id);
+      if (locked) return { error: locked };
       const { data: updated, error } = await admin
         .from('students')
         .update(personal)
@@ -115,6 +135,8 @@ export async function saveStudentAction(
       revalidateStudent(id);
       return { success: true, message: 'Student record updated successfully.' };
     }
+    const locked = await examinationMutationError(admin, examination_id);
+    if (locked) return { error: locked };
     const { data: created, error } = await admin
       .from('students')
       .insert(validation.data)
@@ -159,10 +181,9 @@ export async function deleteStudentAction(id: string): Promise<{ error?: string 
     if (fetchError || !student) return { error: 'Student not found.' };
     if (!student.examination)
       return { error: 'Unable to verify examination status. Please try again.' };
-    if (student.examination.status === 'PUBLISHED')
+    if (!isExamEditable(student.examination.status))
       return {
-        error:
-          'Students cannot be deleted from a published examination. Unpublish the examination first.',
+        error: 'Students cannot be deleted from published or archived examinations.',
       };
     const { data: removed, error } = await admin
       .from('students')

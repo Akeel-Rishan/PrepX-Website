@@ -28,15 +28,15 @@ interface SubjectsManagerProps {
   subjects: Subject[];
   examinationId: string;
   resultCounts: Map<string, number>;
-  isPublished: boolean;
+  isReadOnly: boolean;
 }
 
 export function SubjectsManager({
   subjects,
   examinationId,
   resultCounts,
-  isPublished,
-}: SubjectsManagerProps): JSX.Element {
+  isReadOnly,
+}: SubjectsManagerProps): React.JSX.Element {
   const router = useRouter();
   const [refreshing, startTransition] = useTransition();
   const [pending, setPending] = useState<{ id: string; action: string } | null>(null);
@@ -49,7 +49,7 @@ export function SubjectsManager({
   const closeForm = useCallback(() => setForm(null), []);
 
   async function runAction(id: string, action: string, fn: () => Promise<{ error?: string }>) {
-    if (inFlight.current || busy || isPublished) return;
+    if (inFlight.current || busy || isReadOnly) return;
     inFlight.current = true;
     setPending({ id, action });
     setActionError(null);
@@ -72,13 +72,12 @@ export function SubjectsManager({
     'rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-30';
   return (
     <div className="space-y-4">
-      {isPublished && (
+      {isReadOnly && (
         <Alert variant="info">
-          This examination is published. Subjects cannot be edited. Unpublish the examination first
-          to make changes.
+          Published and archived examinations are read-only. Subjects cannot be changed.
         </Alert>
       )}
-      {!isPublished && (
+      {!isReadOnly && (
         <div className="flex justify-end">
           <Button
             variant="primary"
@@ -105,7 +104,7 @@ export function SubjectsManager({
           <p className="mb-4 text-sm text-gray-400">
             No subjects yet. Add subjects to start managing grades.
           </p>
-          {!isPublished && (
+          {!isReadOnly && (
             <Button
               variant="primary"
               size="sm"
@@ -149,7 +148,7 @@ export function SubjectsManager({
                               aria-label={`Move ${subject.subject_name} ${direction}`}
                               disabled={
                                 busy ||
-                                isPublished ||
+                                isReadOnly ||
                                 (direction === 'up' ? index === 0 : index === subjects.length - 1)
                               }
                               className={iconButton}
@@ -188,7 +187,7 @@ export function SubjectsManager({
                         role="switch"
                         aria-label={`${subject.subject_name} active`}
                         aria-checked={subject.active}
-                        disabled={busy || isPublished}
+                        disabled={busy || isReadOnly}
                         title={subject.active ? 'Click to deactivate' : 'Click to activate'}
                         onClick={() =>
                           void runAction(subject.id, 'toggle', () =>
@@ -234,7 +233,7 @@ export function SubjectsManager({
                           type="button"
                           aria-label={`Edit ${subject.subject_name}`}
                           title="Edit subject"
-                          disabled={busy || isPublished}
+                          disabled={busy || isReadOnly}
                           className={cn(iconButton, 'hover:bg-blue-50 hover:text-blue-600')}
                           onClick={() => {
                             setActionError(null);
@@ -247,7 +246,7 @@ export function SubjectsManager({
                           type="button"
                           aria-label={`Delete ${subject.subject_name}`}
                           title="Delete subject"
-                          disabled={busy || isPublished}
+                          disabled={busy || isReadOnly}
                           className={cn(iconButton, 'hover:bg-red-50 hover:text-red-600')}
                           onClick={() => {
                             setActionError(null);
@@ -273,7 +272,7 @@ export function SubjectsManager({
           </p>
         </div>
       )}
-      {form && !isPublished && (
+      {form && !isReadOnly && (
         <SubjectFormModal
           key={`${examinationId}:${form.subject?.id ?? 'add'}`}
           isOpen
@@ -285,7 +284,7 @@ export function SubjectsManager({
         />
       )}
       <ConfirmModal
-        isOpen={!!deleteTarget && !isPublished}
+        isOpen={!!deleteTarget && !isReadOnly}
         onClose={() => setDeleteTarget(null)}
         title="Delete Subject?"
         confirmLabel="Delete Subject"

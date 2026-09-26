@@ -10,19 +10,20 @@ export const metadata: Metadata = { title: 'Examinations | PrepX Admin' };
 export const dynamic = 'force-dynamic';
 
 interface ExaminationsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     status?: string | string[];
     sort?: string | string[];
     direction?: string | string[];
-  };
+  }>;
 }
 
 export default async function ExaminationsPage({
   searchParams,
-}: ExaminationsPageProps): Promise<JSX.Element> {
-  const activeStatus = normalizeExamStatus(searchParams.status);
-  const sort = normalizeExamSort(searchParams.sort);
-  const direction = searchParams.direction === 'asc' ? 'asc' : 'desc';
+}: ExaminationsPageProps): Promise<React.JSX.Element> {
+  const params = await searchParams;
+  const activeStatus = normalizeExamStatus(params.status);
+  const sort = normalizeExamSort(params.sort);
+  const direction = params.direction === 'asc' ? 'asc' : 'desc';
   const examinations = sortExaminations(
     await getExaminationsWithCounts(activeStatus ? { status: activeStatus } : undefined),
     sort,

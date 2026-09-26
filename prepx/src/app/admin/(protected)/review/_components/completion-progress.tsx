@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import type { ReviewSummary } from '@/lib/data/review';
 
 /** Shows overall required-grade completion for the selected examination. */
-export function CompletionProgress({ summary }: { summary: ReviewSummary }): JSX.Element {
+export function CompletionProgress({ summary }: { summary: ReviewSummary }): React.JSX.Element {
   const width = Math.max(summary.completionPercent, summary.total > 0 ? 1 : 0);
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5">

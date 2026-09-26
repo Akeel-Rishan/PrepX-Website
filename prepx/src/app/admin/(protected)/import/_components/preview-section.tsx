@@ -14,7 +14,7 @@ interface PreviewSectionProps {
 }
 
 /** Displays Step 2 validation results and the future confirmation entry point. */
-export function PreviewSection({ result, onBack }: PreviewSectionProps): JSX.Element {
+export function PreviewSection({ result, onBack }: PreviewSectionProps): React.JSX.Element {
   const [showConfirmationPlaceholder, setShowConfirmationPlaceholder] = useState(false);
   const confirmDisabled = result.hasBlockingErrors || result.totalRows === 0;
   const disabledReason = result.hasBlockingErrors

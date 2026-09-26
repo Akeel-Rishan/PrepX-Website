@@ -7,7 +7,7 @@ export default async function AdminLayout({
   children,
 }: {
   children: ReactNode;
-}): Promise<JSX.Element> {
+}): Promise<React.JSX.Element> {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
   const claims = data?.claims;

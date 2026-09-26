@@ -6,7 +6,7 @@ interface StepIndicatorProps {
 }
 
 /** Displays import workflow progress horizontally on desktop and vertically on mobile. */
-export function StepIndicator({ steps, currentStep }: StepIndicatorProps): JSX.Element {
+export function StepIndicator({ steps, currentStep }: StepIndicatorProps): React.JSX.Element {
   return (
     <ol aria-label="Import progress" className="flex flex-col gap-0 md:flex-row md:items-start">
       {steps.map((step, index) => {

@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { subjectSchema, type SubjectFormState } from '@/lib/validations/subject';
 import { createAuditLog } from '@/lib/audit';
+import { isExamEditable } from '@/lib/constants';
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 type ActionResult = { error?: string };
@@ -27,9 +28,9 @@ async function getAdminUserId(): Promise<string | null> {
 async function examinationError(client: AdminClient, id: string): Promise<string | null> {
   const { data, error } = await client.from('examinations').select('status').eq('id', id).single();
   if (error || !data) return 'Examination not found. Please select a valid examination.';
-  return data.status === 'PUBLISHED'
-    ? 'This examination is published. Unpublish the examination before changing subjects.'
-    : null;
+  return isExamEditable(data.status)
+    ? null
+    : 'Published and archived examinations are read-only.';
 }
 
 function refreshSubjects() {
@@ -37,6 +38,39 @@ function refreshSubjects() {
   revalidatePath('/admin/results');
   revalidatePath('/admin/review');
   revalidatePath('/admin/students/[id]', 'page');
+}
+
+async function duplicateSubjectError(
+  client: AdminClient,
+  examinationId: string,
+  subjectName: string,
+  subjectCode: string | null,
+  excludeId?: string
+): Promise<SubjectFormState | null> {
+  const { data, error } = await client
+    .from('subjects')
+    .select('id, subject_name, subject_code')
+    .eq('examination_id', examinationId);
+  if (error) return { error: 'Unable to validate subject uniqueness. Please try again.' };
+  const normalizedName = subjectName.trim().toLocaleLowerCase();
+  const normalizedCode = subjectCode?.trim().toLocaleLowerCase() ?? null;
+  const rows = (data ?? []).filter((subject) => subject.id !== excludeId);
+  if (rows.some((subject) => subject.subject_name.trim().toLocaleLowerCase() === normalizedName)) {
+    return {
+      error: 'Please fix errors below.',
+      fieldErrors: { subject_name: ['This subject name already exists in the examination.'] },
+    };
+  }
+  if (
+    normalizedCode &&
+    rows.some((subject) => subject.subject_code?.trim().toLocaleLowerCase() === normalizedCode)
+  ) {
+    return {
+      error: 'Please fix errors below.',
+      fieldErrors: { subject_code: ['This subject code already exists in the examination.'] },
+    };
+  }
+  return null;
 }
 
 export async function saveSubjectAction(
@@ -75,6 +109,14 @@ export async function saveSubjectAction(
         return { error: 'The subject’s examination cannot be changed.' };
       const locked = await examinationError(client, existing.examination_id);
       if (locked) return { error: locked };
+      const duplicate = await duplicateSubjectError(
+        client,
+        existing.examination_id,
+        fields.subject_name,
+        fields.subject_code,
+        id
+      );
+      if (duplicate) return duplicate;
       const { data: updated, error: updateError } = await client
         .from('subjects')
         .update(fields)
@@ -82,6 +124,9 @@ export async function saveSubjectAction(
         .eq('updated_at', existing.updated_at)
         .select('id')
         .maybeSingle();
+      if (updateError?.code === '23505') {
+        return { error: 'A subject with this name or code already exists.' };
+      }
       if (updateError) return { error: 'Failed to update subject. Please try again.' };
       if (!updated)
         return { error: 'This subject changed or was deleted. Refresh before trying again.' };
@@ -97,6 +142,13 @@ export async function saveSubjectAction(
     } else {
       const locked = await examinationError(client, examination_id);
       if (locked) return { error: locked };
+      const duplicate = await duplicateSubjectError(
+        client,
+        examination_id,
+        fields.subject_name,
+        fields.subject_code
+      );
+      if (duplicate) return duplicate;
       const { data: maxData, error: maxError } = await client
         .from('subjects')
         .select('display_order')
@@ -112,6 +164,9 @@ export async function saveSubjectAction(
         .insert(values)
         .select('id')
         .single();
+      if (error?.code === '23505') {
+        return { error: 'A subject with this name or code already exists.' };
+      }
       if (error || !created) return { error: 'Failed to create subject. Please try again.' };
       saved = true;
       await createAuditLog({
