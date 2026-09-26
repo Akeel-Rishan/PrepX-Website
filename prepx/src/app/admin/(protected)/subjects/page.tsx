@@ -61,7 +61,7 @@ export default async function SubjectsPage({
           </div>
         )}
       </div>
-      <ExamSelectorBar examinations={options} selectedExamId={examId} />
+      <ExamSelectorBar examinations={options} selectedExamId={examId} basePath="/admin/subjects" />
       {!examId && (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white p-16 text-center">
           <BookOpen aria-hidden="true" className="mb-3 h-10 w-10 text-gray-300" />

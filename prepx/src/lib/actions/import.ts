@@ -1,6 +1,14 @@
 'use server';
 
 import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { parseImportFile } from '@/lib/import-parser';
+import {
+  IMPORT_REQUIRED_COLUMNS,
+  summariseValidation,
+  validateFileHeaders,
+  validateImportRows,
+} from '@/lib/import-validator';
+import type { ImportPreviewResult } from '@/types/import';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -23,6 +31,45 @@ async function isAdmin(): Promise<boolean> {
     .eq('user_id', user.id)
     .maybeSingle();
   return Boolean(data && !profileError);
+}
+
+function emptyPreview(parseError: string): ImportPreviewResult {
+  return {
+    totalRows: 0,
+    validRows: 0,
+    errorRows: 0,
+    warningRows: 0,
+    hasBlockingErrors: true,
+    columns: [],
+    rows: [],
+    parseError,
+  };
+}
+
+async function loadExistingStudents(
+  examinationId: string
+): Promise<{ indexNumbers: string[]; nicNumbers: string[] }> {
+  const client = createAdminClient();
+  const indexNumbers: string[] = [];
+  const nicNumbers: string[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await client
+      .from('students')
+      .select('index_number, nic_number')
+      .eq('examination_id', examinationId)
+      .order('id')
+      .range(from, from + 999);
+    if (error) {
+      console.error('[Import Existing Students Error]', { code: error.code });
+      throw new Error('student query failed');
+    }
+    for (const student of data ?? []) {
+      indexNumbers.push(student.index_number);
+      if (student.nic_number) nicNumbers.push(student.nic_number);
+    }
+    if ((data?.length ?? 0) < 1000) break;
+  }
+  return { indexNumbers, nicNumbers };
 }
 
 /** Returns active subjects for a Draft or Ready examination template. */
@@ -56,5 +103,72 @@ export async function getSubjectsForTemplateAction(
     return { data: data ?? [] };
   } catch {
     return { error: 'Failed to generate the template. Please try again.' };
+  }
+}
+
+/** Parses and validates an import file without writing any database records. */
+export async function parseAndValidateImportAction(formData: FormData): Promise<ImportPreviewResult> {
+  if (!(await isAdmin())) return emptyPreview('Authentication required.');
+  const examinationId = formData.get('examinationId');
+  const file = formData.get('file');
+  if (typeof examinationId !== 'string' || !UUID_REGEX.test(examinationId)) {
+    return emptyPreview('Select a valid examination.');
+  }
+  if (!(file instanceof File) || file.size === 0) return emptyPreview('Select a non-empty import file.');
+  if (file.size > 5 * 1024 * 1024) return emptyPreview('File size must be under 5 MB.');
+  const lowerName = file.name.toLocaleLowerCase();
+  const fileType = lowerName.endsWith('.xlsx') ? 'xlsx' : lowerName.endsWith('.csv') ? 'csv' : null;
+  if (!fileType) return emptyPreview('Only .xlsx and .csv files are accepted.');
+
+  try {
+    const client = createAdminClient();
+    const { data: examination, error: examinationError } = await client
+      .from('examinations')
+      .select('status')
+      .eq('id', examinationId)
+      .maybeSingle();
+    if (examinationError || !examination) return emptyPreview('Examination not found.');
+    if (examination.status !== 'DRAFT' && examination.status !== 'READY') {
+      return emptyPreview('Results can only be imported into Draft or Ready examinations.');
+    }
+    const [subjectsResult, existingStudents] = await Promise.all([
+      client
+        .from('subjects')
+        .select('subject_name')
+        .eq('examination_id', examinationId)
+        .eq('active', true)
+        .order('display_order', { ascending: true })
+        .order('id', { ascending: true }),
+      loadExistingStudents(examinationId),
+    ]);
+    if (subjectsResult.error) {
+      console.error('[Import Subjects Error]', { code: subjectsResult.error.code });
+      return emptyPreview('Failed to load examination data. Please try again.');
+    }
+    const subjectNames = (subjectsResult.data ?? []).map((subject) => subject.subject_name);
+    let parsed;
+    try {
+      parsed = parseImportFile(Buffer.from(await file.arrayBuffer()), fileType, subjectNames);
+    } catch (error) {
+      return emptyPreview(error instanceof Error ? error.message : 'Could not read the import file.');
+    }
+    const headerResult = validateFileHeaders(parsed.headers, subjectNames);
+    if (!headerResult.valid) {
+      return emptyPreview(`Missing required columns: ${headerResult.missingColumns.join(', ')}`);
+    }
+    const rows = validateImportRows(
+      parsed.rows,
+      subjectNames,
+      existingStudents.indexNumbers,
+      existingStudents.nicNumbers
+    );
+    return {
+      ...summariseValidation(rows),
+      columns: [...IMPORT_REQUIRED_COLUMNS, ...subjectNames],
+      rows,
+      parseError: null,
+    };
+  } catch {
+    return emptyPreview('Failed to load examination data. Please try again.');
   }
 }

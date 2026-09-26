@@ -53,7 +53,7 @@ export function FileDropzone({
               <p className="mt-1 text-xs text-green-800">Size: {formatSize(selectedFile.size)} · Type: {selectedFile.name.toLowerCase().endsWith('.xlsx') ? 'Excel Spreadsheet' : 'CSV File'}</p>
             </div>
           </div>
-          <button type="button" onClick={onClear} className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-green-800 hover:bg-green-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600">
+          <button type="button" onClick={onClear} disabled={disabled} className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-green-800 hover:bg-green-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 disabled:cursor-not-allowed disabled:opacity-50">
             <X aria-hidden="true" className="h-3.5 w-3.5" /> Remove
           </button>
         </div>

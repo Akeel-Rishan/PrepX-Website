@@ -1,12 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, FileCheck2 } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { parseAndValidateImportAction } from '@/lib/actions/import';
+import type { ImportPreviewResult } from '@/types/import';
 import { ExaminationSelector, type ImportExamination } from './_components/examination-selector';
 import { FileDropzone } from './_components/file-dropzone';
 import { ImportInstructions } from './_components/import-instructions';
+import { PreviewSection } from './_components/preview-section';
 import { StepIndicator } from './_components/step-indicator';
 import { TemplateDownloadButton } from './_components/template-download-button';
 import { UpcomingSteps } from './_components/upcoming-steps';
@@ -29,7 +32,7 @@ interface ImportClientProps {
   hiddenExaminationCount: number;
 }
 
-/** Coordinates Step 1 examination, template, and file-selection state. */
+/** Coordinates file selection and the server-backed validation preview. */
 export function ImportClient({ examinations, hiddenExaminationCount }: ImportClientProps): JSX.Element {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedExaminationId, setSelectedExaminationId] = useState('');
@@ -38,12 +41,12 @@ export function ImportClient({ examinations, hiddenExaminationCount }: ImportCli
   const [templateError, setTemplateError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
-  const [showPlaceholder, setShowPlaceholder] = useState(false);
+  const [previewResult, setPreviewResult] = useState<ImportPreviewResult | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setIsInstructionsOpen(window.matchMedia('(min-width: 768px)').matches);
-  }, []);
-
+  useEffect(() => setIsInstructionsOpen(window.matchMedia('(min-width: 768px)').matches), []);
   const selectedExamination = useMemo(
     () => examinations.find((exam) => exam.id === selectedExaminationId) ?? null,
     [examinations, selectedExaminationId]
@@ -54,14 +57,14 @@ export function ImportClient({ examinations, hiddenExaminationCount }: ImportCli
     setSelectedFile(null);
     setFileError(null);
     setTemplateError(null);
-    setShowPlaceholder(false);
+    setPreviewResult(null);
+    setParseError(null);
     setCurrentStep(1);
   }
 
   function validateFile(file: File) {
     const lowerName = file.name.toLowerCase();
-    const validExtension = lowerName.endsWith('.xlsx') || lowerName.endsWith('.csv');
-    if (!validExtension || !VALID_MIME_TYPES.has(file.type)) {
+    if ((!lowerName.endsWith('.xlsx') && !lowerName.endsWith('.csv')) || !VALID_MIME_TYPES.has(file.type)) {
       setSelectedFile(null);
       setFileError('Only .xlsx and .csv files are accepted.');
       return;
@@ -78,8 +81,43 @@ export function ImportClient({ examinations, hiddenExaminationCount }: ImportCli
     }
     setSelectedFile(file);
     setFileError(null);
-    setShowPlaceholder(false);
+    setPreviewResult(null);
+    setParseError(null);
   }
+
+  async function parseFile() {
+    if (!selectedFile || !selectedExaminationId || isParsing) return;
+    setIsParsing(true);
+    setParseError(null);
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('examinationId', selectedExaminationId);
+    try {
+      const result = await parseAndValidateImportAction(formData);
+      if (result.parseError) {
+        setParseError(result.parseError);
+        return;
+      }
+      setPreviewResult(result);
+      setCurrentStep(2);
+      setTimeout(() => previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+    } catch {
+      setParseError('Failed to parse the file. Please try again.');
+    } finally {
+      setIsParsing(false);
+    }
+  }
+
+  const clearFile = () => {
+    setSelectedFile(null);
+    setFileError(null);
+    setPreviewResult(null);
+    setParseError(null);
+  };
+  const returnToSelection = () => {
+    setPreviewResult(null);
+    setCurrentStep(1);
+  };
 
   return (
     <div className="space-y-5">
@@ -87,39 +125,30 @@ export function ImportClient({ examinations, hiddenExaminationCount }: ImportCli
         <StepIndicator steps={STEPS} currentStep={currentStep} />
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-        <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Step 1 of 4</p><h3 className="mt-1 text-lg font-semibold text-gray-900">Select Examination and File</h3><p className="mt-1 text-sm text-gray-600">Choose an open examination, download its template, then upload the completed file.</p></div>
-        <div className="space-y-5">
-          <ExaminationSelector examinations={examinations} selectedId={selectedExaminationId} onChange={selectExamination} hiddenExaminationCount={hiddenExaminationCount} />
-          <div>
-            <p className="mb-1.5 text-sm font-medium text-gray-800">Results file</p>
-            <FileDropzone
-              selectedFile={selectedFile}
-              error={fileError}
-              disabled={!selectedExaminationId}
-              isDragging={isDragging}
-              onDraggingChange={setIsDragging}
-              onFileCandidate={validateFile}
-              onClear={() => { setSelectedFile(null); setFileError(null); setShowPlaceholder(false); }}
-            />
-          </div>
-          {templateError && <Alert variant="error" onClose={() => setTemplateError(null)}>{templateError}</Alert>}
-          {selectedFile && (
-            <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <FileCheck2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-700" />
-              <div><p className="text-sm font-semibold text-blue-900">Ready to Parse</p><p className="mt-0.5 text-sm text-blue-800">The file passed initial checks. Parsing and row validation will be connected in Step 8.2.</p></div>
+      {currentStep === 2 && selectedExamination && selectedFile ? (
+        <section className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div><p className="text-sm font-semibold text-gray-900">{selectedExamination.name} {selectedExamination.year}</p><p className="mt-0.5 text-xs text-gray-600">{selectedFile.name}</p></div>
+          <Button variant="outline" size="sm" onClick={returnToSelection}>Change file</Button>
+        </section>
+      ) : (
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Step 1 of 4</p><h3 className="mt-1 text-lg font-semibold text-gray-900">Select Examination and File</h3><p className="mt-1 text-sm text-gray-600">Choose an open examination, download its template, then upload the completed file.</p></div>
+          <div className="space-y-5">
+            <ExaminationSelector examinations={examinations} selectedId={selectedExaminationId} onChange={selectExamination} hiddenExaminationCount={hiddenExaminationCount} />
+            <div><p className="mb-1.5 text-sm font-medium text-gray-800">Results file</p><FileDropzone selectedFile={selectedFile} error={fileError} disabled={!selectedExaminationId || isParsing} isDragging={isDragging} onDraggingChange={setIsDragging} onFileCandidate={validateFile} onClear={clearFile} /></div>
+            {templateError && <Alert variant="error" onClose={() => setTemplateError(null)}>{templateError}</Alert>}
+            {selectedFile && <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4"><FileCheck2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-700" /><div><p className="text-sm font-semibold text-blue-900">Ready to Parse</p><p className="mt-0.5 text-sm text-blue-800">The file passed initial checks and is ready for server-side validation.</p></div></div>}
+            {parseError && <Alert variant="error" onClose={() => setParseError(null)}>{parseError}</Alert>}
+            <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 md:flex-row md:items-center md:justify-between">
+              <TemplateDownloadButton examinationId={selectedExamination?.id ?? null} examinationYear={selectedExamination?.year ?? null} onError={(message) => setTemplateError(message || null)} />
+              <Button onClick={parseFile} disabled={!selectedExaminationId || !selectedFile} loading={isParsing} className="w-full md:w-auto">{isParsing ? 'Parsing…' : 'Continue to Preview'} {!isParsing && <ArrowRight aria-hidden="true" className="h-4 w-4" />}</Button>
             </div>
-          )}
-          {showPlaceholder && <Alert variant="info" onClose={() => setShowPlaceholder(false)}>Parsing will be available in the next step.</Alert>}
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 md:flex-row md:items-center md:justify-between">
-            <TemplateDownloadButton examinationId={selectedExamination?.id ?? null} examinationYear={selectedExamination?.year ?? null} onError={(message) => setTemplateError(message || null)} />
-            <Button onClick={() => setShowPlaceholder(true)} disabled={!selectedExaminationId || !selectedFile} className="w-full md:w-auto">Continue to Preview <ArrowRight aria-hidden="true" className="h-4 w-4" /></Button>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      <ImportInstructions isOpen={isInstructionsOpen} onToggle={() => setIsInstructionsOpen((open) => !open)} />
-      <UpcomingSteps />
+      {currentStep === 1 && <><ImportInstructions isOpen={isInstructionsOpen} onToggle={() => setIsInstructionsOpen((open) => !open)} /><UpcomingSteps /></>}
+      {previewResult && <div ref={previewRef}><PreviewSection result={previewResult} onBack={returnToSelection} /></div>}
     </div>
   );
 }

@@ -6,11 +6,13 @@ import { useRouter } from 'next/navigation';
 interface ExamSelectorBarProps {
   examinations: Array<{ id: string; name: string; year: number }>;
   selectedExamId: string;
+  basePath?: string;
 }
 
 export function ExamSelectorBar({
   examinations,
   selectedExamId,
+  basePath = '/admin/subjects',
 }: ExamSelectorBarProps): JSX.Element {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -31,7 +33,7 @@ export function ExamSelectorBar({
           const id = event.target.value;
           startTransition(() =>
             router.push(
-              id ? `/admin/subjects?${new URLSearchParams({ examId: id })}` : '/admin/subjects'
+              id ? `${basePath}?${new URLSearchParams({ examId: id })}` : basePath
             )
           );
         }}
