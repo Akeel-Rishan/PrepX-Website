@@ -1,7 +1,7 @@
-import { AlertTriangle, CheckCircle2, EyeOff, Globe, RefreshCw, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Globe, XCircle } from 'lucide-react';
+import { PublicationControls } from './publication-controls';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { getExamStatusBadgeVariant, getExamStatusLabel } from '@/lib/exam-utils';
 import { cn, formatDateTime } from '@/lib/utils';
 import type { PublicationValidationResult } from '@/lib/data/publication';
@@ -228,42 +228,15 @@ export function PublicationChecklist({
         </Alert>
       )}
 
-      {!archived && (
-        <section className="flex flex-col justify-between gap-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-5 dark:border-slate-700 dark:bg-slate-900 sm:flex-row sm:items-center">
-          <div>
-            <p className="text-sm font-medium text-gray-700 dark:text-slate-200">
-              {published
-                ? 'Results are currently published.'
-                : result.canPublish
-                  ? 'Validation passed. Ready to publish.'
-                  : 'Resolve the blocking issues above before publishing.'}
-            </p>
-            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-              Publish and unpublish controls are completed in Step 9.2.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <form action="/admin/publication" method="get">
-              <input type="hidden" name="examId" value={examinationId} />
-              <Button type="submit" variant="outline">
-                <RefreshCw className="h-4 w-4" />
-                Refresh
-              </Button>
-            </form>
-            {published ? (
-              <Button variant="outline" className="text-red-600 dark:text-red-300">
-                <EyeOff className="h-4 w-4" />
-                Unpublish Results
-              </Button>
-            ) : (
-              <Button disabled={!result.canPublish}>
-                <Globe className="h-4 w-4" />
-                Publish Results
-              </Button>
-            )}
-          </div>
-        </section>
-      )}
+      <PublicationControls
+        examinationId={examinationId}
+        examName={`${examination.name} ${examination.year}`}
+        currentStatus={examination.status}
+        canPublish={result.canPublish}
+        studentCount={stats.totalStudents}
+        incompleteCount={stats.incompleteStudents + stats.emptyStudents}
+        warnings={result.warnings}
+      />
     </div>
   );
 }
