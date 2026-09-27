@@ -8,7 +8,8 @@ import './globals.css';
 const themeScript = `
   try {
     var savedTheme = localStorage.getItem('prepx-theme');
-    var useDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var isLoginPage = /^\\/admin\\/login\\/?$/.test(window.location.pathname);
+    var useDark = !isLoginPage && (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches));
     document.documentElement.classList.toggle('dark', useDark);
     document.documentElement.style.colorScheme = useDark ? 'dark' : 'light';
   } catch (_) {}

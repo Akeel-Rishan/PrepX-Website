@@ -2,7 +2,7 @@ import 'server-only';
 
 import { Readable } from 'node:stream';
 import ExcelJS from 'exceljs';
-import type { RawImportRow } from '@/types/import';
+import type { ImportHeaderMapping, RawImportRow } from '@/types/import';
 
 type ImportBaseColumn =
   | 'index_number'
@@ -40,6 +40,47 @@ export interface ParsedImportFile {
 export interface ImportSubjectHeader {
   subject_name: string;
   subject_code: string | null;
+}
+
+function normalizedMappingMap(mappings: readonly ImportHeaderMapping[]): Map<string, string> {
+  return new Map(
+    mappings
+      .map(({ source, target }) => [source.trim().toLocaleLowerCase(), target.trim()] as const)
+      .filter(([source, target]) => source && target)
+  );
+}
+
+/** Applies administrator-approved header aliases and rebuilds parsed row fields. */
+export function applyHeaderMappings(
+  parsed: ParsedImportFile,
+  expectedSubjects: ImportSubjectHeader[],
+  mappings: readonly ImportHeaderMapping[]
+): ParsedImportFile {
+  if (mappings.length === 0) return parsed;
+  const mappingMap = normalizedMappingMap(mappings);
+  const remap = (header: string) => mappingMap.get(header.trim().toLocaleLowerCase()) ?? header;
+  const headers = parsed.headers.map(remap);
+  const subjectNames = expectedSubjects.map((subject) => subject.subject_name);
+  const rows = parsed.rows.map((row) => {
+    const rawValues: Record<string, string> = {};
+    for (const [source, value] of Object.entries(row.rawValues)) {
+      rawValues[remap(source)] = value;
+    }
+    const grades = Object.fromEntries(
+      subjectNames.map((subjectName) => [subjectName, rawValues[subjectName] ?? ''])
+    );
+    return {
+      ...row,
+      index_number: rawValues.index_number ?? '',
+      nic_number: rawValues.nic_number ?? '',
+      full_name: rawValues.full_name ?? '',
+      school_name: rawValues.school_name ?? '',
+      examination_center: rawValues.examination_center ?? '',
+      grades,
+      rawValues,
+    };
+  });
+  return { headers, rows };
 }
 
 function cellString(value: ExcelJS.CellValue): string {

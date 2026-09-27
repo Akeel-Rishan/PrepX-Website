@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { BarChart3, LockKeyhole, ShieldCheck } from 'lucide-react';
 import { LoginForm } from './_components/login-form';
+import { LoginLightModeLock } from './_components/login-light-mode-lock';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export const metadata: Metadata = {
@@ -39,6 +40,7 @@ export default async function AdminLoginPage({
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#071426] text-white">
+      <LoginLightModeLock />
       <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6">
         <ThemeToggle appearance="inverse" />
       </div>

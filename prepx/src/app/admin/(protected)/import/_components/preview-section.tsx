@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, Check, FileSpreadsheet, Minus } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { ImportPreviewResult } from '@/types/import';
+import type { ImportHeaderMapping } from '@/types/import';
+import { AiImportAssistant } from './ai-import-assistant';
 import { PreviewTable } from './preview-table';
 import { ValidationSummary } from './validation-summary';
 
@@ -13,6 +15,9 @@ interface PreviewSectionProps {
   examName: string;
   onBack: () => void;
   onProceed: (result: ImportPreviewResult) => void;
+  aiAssistantConfigured: boolean;
+  examinationId: string;
+  onApplyAiMappings: (mappings: ImportHeaderMapping[]) => Promise<void>;
 }
 
 const BASE_FIELDS = [
@@ -30,6 +35,9 @@ export function PreviewSection({
   examName,
   onBack,
   onProceed,
+  aiAssistantConfigured,
+  examinationId,
+  onApplyAiMappings,
 }: PreviewSectionProps): React.JSX.Element {
   const disabledReason = result.missingRequiredColumns.length
     ? 'Fix missing required columns before importing.'
@@ -59,6 +67,14 @@ export function PreviewSection({
       </div>
 
       <ValidationSummary result={result} />
+
+      {aiAssistantConfigured && (
+        <AiImportAssistant
+          examinationId={examinationId}
+          result={result}
+          onApply={onApplyAiMappings}
+        />
+      )}
 
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
         <h4 className="text-sm font-semibold text-gray-900">Detected columns</h4>

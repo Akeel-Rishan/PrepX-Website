@@ -47,3 +47,24 @@ export interface ImportPreviewResult extends ImportValidationSummary {
   rows: ValidatedRow[];
   parseError: string | null;
 }
+
+export interface ImportHeaderMapping {
+  source: string;
+  target: string;
+}
+
+export interface ImportAiMappingSuggestion extends ImportHeaderMapping {
+  confidence: 'high' | 'medium' | 'low';
+  reason: string;
+}
+
+export interface ImportAiSuggestion {
+  headline: string;
+  summary: string;
+  mappings: ImportAiMappingSuggestion[];
+  guidance: string[];
+}
+
+export type ImportAiActionResult =
+  | { success: true; suggestion: ImportAiSuggestion }
+  | { success: false; error: string };

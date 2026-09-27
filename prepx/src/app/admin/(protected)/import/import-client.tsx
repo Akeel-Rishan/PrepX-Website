@@ -6,7 +6,7 @@ import { ArrowRight, FileCheck2 } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { parseAndValidateImportAction } from '@/lib/actions/import';
-import type { ImportPreviewResult } from '@/types/import';
+import type { ImportHeaderMapping, ImportPreviewResult } from '@/types/import';
 import { ExaminationSelector, type ImportExamination } from './_components/examination-selector';
 import { FileDropzone } from './_components/file-dropzone';
 import { FormatGuide, type ImportGuideSubject } from './_components/format-guide';
@@ -30,6 +30,7 @@ interface ImportClientProps {
   hiddenExaminationCount: number;
   initialExamId: string;
   subjects: ImportGuideSubject[];
+  aiAssistantConfigured: boolean;
 }
 
 /** Coordinates file selection and the server-backed validation preview. */
@@ -38,6 +39,7 @@ export function ImportClient({
   hiddenExaminationCount,
   initialExamId,
   subjects,
+  aiAssistantConfigured,
 }: ImportClientProps): React.JSX.Element {
   const router = useRouter();
   const pathname = usePathname();
@@ -121,6 +123,28 @@ export function ImportClient({
       setTimeout(() => previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
     } catch {
       setParseError('Failed to parse the file. Please try again.');
+    } finally {
+      setIsParsing(false);
+    }
+  }
+
+  async function applyAiMappings(mappings: ImportHeaderMapping[]): Promise<void> {
+    if (!selectedFile || !selectedExaminationId || isParsing) {
+      throw new Error('The selected import file is no longer available.');
+    }
+    setIsParsing(true);
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('examinationId', selectedExaminationId);
+    formData.append('headerMappings', JSON.stringify(mappings));
+    try {
+      const result = await parseAndValidateImportAction(formData);
+      if (result.parseError) throw new Error(result.parseError);
+      setPreviewResult(result);
+    } catch (caught) {
+      throw new Error(
+        caught instanceof Error ? caught.message : 'Unable to apply the AI suggestions.'
+      );
     } finally {
       setIsParsing(false);
     }
@@ -213,7 +237,7 @@ export function ImportClient({
               </p>
             )}
             <div className="flex justify-end border-t border-gray-100 pt-5">
-              <Button onClick={parseFile} disabled={!selectedExaminationId || !selectedFile || subjects.length === 0} loading={isParsing} className="w-full md:w-auto">{isParsing ? 'Parsing...' : 'Parse & Preview'} {!isParsing && <ArrowRight aria-hidden="true" className="h-4 w-4" />}</Button>
+              <Button onClick={() => void parseFile()} disabled={!selectedExaminationId || !selectedFile || subjects.length === 0} loading={isParsing} className="w-full md:w-auto">{isParsing ? 'Parsing...' : 'Parse & Preview'} {!isParsing && <ArrowRight aria-hidden="true" className="h-4 w-4" />}</Button>
             </div>
           </div>
         </section>
@@ -231,6 +255,9 @@ export function ImportClient({
                 : 'Unknown examination'
             }
             onBack={returnToSelection}
+            aiAssistantConfigured={aiAssistantConfigured}
+            examinationId={selectedExaminationId}
+            onApplyAiMappings={applyAiMappings}
             onProceed={(result) => {
               setPreviewResult(result);
               setCurrentStep(3);

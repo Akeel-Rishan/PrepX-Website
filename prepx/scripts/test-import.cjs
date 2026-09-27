@@ -28,7 +28,7 @@ function load(file, overrides = {}) {
 async function main() {
   const ExcelJS = require('exceljs');
   const { generateCsvTemplate } = load('src/lib/import-template.ts');
-  const { parseImportFile } = load('src/lib/import-parser.ts');
+  const { applyHeaderMappings, parseImportFile } = load('src/lib/import-parser.ts');
   const { validateFileHeaders, validateImportRows, summariseValidation } = load('src/lib/import-validator.ts');
   const subjects = [
     { subject_name: 'Mathematics', subject_code: 'MAT', required: true },
@@ -90,6 +90,28 @@ async function main() {
     'index_number', 'nic_number', 'full_name', 'school_name', 'examination_center',
   ]);
   assert.equal(validateFileHeaders(aliases.headers, subjects.map(s => s.subject_name)).valid, true);
+
+  const unfamiliar = await parseImportFile(
+    Buffer.from('Candidate ID,Candidate,Institution,Mathematical Studies\nAI01,AI Student,AI School,A'),
+    'csv',
+    subjects
+  );
+  const remapped = applyHeaderMappings(unfamiliar, subjects, [
+    { source: 'Candidate ID', target: 'index_number' },
+    { source: 'Candidate', target: 'full_name' },
+    { source: 'Institution', target: 'school_name' },
+    { source: 'Mathematical Studies', target: 'Mathematics' },
+  ]);
+  assert.deepEqual(remapped.headers, [
+    'index_number', 'full_name', 'school_name', 'Mathematics',
+  ]);
+  assert.equal(remapped.rows[0].index_number, 'AI01');
+  assert.equal(remapped.rows[0].full_name, 'AI Student');
+  assert.equal(remapped.rows[0].grades.Mathematics, 'A');
+  assert.equal(
+    validateFileHeaders(remapped.headers, subjects.map(subject => subject.subject_name)).valid,
+    true
+  );
 
   const fixtureSubjects = [
     { subject_name: 'Tamil', subject_code: 'TML', required: true },

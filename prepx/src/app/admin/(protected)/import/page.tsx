@@ -37,6 +37,9 @@ async function ImportPageContent({ examId }: { examId: string }): Promise<React.
         subject_code,
         required,
       }))}
+      aiAssistantConfigured={Boolean(
+        process.env.GEMINI_API_KEY?.trim() || process.env.GOOGLE_API_KEY?.trim()
+      )}
     />
   );
 }

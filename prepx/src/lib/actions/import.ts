@@ -1,10 +1,11 @@
 'use server';
 
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getAdminUserId, isAdmin } from '@/lib/auth/admin';
 import { GRADES, isExamEditable } from '@/lib/constants';
-import { parseImportFile } from '@/lib/import-parser';
+import { applyHeaderMappings, parseImportFile } from '@/lib/import-parser';
 import {
   IMPORT_BASE_COLUMNS,
   summariseValidation,
@@ -12,6 +13,7 @@ import {
   validateImportRows,
 } from '@/lib/import-validator';
 import type { ImportPreviewResult } from '@/types/import';
+import type { ImportHeaderMapping } from '@/types/import';
 import type { Json } from '@/types/database';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -19,6 +21,14 @@ const INDEX_NUMBER_REGEX = /^[A-Z0-9]+$/;
 const NIC_REGEX = /^([0-9]{9}[VX]|[0-9]{12})$/;
 const VALID_GRADES = new Set<string>(GRADES);
 const MAX_IMPORT_ROWS = 1000;
+const headerMappingsSchema = z
+  .array(
+    z.object({
+      source: z.string().trim().min(1).max(200),
+      target: z.string().trim().min(1).max(200),
+    })
+  )
+  .max(100);
 
 export interface ImportRow {
   index_number: string;
@@ -181,6 +191,33 @@ export async function parseAndValidateImportAction(formData: FormData): Promise<
       );
     } catch (error) {
       return emptyPreview(error instanceof Error ? error.message : 'Could not read the import file.');
+    }
+    const rawMappings = formData.get('headerMappings');
+    if (rawMappings !== null) {
+      if (typeof rawMappings !== 'string') return emptyPreview('Invalid header mapping data.');
+      let candidateMappings: unknown;
+      try {
+        candidateMappings = JSON.parse(rawMappings);
+      } catch {
+        return emptyPreview('Invalid header mapping data.');
+      }
+      const mappingResult = headerMappingsSchema.safeParse(candidateMappings);
+      if (!mappingResult.success) return emptyPreview('Invalid header mapping data.');
+      const sourceHeaders = new Set(parsed.headers.map((header) => header.trim().toLocaleLowerCase()));
+      const allowedTargets = new Set([
+        ...IMPORT_BASE_COLUMNS,
+        ...subjectDefinitions.map((subject) => subject.subject_name),
+      ]);
+      const mappings: ImportHeaderMapping[] = mappingResult.data;
+      if (
+        mappings.some(
+          ({ source, target }) =>
+            !sourceHeaders.has(source.toLocaleLowerCase()) || !allowedTargets.has(target)
+        )
+      ) {
+        return emptyPreview('One or more header mappings are no longer valid. Run the assistant again.');
+      }
+      parsed = applyHeaderMappings(parsed, subjectDefinitions, mappings);
     }
     const headerResult = validateFileHeaders(parsed.headers, subjectNames);
     if (!parsed.headers.some(Boolean)) return emptyPreview('The file contains no column headers.');
