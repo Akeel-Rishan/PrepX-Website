@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
+import { Dropdown } from '@/components/ui/dropdown';
 
 interface ResultsFilterBarProps {
   examinations: Array<{ id: string; name: string; year: number }>;
@@ -48,20 +49,33 @@ export function ResultsFilterBar({
     <div className="rounded-xl border border-gray-200 bg-white p-4">
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex items-center gap-2">
-          <label htmlFor="results-examination" className="whitespace-nowrap text-sm font-medium text-gray-700">Examination:</label>
-          <select
+          <label
+            htmlFor="results-examination"
+            className="whitespace-nowrap text-sm font-medium text-gray-700"
+          >
+            Examination:
+          </label>
+          <Dropdown
             id="results-examination"
             value={selectedExamId}
-            onChange={(event) => handleExamChange(event.target.value)}
-            className="min-w-[220px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select an examination...</option>
-            {examinations.map((exam) => <option key={exam.id} value={exam.id}>{exam.name} {exam.year}</option>)}
-          </select>
+            options={[
+              { value: '', label: 'Select an examination...' },
+              ...examinations.map((exam) => ({
+                value: exam.id,
+                label: `${exam.name} ${exam.year}`,
+              })),
+            ]}
+            onValueChange={handleExamChange}
+            ariaLabel="Examination"
+            className="min-w-[240px]"
+          />
         </div>
         {selectedExamId && (
           <div className="relative flex-1">
-            <Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search
+              aria-hidden="true"
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+            />
             <input
               type="search"
               aria-label="Search students"

@@ -1,34 +1,47 @@
-import type { SelectHTMLAttributes } from 'react';
-import { cn } from '@/lib/utils';
+'use client';
 
-export interface SelectOption {
-  value: string;
-  label: string;
-  disabled?: boolean;
-}
+import { Dropdown, type DropdownOption } from '@/components/ui/dropdown';
 
-interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+export type SelectOption = DropdownOption;
+
+interface SelectProps {
   id: string;
+  name?: string;
   label: string;
   placeholder?: string;
   options: SelectOption[];
   error?: string;
   hint?: string;
+  value?: string;
+  defaultValue?: string;
+  disabled?: boolean;
+  required?: boolean;
+  className?: string;
+  onValueChange?: (value: string) => void;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean | 'true' | 'false';
 }
 
 export function Select({
   id,
+  name,
   label,
   placeholder,
   options,
   error,
   hint,
+  value,
+  defaultValue,
+  disabled,
+  required,
   className,
+  onValueChange,
   'aria-describedby': describedBy,
   'aria-invalid': invalid,
-  ...rest
 }: SelectProps): React.JSX.Element {
   const helpId = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
+  const ariaDescribedBy = [describedBy, helpId].filter(Boolean).join(' ') || undefined;
+
   return (
     <div>
       <label
@@ -37,37 +50,28 @@ export function Select({
       >
         {label}
       </label>
-      <select
-        {...rest}
+      <Dropdown
         id={id}
-        aria-invalid={error ? true : invalid}
-        aria-describedby={[describedBy, helpId].filter(Boolean).join(' ') || undefined}
-        className={cn(
-          'min-h-11 w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-950 shadow-sm transition-[background-color,border-color,box-shadow] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 dark:bg-slate-900 dark:text-slate-100 dark:disabled:bg-slate-950 dark:disabled:text-slate-500',
-          error
-            ? 'border-red-500 focus:ring-red-500'
-            : 'border-slate-300 dark:border-slate-700 dark:focus:border-blue-400',
-          className
-        )}
-      >
-        {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
-        )}
-        {options.map(({ value, label: optionLabel, disabled }) => (
-          <option key={value} value={value} disabled={disabled}>
-            {optionLabel}
-          </option>
-        ))}
-      </select>
+        name={name}
+        value={value}
+        defaultValue={defaultValue}
+        options={options}
+        placeholder={placeholder}
+        disabled={disabled}
+        required={required}
+        ariaLabel={label}
+        ariaDescribedBy={ariaDescribedBy}
+        ariaInvalid={error ? true : invalid}
+        onValueChange={onValueChange}
+        className={className}
+      />
       {error && (
-        <p id={helpId} className="mt-1 text-sm text-red-600 dark:text-red-400">
+        <p id={helpId} className="mt-1.5 text-sm text-red-600 dark:text-red-400">
           {error}
         </p>
       )}
       {!error && hint && (
-        <p id={helpId} className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+        <p id={helpId} className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
           {hint}
         </p>
       )}

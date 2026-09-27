@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Dropdown } from '@/components/ui/dropdown';
 
 interface ExamSelectorBarProps {
   examinations: Array<{ id: string; name: string; year: number }>;
@@ -27,29 +28,30 @@ export function ExamSelectorBar({
       <label htmlFor={id} className="whitespace-nowrap text-sm font-medium text-gray-700">
         {label}
       </label>
-      <select
+      <Dropdown
         id={id}
         value={selectedExamId}
+        options={[
+          { value: '', label: 'Select an examination...' },
+          ...(selectedExamId && !examinations.some((exam) => exam.id === selectedExamId)
+            ? [{ value: selectedExamId, label: 'Unavailable examination' }]
+            : []),
+          ...examinations.map((exam) => ({
+            value: exam.id,
+            label: `${exam.name} ${exam.year}`,
+          })),
+        ]}
         disabled={pending}
-        aria-busy={pending}
-        onChange={(event) => {
-          const id = event.target.value;
+        ariaLabel={label.replace(':', '')}
+        onValueChange={(nextId) => {
           startTransition(() =>
-            router.push(id ? `${basePath}?${new URLSearchParams({ examId: id })}` : basePath)
+            router.push(
+              nextId ? `${basePath}?${new URLSearchParams({ examId: nextId })}` : basePath
+            )
           );
         }}
-        className="min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 sm:min-w-[220px]"
-      >
-        <option value="">Select an examination...</option>
-        {selectedExamId && !examinations.some((exam) => exam.id === selectedExamId) && (
-          <option value={selectedExamId}>Unavailable examination</option>
-        )}
-        {examinations.map((exam) => (
-          <option key={exam.id} value={exam.id}>
-            {exam.name} {exam.year}
-          </option>
-        ))}
-      </select>
+        className="min-w-0 sm:min-w-[240px]"
+      />
       {pending && (
         <span role="status" className="text-xs text-gray-500">
           {loadingLabel}

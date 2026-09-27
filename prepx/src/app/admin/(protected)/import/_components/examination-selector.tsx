@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Dropdown } from '@/components/ui/dropdown';
 
 export interface ImportExamination {
   id: string;
@@ -40,19 +41,20 @@ export function ExaminationSelector({
       >
         Examination
       </label>
-      <select
+      <Dropdown
         id="import-examination"
         value={selectedId}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="">Select an examination...</option>
-        {examinations.map((exam) => (
-          <option key={exam.id} value={exam.id}>
-            {exam.name} {exam.year} ({exam.status})
-          </option>
-        ))}
-      </select>
+        options={[
+          { value: '', label: 'Select an examination...' },
+          ...examinations.map((exam) => ({
+            value: exam.id,
+            label: `${exam.name} ${exam.year} (${exam.status})`,
+          })),
+        ]}
+        onValueChange={onChange}
+        ariaLabel="Examination"
+        className="max-w-md"
+      />
       {hiddenExaminationCount > 0 && (
         <p
           className="mt-1.5 text-xs text-gray-600"

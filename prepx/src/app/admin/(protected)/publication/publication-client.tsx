@@ -7,6 +7,7 @@ import { runPublicationValidation } from './actions';
 import { ValidationReport } from './components/ValidationReport';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Dropdown } from '@/components/ui/dropdown';
 import type { ExamStatus } from '@/lib/constants';
 import type { PublicationValidationResult } from '@/lib/publication-validator';
 
@@ -79,19 +80,18 @@ export function PublicationClient({
           Examination
         </label>
         <div className="mt-2 flex flex-col gap-3 sm:flex-row">
-          <select
+          <Dropdown
             id="publication-exam"
             value={selectedExamId}
-            onChange={(event) => selectExamination(event.target.value)}
+            options={examinations.map((exam) => ({
+              value: exam.id,
+              label: `${exam.name} ${exam.year} (${exam.status})`,
+            }))}
+            onValueChange={selectExamination}
             disabled={loading || isNavigating}
-            className="h-10 min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
-          >
-            {examinations.map((exam) => (
-              <option key={exam.id} value={exam.id}>
-                {exam.name} {exam.year} ({exam.status})
-              </option>
-            ))}
-          </select>
+            ariaLabel="Examination"
+            className="min-w-0 flex-1"
+          />
           <Button
             variant="outline"
             onClick={() => void validate(selectedExamId)}

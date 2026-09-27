@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
+import { Dropdown } from '@/components/ui/dropdown';
 
 interface StudentsFilterBarProps {
   examinations: Array<{ id: string; name: string; year: number }>;
@@ -61,36 +62,33 @@ export function StudentsFilterBar({
             className={inputClass + ' w-full pl-9'}
           />
         </div>
-        <select
-          aria-label="Examination"
+        <Dropdown
+          ariaLabel="Examination"
           value={initialExamId}
-          onChange={(event) => updateParams({ examId: event.target.value, school: '' })}
-          className={inputClass + ' sm:min-w-[180px]'}
-        >
-          <option value="">All Examinations</option>
-          {examinations.map((exam) => (
-            <option key={exam.id} value={exam.id}>
-              {exam.name} {exam.year}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label="School"
+          options={[
+            { value: '', label: 'All Examinations' },
+            ...examinations.map((exam) => ({
+              value: exam.id,
+              label: `${exam.name} ${exam.year}`,
+            })),
+          ]}
+          onValueChange={(examId) => updateParams({ examId, school: '' })}
+          className="sm:w-auto sm:min-w-[210px]"
+        />
+        <Dropdown
+          ariaLabel="School"
           value={initialSchool}
-          onChange={(event) => updateParams({ school: event.target.value })}
+          options={[
+            { value: '', label: 'All Schools' },
+            ...(initialSchool && !schools.includes(initialSchool)
+              ? [{ value: initialSchool, label: initialSchool }]
+              : []),
+            ...schools.map((school) => ({ value: school, label: school })),
+          ]}
+          onValueChange={(school) => updateParams({ school })}
           disabled={schools.length === 0}
-          className={inputClass + ' sm:min-w-[160px]'}
-        >
-          <option value="">All Schools</option>
-          {initialSchool && !schools.includes(initialSchool) && (
-            <option value={initialSchool}>{initialSchool}</option>
-          )}
-          {schools.map((school) => (
-            <option key={school} value={school}>
-              {school}
-            </option>
-          ))}
-        </select>
+          className="sm:w-auto sm:min-w-[180px]"
+        />
         {(searchValue || initialExamId || initialSchool) && (
           <button
             type="button"

@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { Dropdown } from '@/components/ui/dropdown';
 
 interface GradeCellProps {
   studentId: string;
@@ -37,27 +38,28 @@ export function GradeCell({
           className="absolute -right-1 -top-1 z-10 h-2 w-2 rounded-full border border-white bg-orange-400"
         />
       )}
-      <select
-        aria-label={`Grade for student ${studentId}`}
+      <Dropdown
+        ariaLabel={`Grade for student ${studentId}`}
         value={value}
-        onChange={(event) => onChange(studentId, subjectId, event.target.value)}
+        options={[
+          { value: '', label: 'Not entered' },
+          { value: 'A', label: 'A' },
+          { value: 'B', label: 'B' },
+          { value: 'C', label: 'C' },
+          { value: 'S', label: 'S' },
+          { value: 'W', label: 'W' },
+          { value: 'AB', label: 'AB' },
+        ]}
+        onValueChange={(grade) => onChange(studentId, subjectId, grade)}
         disabled={disabled}
+        compact
+        align="right"
         className={cn(
-          'h-8 w-16 cursor-pointer appearance-none rounded-md border text-center text-xs font-semibold transition-colors',
-          'focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0',
-          'disabled:cursor-not-allowed disabled:opacity-60',
+          'w-20 text-center',
           isDirty && 'ring-2 ring-orange-300 ring-offset-0',
           GRADE_STYLES[value] ?? GRADE_STYLES['']
         )}
-      >
-        <option value="">Not entered</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="C">C</option>
-        <option value="S">S</option>
-        <option value="W">W</option>
-        <option value="AB">AB</option>
-      </select>
+      />
     </div>
   );
 }

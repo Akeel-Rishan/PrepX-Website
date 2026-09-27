@@ -3,6 +3,7 @@
 import { useTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { CalendarDays } from 'lucide-react';
+import { Dropdown } from '@/components/ui/dropdown';
 
 interface YearSelectorProps {
   years: number[];
@@ -15,7 +16,7 @@ export function YearSelector({ years, selectedYear }: YearSelectorProps): React.
   const [isPending, startTransition] = useTransition();
 
   return (
-    <label className="flex min-w-48 items-center gap-3 rounded-xl border border-white/15 bg-white/10 p-2 pl-3 text-white shadow-sm backdrop-blur-sm">
+    <div className="flex min-w-48 items-center gap-3 rounded-xl border border-white/15 bg-white/10 p-2 pl-3 text-white shadow-sm backdrop-blur-sm">
       <CalendarDays aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-300" />
       <span className="min-w-0 flex-1">
         <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-200/70">
@@ -23,26 +24,21 @@ export function YearSelector({ years, selectedYear }: YearSelectorProps): React.
         </span>
         <span className="block text-sm font-medium">{isPending ? 'Updating…' : selectedYear}</span>
       </span>
-      <select
-        aria-label="Dashboard year"
-        value={selectedYear}
+      <Dropdown
+        ariaLabel="Dashboard year"
+        value={String(selectedYear)}
+        options={(years.length ? years : [selectedYear]).map((year) => ({
+          value: String(year),
+          label: String(year),
+        }))}
         disabled={isPending || years.length === 0}
-        onChange={(event) => {
-          const year = event.target.value;
+        onValueChange={(year) => {
           startTransition(() => router.push(`${pathname}?year=${encodeURIComponent(year)}`));
         }}
-        className="h-9 max-w-24 rounded-lg border border-white/10 bg-slate-800 px-2 text-sm font-semibold text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/30 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {years.length === 0 ? (
-          <option value={selectedYear}>{selectedYear}</option>
-        ) : (
-          years.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))
-        )}
-      </select>
-    </label>
+        compact
+        align="right"
+        className="w-24 border-white/15 bg-slate-800 text-sm font-semibold text-white hover:border-white/30 dark:border-white/15 dark:bg-slate-800 dark:text-white dark:hover:border-white/30"
+      />
+    </div>
   );
 }

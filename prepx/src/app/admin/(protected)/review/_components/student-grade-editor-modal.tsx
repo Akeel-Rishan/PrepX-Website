@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Dropdown } from '@/components/ui/dropdown';
 import { Modal } from '@/components/ui/modal';
 import { saveGradesAction } from '@/lib/actions/grades';
 import type { GradeChange } from '@/lib/data/grades';
@@ -120,24 +121,28 @@ export function StudentGradeEditorModal({
                   Missing
                 </span>
               )}
-              <select
-                aria-label={`Grade for ${subject.subject_name}`}
+              <Dropdown
+                ariaLabel={`Grade for ${subject.subject_name}`}
                 value={current}
+                options={[
+                  { value: '', label: 'Not entered' },
+                  ...['A', 'B', 'C', 'S', 'W', 'AB'].map((grade) => ({
+                    value: grade,
+                    label: grade,
+                  })),
+                ]}
                 disabled={isSaving}
-                onChange={(event) =>
-                  setModalGrades((grades) => ({ ...grades, [subject.id]: event.target.value }))
+                onValueChange={(grade) =>
+                  setModalGrades((grades) => ({ ...grades, [subject.id]: grade }))
                 }
+                compact
+                align="right"
                 className={cn(
-                  'h-8 w-20 cursor-pointer appearance-none rounded-md border bg-white text-center text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60',
+                  'w-28',
                   missing ? 'border-amber-300' : 'border-gray-300',
                   GRADE_TEXT[current]
                 )}
-              >
-                <option value="">Not entered</option>
-                {['A', 'B', 'C', 'S', 'W', 'AB'].map((grade) => (
-                  <option key={grade}>{grade}</option>
-                ))}
-              </select>
+              />
             </div>
           );
         })}
