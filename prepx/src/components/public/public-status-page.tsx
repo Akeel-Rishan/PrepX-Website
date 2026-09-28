@@ -67,7 +67,7 @@ export function PublicStatusPage({
             {primaryHref && primaryLabel && (
               <Link
                 href={primaryHref}
-                className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform] active:scale-[0.98] hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus-visible:ring-offset-slate-900"
+                className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform] active:scale-[0.98] hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus-visible:ring-offset-slate-900"
               >
                 {primaryLabel}
                 <ArrowRight aria-hidden="true" className="h-4 w-4" />

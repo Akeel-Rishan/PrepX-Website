@@ -1,2 +1,1 @@
-// Public result search form placeholder.
-export {};
+export { SearchForm } from '@/app/(public)/_components/search-form';

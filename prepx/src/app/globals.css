@@ -34,6 +34,63 @@ html.dark body {
   background: #020617;
 }
 
+/* Public result portal: a restrained registry-paper pattern related to the
+   login atmosphere, using diagonal lines instead of its square grid. */
+.public-portal-background {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #f4f7fb;
+}
+
+.public-portal-background::before {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(118deg, rgb(37 99 235 / 0.1) 0%, transparent 38%),
+    linear-gradient(302deg, rgb(59 130 246 / 0.07) 0%, transparent 36%);
+  content: '';
+  pointer-events: none;
+}
+
+.public-portal-background::after {
+  position: absolute;
+  inset: -25%;
+  z-index: -1;
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0,
+    transparent 31px,
+    rgb(37 99 235 / 0.045) 31px,
+    rgb(37 99 235 / 0.045) 32px
+  );
+  content: '';
+  mask-image: linear-gradient(to bottom, black 0%, rgb(0 0 0 / 0.72) 48%, transparent 88%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, rgb(0 0 0 / 0.72) 48%, transparent 88%);
+  pointer-events: none;
+}
+
+.dark .public-portal-background {
+  background-color: #050b16;
+}
+
+.dark .public-portal-background::before {
+  background:
+    linear-gradient(118deg, rgb(37 99 235 / 0.16) 0%, transparent 40%),
+    linear-gradient(302deg, rgb(30 64 175 / 0.13) 0%, transparent 38%);
+}
+
+.dark .public-portal-background::after {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0,
+    transparent 31px,
+    rgb(147 197 253 / 0.055) 31px,
+    rgb(147 197 253 / 0.055) 32px
+  );
+}
+
 /* Dark-theme compatibility for established admin surfaces. New components
    should continue to use explicit dark: utilities where practical. */
 .dark .theme-content .bg-white {
@@ -330,5 +387,11 @@ html.dark body {
 @media (prefers-reduced-motion: reduce) {
   .review-grade-sheet {
     animation: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .public-portal-surface {
+    backdrop-filter: none;
   }
 }

@@ -24,8 +24,11 @@ const inter = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'PrepX | Examination Results',
-  description: 'O/L Model Examination Results Portal',
+  title: {
+    default: 'PrepX | Examination Results',
+    template: '%s | PrepX',
+  },
+  description: 'O/L Model Examination Results Portal by PrepX.',
 };
 
 export default function RootLayout({

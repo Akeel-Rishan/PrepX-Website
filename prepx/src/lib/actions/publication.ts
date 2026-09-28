@@ -20,6 +20,7 @@ const publicationPaths = [
   '/admin/students',
   '/admin/subjects',
   '/admin/import',
+  '/',
   '/results',
 ] as const;
 
