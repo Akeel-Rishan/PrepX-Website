@@ -18,6 +18,7 @@ export interface DropdownOption {
   value: string;
   label: string;
   disabled?: boolean;
+  isGroup?: boolean;
 }
 
 interface DropdownProps {
@@ -258,6 +259,17 @@ export function Dropdown({
       style={menuPosition}
     >
       {options.map((option, index) => {
+        if (option.isGroup) {
+          return (
+            <div
+              key={`${option.value}-${index}`}
+              role="presentation"
+              className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400 first:pt-1 dark:text-slate-500"
+            >
+              {option.label}
+            </div>
+          );
+        }
         const selected = option.value === selectedValue;
         const active = index === activeIndex;
         return (
