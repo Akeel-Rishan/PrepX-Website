@@ -45,7 +45,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
   return (
     <div className="flex flex-1 items-center px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
       <div className="mx-auto grid w-full max-w-6xl items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.78fr)] lg:gap-14">
-        <section className="pt-1 lg:sticky lg:top-8 lg:pt-6" aria-labelledby="portal-heading">
+        <section className="min-w-0 pt-1 lg:sticky lg:top-8 lg:pt-6" aria-labelledby="portal-heading">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
             Official result service
           </p>
@@ -57,7 +57,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
           </h1>
 
           {currentExam ? (
-            <div className="mt-6 flex items-center gap-4 border-l-4 border-blue-600 pl-5">
+            <div className="mt-6 flex flex-wrap items-center gap-4 border-l-4 border-blue-600 pl-5">
               <p className="text-5xl font-extrabold tracking-[-0.05em] text-blue-600 dark:text-blue-400 sm:text-6xl">
                 {currentExam.year}
               </p>
@@ -133,9 +133,9 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
 
         <section
           aria-labelledby="result-search-heading"
-          className="public-portal-surface overflow-hidden rounded-2xl border border-white/90 bg-white/[0.88] shadow-[0_28px_80px_-34px_rgba(30,64,175,0.34)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/[0.88] dark:shadow-[0_28px_80px_-34px_rgba(0,0,0,0.88)]"
+          className="public-portal-surface min-w-0 overflow-hidden rounded-2xl border border-white/90 bg-white/[0.88] shadow-[0_28px_80px_-34px_rgba(30,64,175,0.34)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/[0.88] dark:shadow-[0_28px_80px_-34px_rgba(0,0,0,0.88)]"
         >
-          <div className="border-b border-slate-200/80 bg-slate-50/65 px-6 py-5 dark:border-slate-800 dark:bg-slate-900/70 sm:px-7">
+          <div className="border-b border-slate-200/80 bg-slate-50/65 px-4 py-5 sm:px-6 dark:border-slate-800 dark:bg-slate-900/70 sm:px-7">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm dark:bg-blue-500">
                 <School aria-hidden="true" strokeWidth={1.8} className="h-5 w-5" />
@@ -154,7 +154,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
             </div>
           </div>
 
-          <div className="p-6 sm:p-7">
+          <div className="p-4 sm:p-7">
             {queryFailed ? (
               <div className="flex flex-col items-center py-8 text-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300">
@@ -189,7 +189,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
             )}
           </div>
 
-          <div className="border-t border-slate-200/80 bg-slate-50/60 px-6 py-4 dark:border-slate-800 dark:bg-slate-950/[0.45] sm:px-7">
+          <div className="border-t border-slate-200/80 bg-slate-50/60 px-4 py-4 sm:px-6 dark:border-slate-800 dark:bg-slate-950/[0.45] sm:px-7">
             <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
               Need help? Contact your school&apos;s examination coordinator. Never share your NIC
               with anyone outside the official process.

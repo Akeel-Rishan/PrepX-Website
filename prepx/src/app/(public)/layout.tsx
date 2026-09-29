@@ -48,7 +48,7 @@ export default function PublicLayout({
         </div>
       </header>
 
-      <main className="relative z-0 flex flex-1 flex-col">{children}</main>
+      <main className="relative z-0 flex min-w-0 flex-1 flex-col [overflow-wrap:anywhere]">{children}</main>
 
       <footer className="public-portal-surface relative z-10 border-t border-white/80 bg-white/70 px-4 py-6 backdrop-blur-xl dark:border-slate-800/90 dark:bg-slate-950/[0.72]">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 text-center sm:px-2 md:flex-row md:items-end md:justify-between md:text-left">
@@ -56,7 +56,7 @@ export default function PublicLayout({
             Results displayed here are official and final as published. Contact your school&apos;s
             examination coordinator for queries or corrections.
           </p>
-          <p className="shrink-0 text-xs text-slate-400 dark:text-slate-500">
+          <p className="text-xs text-slate-400 md:shrink-0 dark:text-slate-500">
             &copy; {currentYear} PrepX Examination System. All rights reserved.
           </p>
         </div>

@@ -169,7 +169,7 @@ export function StudentIssueTable({ rows }: StudentIssueTableProps): React.JSX.E
         </div>
       )}
       {pageCount > 1 && (
-        <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 sm:px-5">
+        <div className="flex flex-col gap-3 border-t border-gray-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <p className="text-xs text-gray-500">
             Page {page} of {pageCount}, {filtered.length} records
           </p>

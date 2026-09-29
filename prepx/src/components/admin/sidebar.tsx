@@ -39,7 +39,7 @@ export function Sidebar({
           </div>
         </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 lg:overflow-hidden lg:py-2">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 lg:py-2">
         <SidebarNav onNavClick={onNavClick} />
       </div>
       <div className="border-t border-slate-800 p-3">

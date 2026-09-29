@@ -47,8 +47,8 @@ export function ResultsFilterBar({
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-3 xl:flex-row">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center xl:flex-1">
           <label
             htmlFor="results-examination"
             className="whitespace-nowrap text-sm font-medium text-gray-700"
@@ -67,11 +67,11 @@ export function ResultsFilterBar({
             ]}
             onValueChange={handleExamChange}
             ariaLabel="Examination"
-            className="min-w-[240px]"
+            className="min-w-0 sm:flex-1"
           />
         </div>
         {selectedExamId && (
-          <div className="relative flex-1">
+          <div className="relative min-w-0 flex-1">
             <Search
               aria-hidden="true"
               className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"

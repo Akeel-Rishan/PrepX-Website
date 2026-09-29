@@ -43,7 +43,7 @@ export function Select({
   const ariaDescribedBy = [describedBy, helpId].filter(Boolean).join(' ') || undefined;
 
   return (
-    <div>
+    <div className="min-w-0">
       <label
         htmlFor={id}
         className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"

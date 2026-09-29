@@ -142,7 +142,7 @@ export function GradeGrid({
   return (
     <div className="space-y-4">
       {!isReadOnly && dirtyGrades.size > 0 && (
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
+        <div className="flex flex-col gap-3 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-orange-400" />
             <p className="text-sm font-medium text-orange-800">
@@ -193,7 +193,7 @@ export function GradeGrid({
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="sticky left-0 z-20 min-w-[200px] border-r border-gray-200 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <th className="sticky left-0 z-20 w-36 min-w-36 border-r border-gray-200 bg-gray-50 px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 sm:w-[200px] sm:min-w-[200px] sm:px-4">
                     Student
                   </th>
                   {data.subjects.map((subject) => (
@@ -212,7 +212,7 @@ export function GradeGrid({
               <tbody className="divide-y divide-gray-100">
                 {data.students.map((student) => (
                   <tr key={student.id} className="transition-colors hover:bg-slate-50/50">
-                    <td className="sticky left-0 z-10 border-r border-gray-100 bg-white px-4 py-3">
+                    <td className="sticky left-0 z-10 max-w-36 break-words border-r border-gray-100 bg-white px-3 py-3 sm:max-w-[200px] sm:px-4">
                       <div className="text-sm font-medium leading-tight text-gray-900">{student.full_name}</div>
                       <div className="mt-0.5 font-mono text-xs text-gray-400">{student.index_number}</div>
                     </td>
