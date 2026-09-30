@@ -27,6 +27,9 @@ const { getPublicSearchErrorMessage, preparePublicSearch, PUBLIC_SEARCH_ERROR_ME
 );
 
 const empty = preparePublicSearch('  ', '');
+for (const inherited of ['toString', '__proto__', 'constructor', 'hasOwnProperty']) {
+  assert.equal(getPublicSearchErrorMessage(inherited), PUBLIC_SEARCH_ERROR_MESSAGES.SERVER_ERROR);
+}
 assert.equal(empty.ok, false);
 assert.equal(empty.message, PUBLIC_SEARCH_ERROR_MESSAGES.VALIDATION_ERROR);
 

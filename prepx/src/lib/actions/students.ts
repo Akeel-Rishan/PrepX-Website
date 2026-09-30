@@ -42,6 +42,7 @@ function handleDatabaseError(error: { code?: string; message?: string }): Studen
 function revalidateStudent(id: string) {
   revalidateTag('student-lookups');
   revalidateTag('students');
+  revalidateTag('results');
   revalidateTag('examinations');
   revalidateTag('dashboard');
   revalidatePath('/admin/students');

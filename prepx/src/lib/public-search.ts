@@ -50,7 +50,7 @@ export function preparePublicSearch(indexNumber: string, nicNumber: string): Pre
 
 /** Convert an untrusted API error code into a safe, non-enumerating student message. */
 export function getPublicSearchErrorMessage(code: unknown): string {
-  if (typeof code === 'string' && code in PUBLIC_SEARCH_ERROR_MESSAGES && code !== 'INVALID_NIC') {
+  if (typeof code === 'string' && Object.hasOwn(PUBLIC_SEARCH_ERROR_MESSAGES, code) && code !== 'INVALID_NIC') {
     return PUBLIC_SEARCH_ERROR_MESSAGES[code as PublicSearchApiErrorCode];
   }
   return PUBLIC_SEARCH_ERROR_MESSAGES.SERVER_ERROR;

@@ -77,9 +77,9 @@ export async function getImportAiSuggestionsAction(
       issueSummaries: parsed.data.issueSummaries,
     });
     return { success: true, suggestion };
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : 'unknown';
-    console.error('[Gemini Import Assistant Error]', { reason });
+  } catch {
+    // Provider errors can contain request data and credentials.
+    console.error('[Gemini Import Assistant Error]', { reason: 'provider-request-failed' });
     return {
       success: false,
       error: 'The AI assistant is temporarily unavailable. The normal validator is still active.',

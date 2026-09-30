@@ -30,7 +30,9 @@ const { buildPublicationValidation, computeOverallStatus } = load(
   'src/lib/publication-validator.ts'
 );
 
-assert.equal(computeOverallStatus({ optional: 'AB' }, ['required']), 'ABSENT');
+assert.equal(computeOverallStatus({ optional: 'AB' }, ['required']), 'INCOMPLETE');
+assert.equal(computeOverallStatus({}, []), 'INCOMPLETE');
+assert.equal(computeOverallStatus({ required: 'AB', optional: 'A' }, ['required']), 'ABSENT');
 assert.equal(computeOverallStatus({ required: 'A' }, ['required', 'missing']), 'INCOMPLETE');
 assert.equal(computeOverallStatus({ required: 'W' }, ['required']), 'NOT_PASSED');
 assert.equal(computeOverallStatus({ required: 'A', optional: 'W' }, ['required']), 'PASSED');

@@ -1,6 +1,8 @@
 import 'server-only';
 
-import { unstable_cache, unstable_noStore as noStore } from 'next/cache';
+import { unstable_noStore as noStore } from 'next/cache';
+import { getGradeOverview } from '@/lib/data/grade-overview';
+import { normalizePage, normalizePageSize } from '@/lib/pagination';
 import { createAdminClient } from '@/lib/supabase/server';
 import { computeIncompleteStudents } from '@/lib/review-utils';
 import type { Student, Subject } from '@/types';
@@ -90,45 +92,25 @@ async function loadStudents(examinationId: string): Promise<ReviewStudent[]> {
 }
 
 /** Loads and classifies all active grades, then filters and paginates in memory. */
-async function queryReviewData(filters: {
+export async function getReviewData(filters: {
   examinationId: string;
   statusFilter?: StatusFilter;
   page?: number;
   pageSize?: number;
   search?: string;
 }): Promise<ReviewData> {
-  const pageSize = Math.max(1, Math.min(filters.pageSize ?? 25, 100));
-  const requestedPage = Math.max(1, filters.page ?? 1);
+  const pageSize = normalizePageSize(filters.pageSize);
+  const requestedPage = normalizePage(filters.page);
   const statusFilter = filters.statusFilter ?? 'needs_attention';
   if (!UUID_REGEX.test(filters.examinationId)) throw new Error('Invalid examination');
-  const client = createAdminClient();
-  const [students, subjectsResult] = await Promise.all([
-    loadStudents(filters.examinationId),
-    client.from('subjects').select('*').eq('examination_id', filters.examinationId)
-      .eq('active', true).order('display_order').order('id'),
-  ]);
-  if (subjectsResult.error) throw new Error('subjects');
-  const allSubjects = subjectsResult.data ?? [];
-  const activeSubjectIds = allSubjects.map((subject) => subject.id);
+  const { students, subjects: allSubjects, grades } = await getGradeOverview(filters.examinationId);
   const requiredSubjects = allSubjects.filter((subject) => subject.required);
   const gradesByStudent = new Map<string, Map<string, string>>();
 
-  if (students.length && activeSubjectIds.length) {
-    for (let start = 0; start < students.length; start += 100) {
-      const studentIds = students.slice(start, start + 100).map((student) => student.id);
-      for (let from = 0; ; from += 1000) {
-        const { data, error } = await client.from('student_results')
-          .select('student_id, subject_id, grade').in('student_id', studentIds)
-          .in('subject_id', activeSubjectIds).order('id').range(from, from + 999);
-        if (error) throw new Error('grades');
-        for (const result of data ?? []) {
-          const gradeMap = gradesByStudent.get(result.student_id) ?? new Map<string, string>();
-          gradeMap.set(result.subject_id, result.grade);
-          gradesByStudent.set(result.student_id, gradeMap);
-        }
-        if ((data?.length ?? 0) < 1000) break;
-      }
-    }
+  for (const result of grades) {
+    const gradeMap = gradesByStudent.get(result.student_id) ?? new Map<string, string>();
+    gradeMap.set(result.subject_id, result.grade);
+    gradesByStudent.set(result.student_id, gradeMap);
   }
 
   const allRows: ReviewStudentRow[] = students.map((student) => {
@@ -167,35 +149,6 @@ async function queryReviewData(filters: {
     students: filtered.slice(from, from + pageSize), allSubjects, requiredSubjects, summary,
     totalFiltered, totalPages, currentPage, pageSize,
   };
-}
-
-const readReviewData = unstable_cache(
-  async (
-    examinationId: string,
-    statusFilter: StatusFilter,
-    page: number,
-    pageSize: number,
-    search: string
-  ): Promise<ReviewData> =>
-    queryReviewData({ examinationId, statusFilter, page, pageSize, search }),
-  ['review-data-v1'],
-  { revalidate: 30, tags: ['results', 'students', 'subjects'] }
-);
-
-export async function getReviewData(filters: {
-  examinationId: string;
-  statusFilter?: StatusFilter;
-  page?: number;
-  pageSize?: number;
-  search?: string;
-}): Promise<ReviewData> {
-  return readReviewData(
-    filters.examinationId,
-    filters.statusFilter ?? 'needs_attention',
-    filters.page ?? 1,
-    filters.pageSize ?? 25,
-    filters.search?.trim() ?? ''
-  );
 }
 
 /** Returns the complete/incomplete summary and all students missing active required grades. */

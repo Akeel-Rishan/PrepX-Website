@@ -146,7 +146,10 @@ export async function saveReviewGradeAction(
             .eq('id', resultId)
             .eq('updated_at', savedVersion);
       if (rollback.error) console.error('[Review Grade Rollback Error]', { code: rollback.error.code });
-      return { status: 'error', error: 'The grade could not be audited, so the save was cancelled.' };
+      revalidateTag('results');
+      revalidatePath('/admin/review');
+      revalidatePath('/admin/results');
+      return { status: 'error', error: 'The audit failed and a rollback was attempted. Refresh to confirm the current grade before retrying.' };
     }
 
     revalidateTag('results');

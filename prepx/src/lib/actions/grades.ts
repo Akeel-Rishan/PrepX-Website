@@ -28,11 +28,13 @@ export async function saveGradesAction(
   if (changes.length > 1000) return { error: 'Too many changes in a single request.' };
 
   for (const change of changes) {
-    if (!UUID_REGEX.test(change.studentId) || !UUID_REGEX.test(change.subjectId)) {
+    if (!change || typeof change !== 'object' ||
+      typeof change.studentId !== 'string' || typeof change.subjectId !== 'string' ||
+      !UUID_REGEX.test(change.studentId) || !UUID_REGEX.test(change.subjectId)) {
       return { error: 'Invalid data format.' };
     }
     if (change.grade !== null && !VALID_GRADES.has(change.grade)) {
-      return { error: `Invalid grade value: "${change.grade}".` };
+      return { error: 'Invalid grade value.' };
     }
   }
 

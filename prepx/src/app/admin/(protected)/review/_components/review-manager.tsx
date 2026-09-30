@@ -19,6 +19,8 @@ interface ReviewManagerProps {
 }
 
 function MissingList({ student }: { student: ReviewStudentRow }): React.JSX.Element {
+  if (student.status === 'empty' && student.missingCount === 0)
+    return <span className="text-xs text-gray-600">No grades entered</span>;
   if (student.missingCount === 0) return <span className="text-xs text-green-700">Complete</span>;
   if (student.status === 'empty')
     return (

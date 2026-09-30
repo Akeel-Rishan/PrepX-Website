@@ -123,6 +123,9 @@ async function readMatrix(fileBuffer: Buffer, fileType: 'xlsx' | 'csv'): Promise
   } else {
     const source = stripLeadingCsvComments(fileBuffer.toString('utf8'));
     worksheet = await workbook.csv.read(Readable.from([source]), {
+      // Identifiers are text: ExcelJS's default mapper removes leading zeros
+      // and turns date-like school/centre values into dates.
+      map: (value: string) => value,
       parserOptions: { ignoreEmpty: true, trim: false },
     });
   }

@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getSafeRedirect } from '@/lib/auth/redirect';
+import { isInvalidRefreshTokenError } from '@/lib/auth/session-errors';
 import type { Database } from '@/types/database';
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
@@ -29,7 +30,30 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // Verify the signature against cached public keys; this also refreshes expired
   // sessions. Never authorize from an unverified getSession() result.
-  const { data, error } = await supabase.auth.getClaims();
+  const { data, error } = await supabase.auth.getClaims().catch((error: unknown) => {
+    if (isInvalidRefreshTokenError(error)) return { data: null, error };
+    throw error;
+  });
+  if (isInvalidRefreshTokenError(error)) {
+    // Expire only this project's session (including chunked cookies). Keep
+    // unrelated cookies and transient network failures untouched.
+    const projectRef = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname.split('.')[0];
+    const sessionCookie = `sb-${projectRef}-auth-token`;
+    const staleCookies = request.cookies.getAll().filter(({ name }) =>
+      name === sessionCookie ||
+      (name.startsWith(`${sessionCookie}.`) && /^\d+$/.test(name.slice(sessionCookie.length + 1)))
+    );
+    staleCookies.forEach(({ name }) => request.cookies.delete(name));
+    const previousCookies = supabaseResponse.cookies.getAll();
+    supabaseResponse = NextResponse.next({ request });
+    previousCookies.forEach((cookie) => supabaseResponse.cookies.set(cookie));
+    staleCookies.forEach(({ name }) =>
+      supabaseResponse.cookies.set(name, '', { path: '/', maxAge: 0 })
+    );
+    supabaseResponse.headers.set('Cache-Control', 'private, no-store');
+    supabaseResponse.headers.set('Pragma', 'no-cache');
+    supabaseResponse.headers.set('Expires', '0');
+  }
   const userId = data?.claims.sub;
   const { pathname, search } = request.nextUrl;
   const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');

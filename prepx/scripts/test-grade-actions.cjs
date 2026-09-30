@@ -69,6 +69,11 @@ function harness({ status = 'DRAFT', subjectActive = true } = {}) {
 }
 
 async function main() {
+  for (const malformed of [null, undefined, 1, 'A', {}, { studentId: studentId, subjectId: subjectId, grade: {} }]) {
+    const invalid = harness();
+    assert.ok((await invalid.saveGradesAction(examId, [malformed])).error);
+    assert.equal(invalid.writes(), 0);
+  }
   const change = [{ studentId, subjectId, grade: 'A' }];
   for (const status of ['PUBLISHED', 'ARCHIVED']) {
     const locked = harness({ status });

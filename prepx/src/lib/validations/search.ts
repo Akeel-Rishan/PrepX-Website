@@ -25,3 +25,6 @@ export const searchSchema = z
   });
 
 export type SearchSchema = z.infer<typeof searchSchema>;
+
+/** API requests additionally identify the examination being searched. */
+export const searchRequestSchema = searchSchema.safeExtend({ examinationId: z.uuid() });

@@ -21,6 +21,7 @@ async function examinationError(client: AdminClient, id: string): Promise<string
 
 function refreshSubjects() {
   revalidateTag('subjects');
+  revalidateTag('results');
   revalidatePath('/admin/subjects');
   revalidatePath('/admin/results');
   revalidatePath('/admin/review');

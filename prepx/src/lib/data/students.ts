@@ -105,7 +105,7 @@ const readStudentsWithPagination = unstable_cache(
   ): Promise<PaginatedStudents> =>
     queryStudentsWithPagination({ page, pageSize, search, examinationId, school }),
   ['students-with-pagination-v1'],
-  { revalidate: 30, tags: ['students'] }
+  { revalidate: 30, tags: ['students', 'examinations'] }
 );
 
 export async function getStudentsWithPagination(
@@ -180,7 +180,7 @@ const readStudentById = unstable_cache(
   }
   },
   ['student-by-id-v1'],
-  { revalidate: 30, tags: ['students', 'results'] }
+  { revalidate: 30, tags: ['students', 'results', 'examinations'] }
 );
 
 // Metadata and the page share one lookup during this server render only.

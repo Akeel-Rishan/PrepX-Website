@@ -9,7 +9,9 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "type-check": "tsc --noEmit",
     "test:db": "tsx scripts/test-db.ts",
-    "test:logic": "node scripts/test-import.cjs && node scripts/test-import-action.cjs && node scripts/test-import-ai-action.cjs && node scripts/test-auth-actions.cjs && node scripts/test-student-actions.cjs && node scripts/test-grade-actions.cjs && node scripts/test-examination-actions.cjs && node scripts/test-dashboard.cjs && node scripts/test-publication-validator.cjs && node scripts/test-publication-actions.cjs && node scripts/test-publication-state-actions.cjs && node scripts/test-publication-summary.cjs && node scripts/test-audit-logs.cjs && node scripts/test-public-search.cjs"
+    "test:logic": "node scripts/test-import.cjs && node scripts/test-import-action.cjs && node scripts/test-import-ai-action.cjs && node scripts/test-auth-actions.cjs && node scripts/test-student-actions.cjs && node scripts/test-grade-actions.cjs && node scripts/test-examination-actions.cjs && node scripts/test-dashboard.cjs && node scripts/test-publication-validator.cjs && node scripts/test-publication-actions.cjs && node scripts/test-publication-state-actions.cjs && node scripts/test-publication-summary.cjs && node scripts/test-audit-logs.cjs && node scripts/test-public-search.cjs && node scripts/test-result-search.cjs && node scripts/test-auth-session.cjs && node scripts/test-grade-data.cjs",
+    "test:results": "node scripts/test-result-search.cjs",
+    "test:results:live": "node scripts/test-result-search-live.cjs"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
