@@ -128,7 +128,7 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
           }}
           disabled={isLoading}
           aria-invalid={Boolean(errorMessage)}
-          className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 font-mono text-sm tracking-wide text-slate-950 shadow-sm shadow-slate-950/[0.02] placeholder:text-slate-500 transition-[border-color,box-shadow,background-color] focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:shadow-none dark:placeholder:text-slate-400 dark:focus:border-blue-400 dark:focus:ring-blue-400/15 dark:disabled:bg-slate-800"
+          className="h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-mono text-base tracking-wide sm:px-4 sm:text-sm text-slate-950 shadow-sm shadow-slate-950/[0.02] placeholder:text-slate-500 transition-[border-color,box-shadow,background-color] focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:shadow-none dark:placeholder:text-slate-400 dark:focus:border-blue-400 dark:focus:ring-blue-400/15 dark:disabled:bg-slate-800"
         />
       </div>
 
@@ -172,7 +172,7 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
           }}
           disabled={isLoading}
           aria-invalid={Boolean(errorMessage)}
-          className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 font-mono text-sm tracking-wide text-slate-950 shadow-sm shadow-slate-950/[0.02] placeholder:text-slate-500 transition-[border-color,box-shadow,background-color] focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:shadow-none dark:placeholder:text-slate-400 dark:focus:border-blue-400 dark:focus:ring-blue-400/15 dark:disabled:bg-slate-800"
+          className="h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-mono text-base tracking-wide sm:px-4 sm:text-sm text-slate-950 shadow-sm shadow-slate-950/[0.02] placeholder:text-slate-500 transition-[border-color,box-shadow,background-color] focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:shadow-none dark:placeholder:text-slate-400 dark:focus:border-blue-400 dark:focus:ring-blue-400/15 dark:disabled:bg-slate-800"
         />
       </div>
 

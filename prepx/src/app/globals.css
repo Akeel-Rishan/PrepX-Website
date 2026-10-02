@@ -91,6 +91,151 @@ html.dark body {
   );
 }
 
+/* Public search hero only. These decorations never participate in layout or input. */
+.public-results-animation,
+.public-results-animation *,
+.public-results-year-orbits,
+.public-results-year-orbits * {
+  pointer-events: none;
+}
+
+.public-results-animation {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.public-results-gradient {
+  position: absolute;
+  inset: -12%;
+  z-index: 1;
+  background: linear-gradient(125deg, #f4f7fb, #eaf1fc 35%, #f4f7fb 65%, #edf4fc);
+  animation: public-results-gradient-drift 26s ease-in-out infinite;
+}
+
+.dark .public-results-gradient {
+  background: linear-gradient(125deg, #020617, #06152b 35%, #0a1f3d 65%, #071426);
+}
+
+.public-results-grid {
+  position: absolute;
+  inset: -48px;
+  z-index: 2;
+  background-image: repeating-linear-gradient(
+    135deg, transparent 0, transparent 31px,
+    rgb(37 99 235 / 0.045) 31px, rgb(37 99 235 / 0.045) 32px
+  );
+  mask-image: linear-gradient(to bottom, black, rgb(0 0 0 / 0.72) 48%, transparent 92%);
+  animation: public-results-grid-drift 34s linear infinite;
+}
+
+.dark .public-results-grid {
+  background-image: repeating-linear-gradient(
+    135deg, transparent 0, transparent 31px,
+    rgb(147 197 253 / 0.055) 31px, rgb(147 197 253 / 0.055) 32px
+  );
+}
+
+.public-results-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
+.public-results-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: #3b82f6;
+  opacity: 0;
+  box-shadow: 0 0 6px rgb(59 130 246 / 0.24);
+  animation: public-results-particle-float 32s linear infinite;
+}
+
+.public-results-particle:nth-child(3n) { background: #67c4de; }
+.dark .public-results-particle:nth-child(4n) { background: #dbeafe; }
+
+.public-results-year-orbits {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+.public-results-orbit {
+  position: absolute;
+  border: 1px solid rgb(59 130 246 / 0.15);
+  border-radius: 50%;
+}
+
+.public-results-orbit-one {
+  inset: -8px -18px;
+  transform: rotate(-16deg);
+}
+
+.public-results-orbit-two {
+  inset: -15px -9px;
+  transform: rotate(20deg);
+  border-color: rgb(59 130 246 / 0.12);
+}
+
+.public-results-orbit-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgb(56 189 248 / 0.65);
+  box-shadow: 0 0 6px rgb(59 130 246 / 0.4);
+  offset-path: ellipse(50% 50% at 50% 50%);
+  offset-rotate: 0deg;
+  animation: public-results-orbit-travel 18s linear infinite;
+}
+
+.public-results-orbit-two .public-results-orbit-dot {
+  width: 4px;
+  height: 4px;
+  background: rgb(147 197 253 / 0.65);
+  animation-duration: 28s;
+  animation-delay: -14s;
+  animation-direction: reverse;
+}
+
+@keyframes public-results-gradient-drift {
+  0%, 100% { transform: translate3d(-3%, -2%, 0); }
+  50% { transform: translate3d(3%, 2%, 0); }
+}
+
+@keyframes public-results-grid-drift {
+  /* Exactly one perpendicular 32px repeat: no jump at the loop boundary. */
+  to { transform: translate3d(22.627417px, 22.627417px, 0); }
+}
+
+@keyframes public-results-particle-float {
+  0% { opacity: 0; transform: translate3d(0, 45px, 0); }
+  25%, 65% { opacity: 0.24; }
+  100% { opacity: 0; transform: translate3d(var(--particle-drift), -100px, 0); }
+}
+
+@keyframes public-results-orbit-travel {
+  to { offset-distance: 100%; }
+}
+
+@media (max-width: 639px) {
+  .public-results-particle:nth-child(n + 13) { display: none; }
+  .public-results-particle { box-shadow: none; }
+  .public-results-orbit-dot { box-shadow: 0 0 3px rgb(59 130 246 / 0.25); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-results-gradient,
+  .public-results-grid,
+  .public-results-particle,
+  .public-results-orbit-dot { animation: none; }
+  .public-results-particle { display: none; }
+  .public-results-orbit-two .public-results-orbit-dot { offset-distance: 50%; }
+}
+
 /* Dark-theme compatibility for established admin surfaces. New components
    should continue to use explicit dark: utilities where practical. */
 .dark .theme-content .bg-white {
@@ -353,9 +498,7 @@ html.dark body {
   }
 }
 
-/* Print styles, implemented in Phase 12 */
-@media print {
-}
+
 @keyframes review-sheet-mobile-in {
   from {
     transform: translateY(100%);
@@ -394,4 +537,235 @@ html.dark body {
   .public-portal-surface {
     backdrop-filter: none;
   }
+}
+
+
+/* ══════════════════════════════════════════════════
+   BASE PRINT UTILITIES
+   Used alongside Tailwind's print: variant.
+   ══════════════════════════════════════════════════ */
+
+/* Screen elements retain their normal display until printing. */
+
+/* Elements only visible in print */
+.print-only {
+  display: none;
+}
+
+/* ══════════════════════════════════════════════════
+   @MEDIA PRINT — Full print document rules
+   ══════════════════════════════════════════════════ */
+
+@media print {
+
+  /* Force colors to print exactly — needed for grade badges */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* A4 page with comfortable margins */
+  @page {
+    size: A4 portrait;
+    margin: 18mm 20mm 22mm 20mm;
+  }
+
+  /* ── Visibility toggles ── */
+  .no-print  { display: none !important; }
+  .print-only { display: block !important; }
+
+  /* ── Body reset ── */
+  body {
+    background: #ffffff !important;
+    font-size: 11pt !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    color: #000000 !important;
+    line-height: 1.45 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ── Layout reset ── */
+  .result-print-wrapper {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Remove all Tailwind shadows and rounded corners for print */
+  [class*="shadow"],
+  [class*="rounded"] {
+    box-shadow: none !important;
+    border-radius: 4pt !important;
+  }
+
+  /* ── Print document header (print-only element) ── */
+  .print-doc-header {
+    text-align: center;
+    border-bottom: 2pt solid #000;
+    padding-bottom: 10pt;
+    margin-bottom: 14pt;
+  }
+
+  .print-doc-header h1 {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #000;
+    margin: 0 0 2pt 0;
+  }
+
+  .print-doc-header p {
+    font-size: 9pt;
+    color: #444;
+    margin: 2pt 0;
+  }
+
+  /* ── Status banner ── */
+  .print-status-banner {
+    border: 2pt solid #000 !important;
+    padding: 8pt 14pt !important;
+    margin-bottom: 14pt !important;
+    background: #f9f9f9 !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* ── Student info section ── */
+  .print-student-info {
+    margin-bottom: 14pt;
+    page-break-inside: avoid;
+  }
+
+  .print-info-row {
+    display: flex;
+    padding: 3.5pt 0;
+    border-bottom: 0.5pt solid #e0e0e0;
+    font-size: 10pt;
+  }
+
+  .print-info-label {
+    width: 38%;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .print-info-value {
+    flex: 1;
+    color: #000;
+  }
+
+  /* ── Grades table ── */
+  .print-grades-section {
+    page-break-inside: avoid;
+  }
+
+  .print-grades-section h3 {
+    font-size: 10pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #333;
+    margin-bottom: 6pt;
+    border-bottom: 1pt solid #999;
+    padding-bottom: 4pt;
+  }
+
+  .print-grades-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+  }
+
+  .print-grades-table th {
+    background: #f0f0f0 !important;
+    border: 0.75pt solid #aaa;
+    padding: 5pt 10pt;
+    font-weight: bold;
+    text-align: left;
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .print-grades-table td {
+    border: 0.75pt solid #ccc;
+    padding: 5pt 10pt;
+    text-align: left;
+  }
+
+  .print-grades-table tr:nth-child(even) td {
+    background: #fafafa !important;
+  }
+
+  /* Grade value cell */
+  .print-grade-cell {
+    font-weight: bold;
+    font-size: 11pt;
+    text-align: center !important;
+    width: 52pt;
+  }
+
+  /* Grade badge for print — always shows border and color */
+  .print-grade-A  { color: #166534; background: #dcfce7 !important; }
+  .print-grade-B  { color: #065f46; background: #d1fae5 !important; }
+  .print-grade-C  { color: #854d0e; background: #fef9c3 !important; }
+  .print-grade-S  { color: #1e40af; background: #dbeafe !important; }
+  .print-grade-W  { color: #991b1b; background: #fee2e2 !important; }
+  .print-grade-AB { color: #374151; background: #f3f4f6 !important; }
+
+  /* ── Print document footer (print-only element) ── */
+  .print-doc-footer {
+    margin-top: 16pt;
+    padding-top: 8pt;
+    border-top: 0.75pt solid #ccc;
+    font-size: 8pt;
+    color: #666;
+    display: flex !important; justify-content: space-between; gap: 12pt;
+  }
+
+  /* ── Notices ── */
+  .print-notice {
+    margin-top: 12pt;
+    font-size: 8.5pt;
+    color: #555;
+    font-style: italic;
+    page-break-inside: avoid;
+  }
+
+  /* ── Summary strip ── */
+  .print-summary {
+    margin-top: 10pt;
+    padding: 6pt 10pt;
+    border: 0.75pt solid #ccc;
+    background: #f9f9f9 !important;
+    font-size: 9pt;
+    page-break-inside: avoid;
+  }
+
+}
+
+/* Reset the public screen shell, including dark mode, without clipping paper. */
+@media print {
+  html { color-scheme: light !important; }
+  body, .public-portal-background { min-height: 0 !important; }
+  .public-portal-background, .public-portal-background > main {
+    display: block !important;
+    overflow: visible !important;
+    background: white !important;
+    color: black !important;
+  }
+  .public-portal-background::before, .public-portal-background::after { display: none !important; }
+  .result-card { padding: 10pt 0 0 !important; border: 0 !important; background: white !important; }
+  .result-print-wrapper [class*='text-'] { color: #000 !important; }
+  .result-print-wrapper .print-grade-A { color: #166534 !important; }
+  .result-print-wrapper .print-grade-B { color: #065f46 !important; }
+  .result-print-wrapper .print-grade-C { color: #854d0e !important; }
+  .result-print-wrapper .print-grade-S { color: #1e40af !important; }
+  .result-print-wrapper .print-grade-W { color: #991b1b !important; }
+  .result-print-wrapper .print-grade-AB { color: #374151 !important; }
+  .print-grades-table { table-layout: fixed; }
+  .print-grades-table th:nth-child(2) { width: 65pt; text-align: center; }
+  .print-grades-table tr { break-inside: avoid; }
+  .print-grade-cell span { width: 22pt; height: 22pt; border: 0.75pt solid currentColor; }
+  .print-doc-footer { break-inside: avoid; }
 }
