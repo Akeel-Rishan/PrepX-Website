@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, Hash, IdCard, Loader2, Search } from 'lucide-react';
 import {
@@ -9,6 +9,7 @@ import {
   PUBLIC_SEARCH_ERROR_MESSAGES,
 } from '@/lib/public-search';
 import { cn } from '@/lib/utils';
+import { usePublicResult } from '@/components/public/result-provider';
 
 interface SearchFormProps {
   examinationId: string;
@@ -27,10 +28,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function SearchForm({ examinationId, examName }: SearchFormProps): React.JSX.Element {
   const router = useRouter();
+  const { acceptResult, clearResult } = usePublicResult();
+  const requestRef = useRef<AbortController | null>(null);
   const [indexNumber, setIndexNumber] = useState('');
   const [nicNumber, setNicNumber] = useState('');
   const [status, setStatus] = useState<SearchStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => () => requestRef.current?.abort(), []);
 
   function clearError(): void {
     setErrorMessage(null);
@@ -39,6 +44,8 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    if (requestRef.current) return;
+    clearResult();
     setErrorMessage(null);
 
     const prepared = preparePublicSearch(indexNumber, nicNumber);
@@ -49,10 +56,14 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
     }
 
     setStatus('loading');
+    const controller = new AbortController();
+    requestRef.current = controller;
+    let navigating = false;
 
     try {
       const response = await fetch('/api/results/search', {
         method: 'POST',
+        signal: controller.signal,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           examinationId,
@@ -62,30 +73,38 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
       });
 
       const data: unknown = await response.json().catch(() => null);
+      if (controller.signal.aborted) return;
 
       if (!response.ok) {
         const apiError: ApiError = isRecord(data) ? data : {};
+        if (apiError.error === 'NOT_FOUND' || apiError.error === 'NOT_PUBLISHED') {
+          navigating = true;
+          router.push(
+            apiError.error === 'NOT_FOUND' ? '/results/not-found' : '/results/not-published'
+          );
+          return;
+        }
         setErrorMessage(getPublicSearchErrorMessage(apiError.error));
         setStatus('error');
         return;
       }
 
-      if (!isRecord(data)) {
+      if (!acceptResult(data)) {
         setErrorMessage(PUBLIC_SEARCH_ERROR_MESSAGES.SERVER_ERROR);
         setStatus('error');
         return;
       }
 
-      try {
-        sessionStorage.setItem('prepx_result', JSON.stringify(data));
-      } catch {
-        // The result page handles unavailable browser storage safely.
-      }
-
+      setNicNumber('');
+      setIndexNumber('');
+      navigating = true;
       router.push('/results');
     } catch {
+      if (controller.signal.aborted) return;
       setErrorMessage(PUBLIC_SEARCH_ERROR_MESSAGES.SERVER_ERROR);
       setStatus('error');
+    } finally {
+      if (!navigating) requestRef.current = null;
     }
   }
 
@@ -220,6 +239,9 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
         className="text-center text-xs leading-5 text-slate-500 dark:text-slate-400"
       >
         Use either your Index Number or NIC Number. Only one is required.
+      </p>
+      <p role="status" className="sr-only">
+        {isLoading ? 'Searching for your result.' : ''}
       </p>
     </form>
   );

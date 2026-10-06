@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { ResultProvider } from '@/components/public/result-provider';
 
 export const metadata: Metadata = {
   title: {
@@ -48,7 +49,9 @@ export default function PublicLayout({
         </div>
       </header>
 
-      <main className="relative z-0 flex min-w-0 flex-1 flex-col [overflow-wrap:anywhere]">{children}</main>
+      <main className="relative z-0 flex min-w-0 flex-1 flex-col [overflow-wrap:anywhere]">
+        <ResultProvider>{children}</ResultProvider>
+      </main>
 
       <footer className="no-print public-portal-surface relative z-10 border-t border-white/80 bg-white/70 px-4 py-6 backdrop-blur-xl dark:border-slate-800/90 dark:bg-slate-950/[0.72]">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 text-center sm:px-2 md:flex-row md:items-end md:justify-between md:text-left">

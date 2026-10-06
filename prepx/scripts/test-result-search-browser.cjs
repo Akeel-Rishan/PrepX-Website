@@ -39,21 +39,20 @@ async function main() {
   await page.waitForTimeout(100);
   if (!releaseRequest) throw new Error('Request was not dispatched');
   releaseRequest();
-  stage = 'result navigation and storage';
+  stage = 'result navigation without persistence';
   await page.waitForURL(baseURL + '/results');
-  const result = await page.evaluate(() => JSON.parse(sessionStorage.getItem('prepx_result')));
-  assert.equal(result.indexNumber, student.index_number);
-  assert.ok(Array.isArray(result.grades));
-  if (student.nic_number) assert.ok(!JSON.stringify(result).includes(student.nic_number));
+  await page.getByText(student.index_number, { exact: true }).waitFor();
+  assert.equal(await page.evaluate(() => sessionStorage.getItem('prepx_result')), null);
+  if (student.nic_number) assert.ok(!(await page.locator('body').innerText()).includes(student.nic_number));
   assert.equal(new URL(page.url()).search, '');
   await page.unroute('**/api/results/search');
-  stage = 'inline failure';
+  stage = 'generic not-found route';
   await page.goto(baseURL);
   await page.locator('#indexNumber').fill('NO-MATCH-' + require('node:crypto').randomUUID());
   await page.getByRole('button', { name: 'Search My Results' }).click();
-  await page.getByText('The provided information does not match any available result. Please check your Index Number or NIC and try again.').waitFor();
-  assert.equal(new URL(page.url()).pathname, '/');
-  console.log('PASS 10: browser spinner, POST, masked session storage, /results navigation and inline failure');
+  await page.waitForURL(baseURL + '/results/not-found');
+  await page.getByRole('heading', { name: 'Result Not Found', exact: true }).waitFor();
+  console.log('PASS 10: browser spinner, POST, in-memory result display, no persisted result and generic not-found navigation');
 }
 main().catch(() => {
   console.error(`FAIL: browser verification stopped at ${stage}. No sensitive details logged.`);

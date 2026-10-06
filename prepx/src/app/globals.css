@@ -659,7 +659,7 @@ html.dark body {
     page-break-inside: avoid;
   }
 
-  .print-grades-section h3 {
+  .print-grades-section h2 {
     font-size: 10pt;
     font-weight: bold;
     text-transform: uppercase;
@@ -676,7 +676,7 @@ html.dark body {
     font-size: 10pt;
   }
 
-  .print-grades-table th {
+  .print-grades-table thead th {
     background: #f0f0f0 !important;
     border: 0.75pt solid #aaa;
     padding: 5pt 10pt;
@@ -687,13 +687,15 @@ html.dark body {
     letter-spacing: 0.03em;
   }
 
-  .print-grades-table td {
+  .print-grades-table td,
+  .print-grades-table tbody th {
     border: 0.75pt solid #ccc;
     padding: 5pt 10pt;
     text-align: left;
   }
 
-  .print-grades-table tr:nth-child(even) td {
+  .print-grades-table tr:nth-child(even) td,
+  .print-grades-table tbody tr:nth-child(even) th {
     background: #fafafa !important;
   }
 
@@ -756,6 +758,8 @@ html.dark body {
   }
   .public-portal-background::before, .public-portal-background::after { display: none !important; }
   .result-card { padding: 10pt 0 0 !important; border: 0 !important; background: white !important; }
+  .result-card-content { padding: 0 !important; }
+  .print-info-row { flex-direction: row !important; }
   .result-print-wrapper [class*='text-'] { color: #000 !important; }
   .result-print-wrapper .print-grade-A { color: #166534 !important; }
   .result-print-wrapper .print-grade-B { color: #065f46 !important; }

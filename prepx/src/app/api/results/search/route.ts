@@ -84,7 +84,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
     const overallStatus = calculateResultStatus(gradeMap, requiredIds);
     const grades: GradeEntry[] = subjects.map((subject) => ({
-      subjectId: subject.id,
       subjectName: subject.subject_name,
       subjectCode: subject.subject_code,
       displayOrder: subject.display_order,

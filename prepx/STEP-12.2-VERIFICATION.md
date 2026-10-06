@@ -1,4 +1,6 @@
-﻿# Step 12.2 verification
+> Update (6 October 2026): Step 12.1 replaced the historical sessionStorage handoff described below with in-memory public-route state. The print browser test now uses the search flow and has passed again. See STEP-12.1-VERIFICATION.md for current behavior.
+
+# Step 12.2 verification
 
 Implemented the result display as well as print support: the starting `/results` page was a placeholder. It now reads the existing `prepx_result` search payload, validates it, shows masked NIC/student information, status and grades, and offers browser-native printing. Missing or invalid session data offers a fresh search.
 

@@ -115,7 +115,11 @@ async function main() {
     ].sort());
     assert.equal(response.body.maskedNic, '********5678');
     assert.equal(response.body.overallStatus, 'Passed');
-    assert.deepEqual(response.body.grades.map(g => [g.subjectId, g.grade]), [['s1', 'A'], ['s2', null]]);
+    assert.deepEqual(response.body.grades.map(g => [g.subjectName, g.grade]), [['Maths', 'A'], ['Science', null]]);
+    for (const grade of response.body.grades) {
+      assert.deepEqual(Object.keys(grade).sort(), ['subjectName', 'subjectCode', 'displayOrder', 'grade'].sort());
+    }
+    assert.ok(!JSON.stringify(response.body).includes('student-id'));
     assert.ok(!JSON.stringify(response.body).includes(nic));
     assert.deepEqual(h.calls.map(c => c.table), ['examinations', 'students', 'subjects', 'student_results']);
     assert.equal(h.calls[1].filters.examination_id, examId);
