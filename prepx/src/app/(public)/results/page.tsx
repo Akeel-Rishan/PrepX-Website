@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { FileSearch, ShieldCheck } from 'lucide-react';
 import { usePublicResult } from '@/components/public/result-provider';
 import { PublicStatusPage } from '@/components/public/public-status-page';
@@ -36,12 +37,29 @@ export default function ResultsPage() {
 
   if (!ready)
     return (
-      <div
-        role="status"
-        className="px-4 py-12 text-center text-sm text-slate-600 dark:text-slate-300"
-      >
-        Loading result…
-      </div>
+      <>
+        <div
+          role="status"
+          className="result-loading px-4 py-12 text-center text-sm text-slate-600 dark:text-slate-300"
+        >
+          Loading result…
+        </div>
+        <noscript>
+          <style>{'.result-loading { display: none; }'}</style>
+          <div className="px-4 py-12 text-center">
+            <h1 className="text-xl font-bold">JavaScript is needed to view your result</h1>
+            <p className="mt-3 text-sm">
+              Enable JavaScript, then search again to view and print your result.
+            </p>
+            <Link
+              href="/"
+              className="mt-4 inline-block rounded-lg px-4 py-3 font-semibold text-blue-600 underline focus-visible:outline focus-visible:outline-2"
+            >
+              Back to Search
+            </Link>
+          </div>
+        </noscript>
+      </>
     );
   if (!result)
     return (
@@ -89,11 +107,7 @@ export default function ResultsPage() {
           <p className="mt-3 text-sm font-semibold text-amber-200">{result.examinationYear}</p>
         </div>
         <div className="result-card-content px-4 py-5 sm:px-7 sm:py-7">
-          <PrintHeader
-            examName={result.examinationName}
-            examYear={result.examinationYear}
-            orgName="PrepX Institute"
-          />
+          <PrintHeader examName={result.examinationName} examYear={result.examinationYear} />
           <section aria-labelledby="student-details-heading" className="print-student-info">
             <h2
               id="student-details-heading"
@@ -128,7 +142,6 @@ export default function ResultsPage() {
       <PrintActions className="mt-5" />
       <div className="print-only print-doc-footer">
         <span>PrepX Examination System</span>
-        <span>This result was retrieved via the PrepX online portal.</span>
       </div>
     </div>
   );

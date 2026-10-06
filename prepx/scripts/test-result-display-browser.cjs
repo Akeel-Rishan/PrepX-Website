@@ -55,17 +55,17 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
       for (const width of [320, 375, 768, 1280]) {
         await page.setViewportSize({ width, height: 900 });
         assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `No overflow at ${width}`);
-        assert(await page.getByRole('button', { name: 'Print Result' }).isVisible());
+        assert(await page.getByRole('button', { name: 'Print / Save as PDF' }).isVisible());
         if (process.env.PREPX_SCREENSHOT_DIR && [375, 1280].includes(width)) {
           await page.screenshot({ path: require('node:path').join(process.env.PREPX_SCREENSHOT_DIR, `prepx-result-${dark ? 'dark' : 'light'}-${width}.png`), fullPage: true });
         }
       }
     }
-    await page.getByRole('button', { name: 'Print Result' }).focus();
-    assert.equal(await page.evaluate(() => document.activeElement.textContent.trim()), 'Print Result');
+    await page.getByRole('button', { name: 'Print / Save as PDF' }).focus();
+    assert.equal(await page.evaluate(() => document.activeElement.textContent.trim()), 'Print / Save as PDF');
     await page.keyboard.press('Tab');
-    assert.equal(await page.evaluate(() => document.activeElement.textContent.trim()), 'Download PDF');
-    assert.notEqual(await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle), 'none');
+    assert.equal(await page.evaluate(() => document.activeElement.textContent.trim()), 'Search Again');
+    assert.notEqual(await page.evaluate(() => getComputedStyle(document.activeElement).boxShadow), 'none');
     await page.getByRole('link', { name: 'Search Again' }).click();
     await page.waitForURL(base + '/');
     await page.goBack();
@@ -94,6 +94,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
       await search();
       await page.locator('#search-error').waitFor();
       assert.equal(await page.locator('#search-error').innerText(), 'Something went wrong. Please try again.');
+      assert.equal(await page.getByRole('button', { name: 'Print / Save as PDF' }).count(), 0);
       assert.equal(await page.getByRole('button', { name: 'Search My Results' }).isDisabled(), false);
     }
     console.log('PASS: search handoff without persistence, legacy cleanup, duplicate-submit guard, statuses, center, error routes, generic errors, refresh/back behavior, 320/375/768/1280 layouts, table semantics and keyboard focus.');

@@ -35,6 +35,10 @@ function render(result, ready = true) {
 }
 const valid = publicResultSchema.parse(fixture);
 let html = render(valid);
+assert(html.includes('Print / Save as PDF'));
+assert(html.includes('aria-describedby="print-result-help"'));
+assert(!html.includes('Download PDF'));
+assert(html.includes('Organized by UGSM'));
 for (const text of [fixture.studentName, fixture.indexNumber, fixture.maskedNic, fixture.schoolName, fixture.examinationName, '2026']) assert(html.includes(text));
 for (const meaning of ['Distinction', 'Very Good', 'Credit', 'Pass', 'Fail', 'Absent', 'Not available']) assert(html.includes(meaning));
 assert.equal((html.match(/scope="row"/g) || []).length, 8);
@@ -54,6 +58,9 @@ for (const grade of [null, undefined]) {
 assert(render({ ...valid, grades: [] }).includes('Subject grades are not available'));
 assert(render(null).includes('Search for your result'));
 assert(render(null, false).includes('Loading result'));
+assert(!render(null).includes('Print / Save as PDF'));
+assert(!render(null, false).includes('Print / Save as PDF'));
+assert(render(null, false).includes('JavaScript is needed to view your result'));
 for (const maskedNic of ['200312345678', '991234567V', '********12345']) {
   assert.equal(publicResultSchema.safeParse({ ...fixture, maskedNic }).success, false);
 }
@@ -69,6 +76,8 @@ for (const secret of ['200312345678', '9876', '8765', '7654', '6543', 'PRIVATE-S
 }
 for (const [route, title] of [['not-found', 'Result Not Found'], ['not-published', 'Results Not Yet Published']]) {
   const Page = load(`src/app/(public)/results/${route}/page.tsx`).default;
-  assert(renderToStaticMarkup(React.createElement(Page)).includes(title));
+  const markup = renderToStaticMarkup(React.createElement(Page));
+  assert(markup.includes(title));
+  assert(!markup.includes('Print / Save as PDF'));
 }
 console.log('PASS: result contract, all grades/statuses, optional center, masked NIC, missing/empty/malformed results, sensitive-field exclusion, accessible table/status, loading and feedback routes.');
