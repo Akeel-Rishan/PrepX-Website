@@ -3,7 +3,11 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { maskNIC, normalizeIndexNumber } from '@/lib/utils';
 import { calculateResultStatus } from '@/lib/result-utils';
 import { searchRequestSchema } from '@/lib/validations/search';
+import { checkResultSearchRateLimit } from '@/lib/rate-limit';
+import { readSearchBody } from '@/lib/rate-limit/request-body';
 import type { GradeEntry, PublicStudentResult } from '@/types';
+
+export const runtime = 'nodejs';
 
 const noCacheHeaders = {
   'Cache-Control': 'no-store, no-cache, must-revalidate',
@@ -14,31 +18,39 @@ const messages = {
   VALIDATION_ERROR: 'Please enter the required information.',
   NOT_PUBLISHED: 'Results have not been published yet.',
   NOT_FOUND: 'The provided information does not match an available result.',
-  RATE_LIMITED: 'Too many attempts. Please try again shortly.',
+  RATE_LIMITED: 'Too many search attempts. Please try again later.',
   SERVER_ERROR: 'Something went wrong. Please try again.',
 } as const;
 
-function err(code: keyof typeof messages, status: number): NextResponse {
+function err(
+  code: keyof typeof messages,
+  status: number,
+  headers: Record<string, string> = {}
+): NextResponse {
   return NextResponse.json(
     { error: code, message: messages[code] },
-    { status, headers: noCacheHeaders }
+    { status, headers: { ...noCacheHeaders, ...headers } }
   );
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return err('VALIDATION_ERROR', 400);
-  }
-
+  const body = await readSearchBody(request);
   const validation = searchRequestSchema.safeParse(body);
-  if (!validation.success) return err('VALIDATION_ERROR', 400);
+  // Even malformed JSON and invalid identifiers consume IP capacity. No client
+  // or database access occurs until both applicable limits have been checked.
+  const rateLimit = await checkResultSearchRateLimit(request.headers, body);
+  if (!rateLimit.allowed) {
+    return err(
+      rateLimit.status === 429 ? 'RATE_LIMITED' : 'SERVER_ERROR',
+      rateLimit.status,
+      rateLimit.headers
+    );
+  }
+  const errorResponse = (code: keyof typeof messages, status: number) =>
+    err(code, status, rateLimit.headers);
+  if (!validation.success) return errorResponse('VALIDATION_ERROR', 400);
   const { indexNumber, nicNumber, examinationId } = validation.data;
 
-  // Phase 13: add IP-based rate limiting here before any database access.
-  // Do not deploy publicly until that protection is implemented.
   try {
     const supabase = createAdminClient();
     // This client bypasses RLS, so enforce publication before reading students.
@@ -47,9 +59,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .select('id, name, year, status')
       .eq('id', examinationId)
       .maybeSingle();
-    if (examError) return err('SERVER_ERROR', 500);
+    if (examError) return errorResponse('SERVER_ERROR', 500);
     // Missing and unpublished examinations deliberately share a response.
-    if (!exam || exam.status !== 'PUBLISHED') return err('NOT_PUBLISHED', 403);
+    if (!exam || exam.status !== 'PUBLISHED') return errorResponse('NOT_PUBLISHED', 403);
 
     const studentQuery = supabase
       .from('students')
@@ -61,8 +73,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         ? studentQuery.eq('index_number', normalizeIndexNumber(indexNumber))
         : studentQuery.eq('nic_number', nicNumber!)
     ).maybeSingle();
-    if (studentError) return err('SERVER_ERROR', 500);
-    if (!student) return err('NOT_FOUND', 404);
+    if (studentError) return errorResponse('SERVER_ERROR', 500);
+    if (!student) return errorResponse('NOT_FOUND', 404);
 
     const [subjectsResult, gradesResult] = await Promise.all([
       supabase
@@ -74,7 +86,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       supabase.from('student_results').select('subject_id, grade').eq('student_id', student.id),
     ]);
     // Never turn a failed query into an empty grade list or a misleading status.
-    if (subjectsResult.error || gradesResult.error) return err('SERVER_ERROR', 500);
+    if (subjectsResult.error || gradesResult.error) return errorResponse('SERVER_ERROR', 500);
     const subjects = subjectsResult.data ?? [];
     const gradeMap = new Map<string, string>(
       (gradesResult.data ?? []).map((grade) => [grade.subject_id, grade.grade])
@@ -101,13 +113,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       grades,
       overallStatus,
     };
-    console.log(
-      `[Search] Exam: ${examinationId} | Found: ${student.index_number} | Status: ${overallStatus}`
-    );
-    return NextResponse.json(result, { status: 200, headers: noCacheHeaders });
+    return NextResponse.json(result, {
+      status: 200,
+      headers: { ...noCacheHeaders, ...rateLimit.headers },
+    });
   } catch {
     // Do not log exception objects: upstream errors can contain request identifiers.
-    return err('SERVER_ERROR', 500);
+    return errorResponse('SERVER_ERROR', 500);
   }
 }
 

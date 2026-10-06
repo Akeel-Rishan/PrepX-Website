@@ -12,3 +12,5 @@ npm run dev
 ```
 
 Open [http://localhost:3000/admin/login](http://localhost:3000/admin/login) to access the admin sign-in page.
+
+Public result search applies IP and identifier rate limits before database access. Production requires Upstash credentials and a private HMAC secret; `npm run dev` uses an in-memory store. See [RATE-LIMITING.md](RATE-LIMITING.md) for deployment configuration, failure behavior and testing. Run `npm run test:rate-limit` for deterministic limiter tests without Redis.

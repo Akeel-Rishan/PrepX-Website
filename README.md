@@ -27,7 +27,7 @@ Built with **Next.js 14**, **React 18**, **TypeScript**, **Tailwind CSS**, and *
 - Grade entry and result review.
 - Spreadsheet imports.
 - Publication management and audit-log viewer.
-- Request rate limiting.
+- Additional public-endpoint security hardening.
 
 ## Tech stack
 
@@ -79,7 +79,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 `SUPABASE_SECRET_KEY` is used by trusted server-side operations and bypasses row-level security. Keep it out of browser code and Git commits. Local environment files are ignored by the application's `.gitignore`.
 
-The commented Upstash variables in the example file are reserved for future rate limiting and are not needed for the current implementation.
+Public result search now requires shared rate limiting in production. Set `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, and `RATE_LIMIT_HASH_SECRET` before deploying. Missing or invalid configuration blocks result searches with a generic error. Local development uses an in-memory limiter. See [rate-limit setup and policy](prepx/RATE-LIMITING.md) for defaults, trusted proxy configuration, and verification.
 
 ### 3. Set up the database
 

@@ -1,19 +1,17 @@
 import { z } from 'zod';
-import { NIC_REGEX } from '@/lib/public-search';
+import { NIC_REGEX, normalizeSearchIdentifier } from '@/lib/public-search';
 
 /** Old NIC: 9 digits + V or X. New NIC: 12 digits. */
 export const searchSchema = z
   .object({
     indexNumber: z
       .string()
-      .trim()
-      .toUpperCase()
+      .transform(normalizeSearchIdentifier)
       .optional()
       .transform((value) => (value === '' ? undefined : value)),
     nicNumber: z
       .string()
-      .trim()
-      .toUpperCase()
+      .transform(normalizeSearchIdentifier)
       .optional()
       .transform((value) => (value === '' ? undefined : value)),
   })

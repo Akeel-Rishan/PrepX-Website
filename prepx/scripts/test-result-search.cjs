@@ -12,6 +12,7 @@ function load(file, overrides = {}) {
   m.paths = module.paths;
   m.require = name => {
     if (Object.hasOwn(overrides, name)) return overrides[name];
+    if (name === 'server-only') return {};
     if (name.startsWith('@/')) return load('src/' + name.slice(2) + '.ts', overrides);
     return require(name);
   };
@@ -27,6 +28,7 @@ const valid = { examinationId: examId, indexNumber: 'OL2026001' };
 function harness(options = {}) {
   const calls = [];
   const pending = [];
+  let clientCount = 0;
   const subjects = [
     { id: 's1', subject_name: 'Maths', subject_code: 'MAT', display_order: 1, required: true, active: true },
     { id: 's2', subject_name: 'Science', subject_code: 'SCI', display_order: 2, required: false, active: true },
@@ -42,7 +44,9 @@ function harness(options = {}) {
     student_results: [{ subject_id: 's1', grade: 'A' }, { subject_id: 'hidden', grade: 'W' }],
   };
   const route = load('src/app/api/results/search/route.ts', {
+    ...(options.limiter ? { '@/lib/rate-limit': { checkResultSearchRateLimit: options.limiter } } : {}),
     '@/lib/supabase/server': { createAdminClient() {
+      clientCount++;
       if (options.throwClient) throw new Error(nic);
       return { from(table) {
         const call = { table, filters: {}, columns: null, order: null };
@@ -63,25 +67,25 @@ function harness(options = {}) {
           then(resolve, reject) {
             // Both queries must start before either resolves; a sequential implementation fails.
             pending.push(() => { try { resolve(result()); } catch (e) { reject(e); } });
-            if (pending.length === 2) pending.forEach(finish => finish());
+            if (pending.length === 2) pending.splice(0, 2).forEach(finish => finish());
           },
         };
         return query;
       } };
     } },
   });
-  return { route, calls };
+  return { route, calls, clientCount: () => clientCount };
 }
 
-async function search(h, body = valid) {
+async function search(h, body = valid, headers = {}) {
   const request = new NextRequest('http://localhost/api/results/search', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json', ...headers },
     body: typeof body === 'string' ? body : JSON.stringify(body),
   });
   const response = await h.route.POST(request);
   assert.equal(response.headers.get('cache-control'), 'no-store, no-cache, must-revalidate');
   assert.equal(response.headers.get('pragma'), 'no-cache');
-  return { status: response.status, body: await response.json() };
+  return { status: response.status, body: await response.json(), headers: response.headers };
 }
 
 async function main() {
@@ -182,10 +186,13 @@ async function main() {
       }
     }
     assert.equal((await search(harness({ throwClient: true }))).status, 500);
-    assert.ok(logs.every(log => !log.includes(nic) && !log.includes('991234567V')));
+    assert.ok(logs.every(log => !log.includes(nic) && !log.includes('991234567V') && !log.includes(valid.indexNumber)));
     originalLog('PASS 11: no raw NIC in response/logs; database failures fail closed');
   } finally { console.log = originalLog; }
 }
 
-const timeout = setTimeout(() => { console.error('FAIL: query concurrency timeout'); process.exit(1); }, 10000);
-main().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => clearTimeout(timeout));
+module.exports = { load, harness, search, valid };
+if (require.main === module) {
+  const timeout = setTimeout(() => { console.error('FAIL: query concurrency timeout'); process.exit(1); }, 20000);
+  main().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => clearTimeout(timeout));
+}

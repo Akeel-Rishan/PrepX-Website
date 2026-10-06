@@ -1,5 +1,10 @@
 export const NIC_REGEX = /^([0-9]{9}[VvXx]|[0-9]{12})$/;
 
+/** Canonical form shared by validation, lookup inputs and rate-limit fingerprints. */
+export function normalizeSearchIdentifier(value: string): string {
+  return value.trim().toUpperCase();
+}
+
 export const PUBLIC_SEARCH_ERROR_MESSAGES = {
   NOT_FOUND:
     'The provided information does not match any available result. Please check your Index Number or NIC and try again.',
@@ -30,8 +35,8 @@ export type PreparedPublicSearch =
 
 /** Normalize and validate public lookup fields before sending any network request. */
 export function preparePublicSearch(indexNumber: string, nicNumber: string): PreparedPublicSearch {
-  const normalizedIndex = indexNumber.trim().toUpperCase();
-  const normalizedNic = nicNumber.trim().toUpperCase();
+  const normalizedIndex = normalizeSearchIdentifier(indexNumber);
+  const normalizedNic = normalizeSearchIdentifier(nicNumber);
 
   if (!normalizedIndex && !normalizedNic) {
     return { ok: false, message: PUBLIC_SEARCH_ERROR_MESSAGES.VALIDATION_ERROR };
@@ -50,7 +55,11 @@ export function preparePublicSearch(indexNumber: string, nicNumber: string): Pre
 
 /** Convert an untrusted API error code into a safe, non-enumerating student message. */
 export function getPublicSearchErrorMessage(code: unknown): string {
-  if (typeof code === 'string' && Object.hasOwn(PUBLIC_SEARCH_ERROR_MESSAGES, code) && code !== 'INVALID_NIC') {
+  if (
+    typeof code === 'string' &&
+    Object.hasOwn(PUBLIC_SEARCH_ERROR_MESSAGES, code) &&
+    code !== 'INVALID_NIC'
+  ) {
     return PUBLIC_SEARCH_ERROR_MESSAGES[code as PublicSearchApiErrorCode];
   }
   return PUBLIC_SEARCH_ERROR_MESSAGES.SERVER_ERROR;
