@@ -3,6 +3,8 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import '@/lib/security/zod';
+import { isSmallFormData } from '@/lib/security/input';
 import { createAuditLog } from '@/lib/audit';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getAdminUserId } from '@/lib/auth/admin';
@@ -33,6 +35,7 @@ export async function saveExaminationAction(
   const adminId = await getAdminUserId();
   if (!adminId) return { error: 'Authentication required.' };
   const rawId = formData.get('id');
+  if (!isSmallFormData(formData)) return { error: 'Invalid form data.' };
   if (rawId !== null && typeof rawId !== 'string') return { error: 'Invalid examination ID.' };
   const id = rawId?.trim();
   if (id && !z.uuid().safeParse(id).success) return { error: 'Invalid examination ID.' };

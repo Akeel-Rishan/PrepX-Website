@@ -2,11 +2,13 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
+import '@/lib/security/zod';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getAdminUserId } from '@/lib/auth/admin';
 import { subjectSchema, type SubjectFormState } from '@/lib/validations/subject';
 import { createAuditLog } from '@/lib/audit';
 import { isExamEditable } from '@/lib/constants';
+import { isSmallFormData } from '@/lib/security/input';
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 type ActionResult = { error?: string };
@@ -69,6 +71,7 @@ export async function saveSubjectAction(
   try {
     const adminId = await getAdminUserId();
     if (!adminId) return { error: 'Authentication required.' };
+    if (!isSmallFormData(formData)) return { error: 'Invalid form data.' };
     const rawId = formData.get('id');
     if (rawId !== null && typeof rawId !== 'string') return { error: 'Invalid subject ID.' };
     const id = rawId?.trim();

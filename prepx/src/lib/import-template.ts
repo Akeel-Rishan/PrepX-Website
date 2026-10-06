@@ -2,7 +2,8 @@ const COMMENT = '# Valid grades: A, B, C, S, W, AB | Do not remove or rename col
 const EXAMPLE_GRADES = ['A', 'B', 'C', 'S', 'W', 'AB'];
 
 function escapeCsv(value: string): string {
-  return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  const literal = /^[\s]*[=+@-]/.test(value) ? `'${value}` : value;
+  return /[",\r\n]/.test(literal) ? `"${literal.replace(/"/g, '""')}"` : literal;
 }
 
 /** Generates a CSV import template with subject columns in the supplied order. */

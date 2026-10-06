@@ -2,9 +2,13 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
+import '@/lib/security/zod';
+import { plainTextSchema } from '@/lib/security/input';
+import { importRowSchema } from '@/lib/validations/import';
+import { gradeSchema } from '@/lib/validations/grade';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getAdminUserId, isAdmin } from '@/lib/auth/admin';
-import { GRADES, isExamEditable } from '@/lib/constants';
+import { isExamEditable } from '@/lib/constants';
 import { applyHeaderMappings, parseImportFile } from '@/lib/import-parser';
 import {
   IMPORT_BASE_COLUMNS,
@@ -19,13 +23,12 @@ import type { Json } from '@/types/database';
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const INDEX_NUMBER_REGEX = /^[A-Z0-9]+$/;
 const NIC_REGEX = /^([0-9]{9}[VX]|[0-9]{12})$/;
-const VALID_GRADES = new Set<string>(GRADES);
 const MAX_IMPORT_ROWS = 1000;
 const headerMappingsSchema = z
   .array(
     z.object({
-      source: z.string().trim().min(1).max(200),
-      target: z.string().trim().min(1).max(200),
+      source: plainTextSchema(200, 1),
+      target: plainTextSchema(200, 1),
     })
   )
   .max(100);
@@ -194,7 +197,7 @@ export async function parseAndValidateImportAction(formData: FormData): Promise<
     }
     const rawMappings = formData.get('headerMappings');
     if (rawMappings !== null) {
-      if (typeof rawMappings !== 'string') return emptyPreview('Invalid header mapping data.');
+      if (typeof rawMappings !== 'string' || rawMappings.length > 65536) return emptyPreview('Invalid header mapping data.');
       let candidateMappings: unknown;
       try {
         candidateMappings = JSON.parse(rawMappings);
@@ -223,7 +226,7 @@ export async function parseAndValidateImportAction(formData: FormData): Promise<
     if (!parsed.headers.some(Boolean)) return emptyPreview('The file contains no column headers.');
     if (parsed.rows.length === 0) return emptyPreview('The file has headers but no data rows.');
     if (headerResult.duplicateColumns.length) {
-      return emptyPreview(`Duplicate columns are not allowed: ${headerResult.duplicateColumns.join(', ')}`);
+      return emptyPreview('Duplicate columns are not allowed.');
     }
     const sourceColumnSet = new Set(parsed.headers);
     const detectedBaseColumns = IMPORT_BASE_COLUMNS.filter((column) =>
@@ -341,17 +344,19 @@ export async function runImportAction(params: {
       return { success: false, error: `Row ${rowNumber} has an invalid grades object.` };
     }
 
-    const indexNumber = candidate.index_number.trim().toUpperCase();
-    const nicNumber = candidate.nic_number?.trim().toUpperCase() || null;
-    const fullName = candidate.full_name.trim();
-    const schoolName = candidate.school_name.trim();
-    const examinationCenter = candidate.examination_center?.trim() || null;
+    const parsedRow = importRowSchema.safeParse({ ...candidate, nic_number: candidate.nic_number ?? '', examination_center: candidate.examination_center ?? '' });
+    if (!parsedRow.success) return { success: false, error: `Row ${rowNumber} has invalid text or identifiers.` };
+    const indexNumber = parsedRow.data.index_number;
+    const nicNumber = parsedRow.data.nic_number || null;
+    const fullName = parsedRow.data.full_name;
+    const schoolName = parsedRow.data.school_name;
+    const examinationCenter = parsedRow.data.examination_center || null;
 
     if (!indexNumber || indexNumber.length > 50 || !INDEX_NUMBER_REGEX.test(indexNumber)) {
       return { success: false, error: `Row ${rowNumber} has an invalid index number.` };
     }
     if (seenIndexes.has(indexNumber)) {
-      return { success: false, error: `Duplicate index number in import: ${indexNumber}.` };
+      return { success: false, error: 'Duplicate index number in import.' };
     }
     seenIndexes.add(indexNumber);
 
@@ -369,7 +374,7 @@ export async function runImportAction(params: {
         return { success: false, error: `Row ${rowNumber} has an invalid NIC number.` };
       }
       if (seenNics.has(nicNumber)) {
-        return { success: false, error: `Duplicate NIC in import: ${nicNumber}.` };
+        return { success: false, error: 'Duplicate NIC in import.' };
       }
       seenNics.add(nicNumber);
     }
@@ -387,10 +392,10 @@ export async function runImportAction(params: {
         return { success: false, error: `Row ${rowNumber} contains an invalid grade.` };
       }
       const grade = gradeValue.trim().toUpperCase();
-      if (grade && !VALID_GRADES.has(grade)) {
+      if ((grade && !gradeSchema.safeParse(gradeValue).success) || /[\u0000-\u001f\u007f]/.test(gradeValue)) {
         return {
           success: false,
-          error: `Row ${rowNumber} contains invalid grade “${gradeValue}”.`,
+          error: `Row ${rowNumber} contains an invalid grade.`,
         };
       }
       subjectIds.add(subjectId);

@@ -3,11 +3,13 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
+import '@/lib/security/zod';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getAdminUserId } from '@/lib/auth/admin';
 import { studentSchema, type StudentFormState } from '@/lib/validations/student';
 import { createAuditLog } from '@/lib/audit';
 import { isExamEditable } from '@/lib/constants';
+import { isSmallFormData } from '@/lib/security/input';
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
@@ -75,6 +77,7 @@ export async function saveStudentAction(
   try {
     const adminId = await getAdminUserId();
     if (!adminId) return { error: 'Authentication required.' };
+    if (!isSmallFormData(formData)) return { error: 'Invalid form data.' };
     const rawId = formData.get('id');
     if (rawId !== null && typeof rawId !== 'string') return { error: 'Invalid student ID.' };
     const id = rawId?.trim();

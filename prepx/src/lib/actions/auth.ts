@@ -3,6 +3,8 @@
 import { redirect } from 'next/navigation';
 import { isAuthRetryableFetchError } from '@supabase/supabase-js';
 import { z } from 'zod';
+import '@/lib/security/zod';
+import { isSmallFormData } from '@/lib/security/input';
 import { getSafeRedirect } from '@/lib/auth/redirect';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 
@@ -22,6 +24,7 @@ export async function loginAction(
   prevState: LoginActionState,
   formData: FormData
 ): Promise<LoginActionState> {
+  if (!isSmallFormData(formData)) return { error: 'Please enter a valid email and password.' };
   const parsed = loginSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),

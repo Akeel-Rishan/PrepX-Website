@@ -38,6 +38,11 @@ export function preparePublicSearch(indexNumber: string, nicNumber: string): Pre
   const normalizedIndex = normalizeSearchIdentifier(indexNumber);
   const normalizedNic = normalizeSearchIdentifier(nicNumber);
 
+  if (/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/.test(indexNumber + nicNumber) ||
+    normalizedIndex.length > 50 || (normalizedIndex && !/^[A-Z0-9]+$/.test(normalizedIndex))) {
+    return { ok: false, message: PUBLIC_SEARCH_ERROR_MESSAGES.VALIDATION_ERROR };
+  }
+
   if (!normalizedIndex && !normalizedNic) {
     return { ok: false, message: PUBLIC_SEARCH_ERROR_MESSAGES.VALIDATION_ERROR };
   }

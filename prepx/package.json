@@ -9,13 +9,15 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "type-check": "tsc --noEmit",
     "test:db": "tsx scripts/test-db.ts",
-    "test:logic": "node scripts/test-import.cjs && node scripts/test-import-action.cjs && node scripts/test-import-ai-action.cjs && node scripts/test-auth-actions.cjs && node scripts/test-student-actions.cjs && node scripts/test-grade-actions.cjs && node scripts/test-examination-actions.cjs && node scripts/test-dashboard.cjs && node scripts/test-publication-validator.cjs && node scripts/test-publication-actions.cjs && node scripts/test-publication-state-actions.cjs && node scripts/test-publication-summary.cjs && node scripts/test-audit-logs.cjs && node scripts/test-public-search.cjs && node scripts/test-result-search.cjs && node scripts/test-auth-session.cjs && node scripts/test-grade-data.cjs && node scripts/test-result-display.cjs && node scripts/test-rate-limit.cjs",
+    "test:logic": "node scripts/test-import.cjs && node scripts/test-import-action.cjs && node scripts/test-import-ai-action.cjs && node scripts/test-auth-actions.cjs && node scripts/test-student-actions.cjs && node scripts/test-grade-actions.cjs && node scripts/test-examination-actions.cjs && node scripts/test-dashboard.cjs && node scripts/test-publication-validator.cjs && node scripts/test-publication-actions.cjs && node scripts/test-publication-state-actions.cjs && node scripts/test-publication-summary.cjs && node scripts/test-audit-logs.cjs && node scripts/test-public-search.cjs && node scripts/test-result-search.cjs && node scripts/test-auth-session.cjs && node scripts/test-grade-data.cjs && node scripts/test-result-display.cjs && node scripts/test-rate-limit.cjs && node scripts/test-security.cjs",
     "test:results": "node scripts/test-result-search.cjs",
     "test:results:live": "node scripts/test-result-search-live.cjs",
     "test:results:display": "node scripts/test-result-display.cjs",
     "test:results:browser": "node scripts/test-result-display-browser.cjs && node scripts/test-result-print-browser.cjs",
     "test:rate-limit": "node scripts/test-rate-limit.cjs",
-    "test:rate-limit:live": "node scripts/test-rate-limit-live.cjs"
+    "test:rate-limit:live": "node scripts/test-rate-limit-live.cjs",
+    "test:security": "node scripts/test-security.cjs",
+    "test:security:browser": "node scripts/test-security-browser.cjs"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

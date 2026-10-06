@@ -27,7 +27,7 @@ Built with **Next.js 14**, **React 18**, **TypeScript**, **Tailwind CSS**, and *
 - Grade entry and result review.
 - Spreadsheet imports.
 - Publication management and audit-log viewer.
-- Additional public-endpoint security hardening.
+- Further deployment monitoring and abuse protection.
 
 ## Tech stack
 
@@ -78,6 +78,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 `SUPABASE_SECRET_KEY` is used by trusted server-side operations and bypasses row-level security. Keep it out of browser code and Git commits. Local environment files are ignored by the application's `.gitignore`.
+
+Phase 13.2 adds nonce-based CSP, response security headers, Unicode-safe field validation and bounded import parsing. See [security configuration](prepx/SECURITY.md) and [verification results](prepx/STEP-13.2-VERIFICATION.md).
 
 Public result search now requires shared rate limiting in production. Set `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, and `RATE_LIMIT_HASH_SECRET` before deploying. Missing or invalid configuration blocks result searches with a generic error. Local development uses an in-memory limiter. See [rate-limit setup and policy](prepx/RATE-LIMITING.md) for defaults, trusted proxy configuration, and verification.
 

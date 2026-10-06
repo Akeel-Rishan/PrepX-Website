@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import '@/lib/security/zod';
 import { GRADES, RESULT_STATUSES } from '@/lib/constants';
 import type { PublicStudentResult } from '@/types';
 

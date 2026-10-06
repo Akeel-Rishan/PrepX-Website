@@ -7,9 +7,9 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { getAdminUserId } from '@/lib/auth/admin';
 import type { Grade } from '@/lib/constants';
 import { isExamEditable } from '@/lib/constants';
+import { gradeSchema } from '@/lib/validations/grade';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const VALID_GRADES = new Set<string>(['A', 'B', 'C', 'S', 'W', 'AB']);
 
 type SaveReviewGradeResult =
   | { status: 'no_change'; resultId: string; oldGrade: Grade; newGrade: Grade }
@@ -49,9 +49,9 @@ export async function saveReviewGradeAction(
   ) {
     return { status: 'error', error: 'Invalid grade data.' };
   }
-  if (!VALID_GRADES.has(grade)) return { status: 'error', error: 'Select a valid grade.' };
-
-  const newGrade = grade as Grade;
+  const parsedGrade = gradeSchema.safeParse(grade);
+  if (!parsedGrade.success) return { status: 'error', error: 'Select a valid grade.' };
+  const newGrade = parsedGrade.data;
   const client = createAdminClient();
   try {
     const [examResult, studentResult, subjectResult] = await Promise.all([

@@ -1,20 +1,20 @@
 import { z } from 'zod';
-import { NIC_REGEX, normalizeSearchIdentifier } from '@/lib/public-search';
+import '@/lib/security/zod';
+import { NIC_REGEX } from '@/lib/public-search';
+import { identifierTextSchema, optionalNicSchema } from '@/lib/security/input';
 
 /** Old NIC: 9 digits + V or X. New NIC: 12 digits. */
 export const searchSchema = z
   .object({
-    indexNumber: z
-      .string()
-      .transform(normalizeSearchIdentifier)
+    indexNumber: identifierTextSchema(50)
+      .refine((value) => value === '' || /^[A-Z0-9]+$/.test(value), 'Invalid index number.')
       .optional()
       .transform((value) => (value === '' ? undefined : value)),
-    nicNumber: z
-      .string()
-      .transform(normalizeSearchIdentifier)
+    nicNumber: optionalNicSchema
       .optional()
       .transform((value) => (value === '' ? undefined : value)),
   })
+  .strict()
   .refine((data) => data.indexNumber !== undefined || data.nicNumber !== undefined, {
     message: 'Please enter your Index Number or NIC Number.',
   })

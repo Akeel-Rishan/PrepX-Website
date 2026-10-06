@@ -2,22 +2,24 @@ import 'server-only';
 
 import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
+import '@/lib/security/zod';
 import type { ImportAiSuggestion } from '@/types/import';
+import { plainTextSchema } from '@/lib/security/input';
 
 const suggestionSchema = z.object({
-  headline: z.string().min(1).max(100),
-  summary: z.string().min(1).max(500),
+  headline: plainTextSchema(100, 1),
+  summary: plainTextSchema(500, 1),
   mappings: z
     .array(
       z.object({
-        source: z.string().min(1).max(200),
-        target: z.string().min(1).max(200),
+        source: plainTextSchema(200, 1),
+        target: plainTextSchema(200, 1),
         confidence: z.enum(['high', 'medium', 'low']),
-        reason: z.string().min(1).max(300),
+        reason: plainTextSchema(300, 1),
       })
     )
     .max(100),
-  guidance: z.array(z.string().min(1).max(300)).max(8),
+  guidance: z.array(plainTextSchema(300, 1)).max(8),
 });
 
 const suggestionJsonSchema = {

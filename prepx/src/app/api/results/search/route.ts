@@ -48,7 +48,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
   const errorResponse = (code: keyof typeof messages, status: number) =>
     err(code, status, rateLimit.headers);
-  if (!validation.success) return errorResponse('VALIDATION_ERROR', 400);
+  const contentType = request.headers.get('content-type')?.split(';')[0].trim().toLowerCase();
+  if (contentType !== 'application/json' || !validation.success) return errorResponse('VALIDATION_ERROR', 400);
   const { indexNumber, nicNumber, examinationId } = validation.data;
 
   try {
@@ -137,5 +138,11 @@ export async function PUT(): Promise<NextResponse> {
   return methodNotAllowed();
 }
 export async function DELETE(): Promise<NextResponse> {
+  return methodNotAllowed();
+}
+export async function PATCH(): Promise<NextResponse> {
+  return methodNotAllowed();
+}
+export async function OPTIONS(): Promise<NextResponse> {
   return methodNotAllowed();
 }

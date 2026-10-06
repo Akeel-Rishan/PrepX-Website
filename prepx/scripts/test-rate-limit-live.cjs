@@ -32,6 +32,9 @@ async function main() {
       body: typeof body === 'string' ? body : JSON.stringify(body), signal: AbortSignal.timeout(30000),
     });
     assert(response.headers.get('cache-control').includes('no-store'));
+    assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(response.headers.get('x-frame-options'), 'DENY');
+    assert(response.headers.get('content-security-policy').includes("frame-ancestors 'none'"));
     return { response, data: await response.json() };
   }
   stage = 'normal index and NIC searches';

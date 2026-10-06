@@ -13,6 +13,7 @@ function load(file, overrides = {}) {
   m.paths = module.paths;
   m.require = name => {
     if (Object.hasOwn(overrides, name)) return overrides[name];
+    if (name === 'server-only') return {};
     if (name.startsWith('@/')) return load('src/' + name.slice(2) + '.ts', overrides);
     return require(name);
   };
@@ -80,7 +81,11 @@ async function main() {
   const login = await check(null, { authenticated: true, login: true });
   assert.equal(new URL(login.response.headers.get('location')).pathname, '/admin/dashboard');
   assert.equal(login.response.cookies.get('sb-test-auth-token').value, 'renewed');
-  await assert.rejects(check(new Error('Unexpected'), { throws: true }), /Unexpected/);
+  const unavailable = await check(new Error('Unexpected private provider detail'), { throws: true });
+  assert.equal(unavailable.response.status, 500);
+  assert.match(unavailable.response.headers.get('cache-control'), /no-store/);
+  assert.equal(unavailable.response.headers.get('x-frame-options'), 'DENY');
+  assert.equal((await unavailable.response.json()).message, 'Something went wrong. Please try again.');
 
   let publicConfig;
   const server = load('src/lib/supabase/server.ts', {

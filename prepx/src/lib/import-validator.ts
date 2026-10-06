@@ -1,4 +1,6 @@
-import { GRADES } from '@/lib/constants';
+import { importRowSchema } from '@/lib/validations/import';
+import { sanitizeSingleLineText, isSafePlainText } from '@/lib/security/input';
+import { gradeSchema } from '@/lib/validations/grade';
 import type {
   CellError,
   ImportValidationSummary,
@@ -18,7 +20,6 @@ export const IMPORT_BASE_COLUMNS = [
 const OLD_NIC = /^\d{9}[VX]$/;
 const NEW_NIC = /^\d{12}$/;
 const INDEX_NUMBER = /^[A-Z0-9]+$/;
-const VALID_GRADES = new Set<string>(GRADES);
 
 export interface ImportValidationSubject {
   subject_name: string;
@@ -78,9 +79,9 @@ export function validateImportRows(
   return rows.map((row) => {
     const index_number = row.index_number.trim().toUpperCase();
     const nic_number = row.nic_number.trim().toUpperCase();
-    const full_name = row.full_name.trim();
-    const school_name = row.school_name.trim();
-    const examination_center = row.examination_center.trim();
+    const full_name = sanitizeSingleLineText(row.full_name);
+    const school_name = sanitizeSingleLineText(row.school_name);
+    const examination_center = sanitizeSingleLineText(row.examination_center);
     const cellErrors: CellError[] = [];
     const add = (column: string, message: string, severity: CellError['severity']) =>
       cellErrors.push({ column, message, severity });
@@ -148,6 +149,10 @@ export function validateImportRows(
       const value = (row.grades[subjectName] ?? '').trim().toUpperCase();
       grades[subjectName] = value;
       if (!detectedSubjects.has(subjectName)) continue;
+      if (!isSafePlainText(row.grades[subjectName] ?? '')) {
+        add(subjectName, 'Invalid grade. Use plain single-line text.', 'error');
+        continue;
+      }
       if (!value) {
         if (subject.required) {
           add(
@@ -156,16 +161,25 @@ export function validateImportRows(
             'warning'
           );
         }
-      } else if (!VALID_GRADES.has(value)) {
+      } else if (!gradeSchema.safeParse(row.grades[subjectName]).success) {
         add(
           subjectName,
-          `'${value}' is not a valid grade for ${subjectName}. Valid grades: A, B, C, S, W, AB.`,
+          'Invalid grade. Valid grades: A, B, C, S, W, AB.',
           'error'
         );
       }
     }
     for (const column of Object.keys(row.rawValues)) {
-      if (!knownColumns.has(column)) add('_row', `Unknown column '${column}' will be ignored.`, 'warning');
+      if (!knownColumns.has(column)) add('_row', 'An unknown column will be ignored.', 'warning');
+    }
+    const safeRow = importRowSchema.safeParse(row);
+    if (!safeRow.success) {
+      for (const issue of safeRow.error.issues) {
+        const column = String(issue.path[0]);
+        if (!missingRequiredColumns.includes(column) && !cellErrors.some((error) => error.column === column && error.severity === 'error')) {
+          add(column, 'Invalid plain-text field or identifier.', 'error');
+        }
+      }
     }
     return {
       rowNumber: row.rowNumber,

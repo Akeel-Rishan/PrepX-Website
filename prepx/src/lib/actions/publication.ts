@@ -2,6 +2,7 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
+import '@/lib/security/zod';
 import { createAuditLog } from '@/lib/audit';
 import { getAdminUserId } from '@/lib/auth/admin';
 import { getPublicationValidation } from '@/lib/data/publication';

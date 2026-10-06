@@ -1,17 +1,13 @@
 import { z } from 'zod';
+import '@/lib/security/zod';
+import { plainTextSchema } from '@/lib/security/input';
 
 export const subjectSchema = z.object({
   examination_id: z.string().uuid('Invalid examination.'),
-  subject_name: z
-    .string()
-    .trim()
-    .min(1, 'Subject name is required.')
-    .max(100, 'Subject name must be under 100 characters.'),
-  subject_code: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .max(10, 'Subject code must be under 10 characters.')
+  subject_name: plainTextSchema(100, 1),
+  subject_code: plainTextSchema(10)
+    .transform((value) => value.toUpperCase())
+    .pipe(z.string().max(10))
     .optional()
     .nullable()
     .transform((value) => value || null),
