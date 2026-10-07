@@ -28,6 +28,7 @@ const subjectId = '3a320000-0000-4000-8000-000000000199';
 function harness({ status = 'DRAFT', subjectActive = true } = {}) {
   let writes = 0;
   const audits = [];
+  const upserts = [];
   const session = {
     auth: { getClaims: async () => ({ data: { claims: { sub: 'admin-id' } }, error: null }) },
     from() {
@@ -45,7 +46,7 @@ function harness({ status = 'DRAFT', subjectActive = true } = {}) {
           if (table === 'examinations') return { data: { status }, error: null };
           return { data: null, error: null };
         },
-        async upsert() { writes += 1; return { error: null }; },
+        async upsert(rows) { writes += 1; upserts.push(...rows); return { error: null }; },
         delete() { deleting = true; return q; },
         then(resolve) {
           if (deleting) { writes += 1; return resolve({ error: null }); }
@@ -65,10 +66,31 @@ function harness({ status = 'DRAFT', subjectActive = true } = {}) {
     '@/lib/audit': { createAuditLog: async entry => audits.push(entry) },
     'next/cache': { revalidatePath() {}, revalidateTag() {} },
   });
-  return { ...actions, writes: () => writes, audits };
+  return { ...actions, writes: () => writes, audits, upserts };
 }
 
 async function main() {
+  const baseChange = { studentId, subjectId, grade: 'A' };
+  for (const changes of [[], null, 'A', Array(1001).fill(baseChange),
+    [{ ...baseChange, studentId: 'bad' }], [{ ...baseChange, subjectId: 'bad' }],
+    ...['', ' ', 'Z', 1, 'A\n', '<b>A</b>'].map(grade => [{ ...baseChange, grade }])]) {
+    const invalid = harness();
+    assert.ok((await invalid.saveGradesAction(examId, changes)).error);
+    assert.equal(invalid.writes(), 0);
+  }
+  for (const [grade, expected] of [[' a ', 'A'], ['aB', 'AB'], [null, null]]) {
+    const normalized = harness();
+    assert.equal((await normalized.saveGradesAction(examId, [{ ...baseChange, grade }])).savedCount, 1);
+    assert.equal(normalized.writes(), 1);
+    if (expected === null) assert.equal(normalized.upserts.length, 0);
+    else assert.equal(normalized.upserts[0].grade, expected);
+  }
+  const duplicate = harness();
+  assert.equal((await duplicate.saveGradesAction(examId, [baseChange, { ...baseChange, grade: 'W' }])).savedCount, 1);
+  assert.equal(duplicate.upserts.length, 1);
+  assert.equal(duplicate.upserts[0].grade, 'W');
+  const boundary = harness();
+  assert.equal((await boundary.saveGradesAction(examId, Array(1000).fill(baseChange))).savedCount, 1);
   for (const malformed of [null, undefined, 1, 'A', {}, { studentId: studentId, subjectId: subjectId, grade: {} }]) {
     const invalid = harness();
     assert.ok((await invalid.saveGradesAction(examId, [malformed])).error);

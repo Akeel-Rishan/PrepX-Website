@@ -29,7 +29,7 @@ const examinationId = '3a320000-0000-4000-8000-000000002027';
 const subjectId = '3a320000-0000-4000-8000-000000000101';
 const baseRow = {
   index_number: ' ol2027001 ',
-  nic_number: '200312345678',
+  nic_number: '000000000000', // Synthetic format-only identifier.
   full_name: ' Test Student ',
   school_name: ' Test School ',
   examination_center: ' Center A ',
@@ -39,6 +39,7 @@ const baseRow = {
 function harness({
   adminId = 'admin-user-id',
   status = 'DRAFT',
+  examinationExists = true,
   subjectIds = [subjectId],
   rpcData = { rows_processed: 1, grades_written: 1 },
   rpcError = null,
@@ -53,7 +54,7 @@ function harness({
         eq(column, value) { filters[column] = value; return query; },
         in() { return query; },
         async maybeSingle() {
-          if (table === 'examinations') return { data: { status }, error: null };
+          if (table === 'examinations') return { data: examinationExists ? { status } : null, error: null };
           return { data: null, error: null };
         },
         then(resolve) {
@@ -85,6 +86,14 @@ function harness({
 }
 
 async function main() {
+  for (const invalidId of ['', 'not-a-uuid', null, examinationId + 'x']) {
+    const invalid = harness();
+    assert.equal((await invalid.runImportAction({ examinationId: invalidId, rows: [baseRow] })).success, false);
+    assert.equal(invalid.rpcCalls.length, 0);
+  }
+  const missingExam = harness({ examinationExists: false });
+  assert.equal((await missingExam.runImportAction({ examinationId, rows: [baseRow] })).success, false);
+  assert.equal(missingExam.rpcCalls.length, 0);
   const unauthenticated = harness({ adminId: null });
   assert.match((await unauthenticated.runImportAction({ examinationId, rows: [baseRow] })).error, /Authentication/);
   assert.equal(unauthenticated.rpcCalls.length, 0);
@@ -123,7 +132,7 @@ async function main() {
   assert.equal(valid.rpcCalls[0].args.p_admin_id, 'admin-user-id');
   assert.deepEqual(valid.rpcCalls[0].args.p_rows[0], {
     index_number: 'OL2027001',
-    nic_number: '200312345678',
+    nic_number: '000000000000',
     full_name: 'Test Student',
     school_name: 'Test School',
     examination_center: 'Center A',

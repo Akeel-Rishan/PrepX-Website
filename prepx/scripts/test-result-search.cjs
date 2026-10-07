@@ -29,7 +29,7 @@ function harness(options = {}) {
   const calls = [];
   const pending = [];
   let clientCount = 0;
-  const subjects = [
+  const subjects = options.subjects ?? [
     { id: 's1', subject_name: 'Maths', subject_code: 'MAT', display_order: 1, required: true, active: true },
     { id: 's2', subject_name: 'Science', subject_code: 'SCI', display_order: 2, required: false, active: true },
     { id: 'hidden', subject_name: 'Inactive', subject_code: null, display_order: 3, required: true, active: false },
@@ -39,9 +39,10 @@ function harness(options = {}) {
     students: options.missingStudent ? null : {
       id: 'student-id', full_name: 'Test Student', index_number: valid.indexNumber,
       nic_number: options.nic === undefined ? nic : options.nic, school_name: 'School', examination_center: null,
+      ...options.studentFields,
     },
     subjects,
-    student_results: [{ subject_id: 's1', grade: 'A' }, { subject_id: 'hidden', grade: 'W' }],
+    student_results: options.grades ?? [{ subject_id: 's1', grade: 'A' }, { subject_id: 'hidden', grade: 'W' }],
   };
   const route = load('src/app/api/results/search/route.ts', {
     ...(options.limiter ? { '@/lib/rate-limit': { checkResultSearchRateLimit: options.limiter } } : {}),
