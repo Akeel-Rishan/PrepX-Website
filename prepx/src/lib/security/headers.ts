@@ -45,6 +45,10 @@ export function securityHeaders(
   if (/^\/(?:admin|results|api)(?:\/|$)/.test(pathname)) {
     headers['X-Robots-Tag'] = 'noindex, nofollow, noarchive';
   }
+  if (/^\/api\/health\/?$/.test(pathname)) {
+    headers['Cache-Control'] = 'no-store, no-cache, must-revalidate';
+    headers.Pragma = 'no-cache';
+  }
   // Trust deployment configuration, never a caller's forwarded-proto header.
   if (env.NODE_ENV === 'production' && (env.VERCEL === '1' || env.SECURITY_HTTPS_ONLY === 'true')) {
     headers['Strict-Transport-Security'] = `max-age=31536000${env.SECURITY_HSTS_INCLUDE_SUBDOMAINS === 'true' ? '; includeSubDomains' : ''}`;
