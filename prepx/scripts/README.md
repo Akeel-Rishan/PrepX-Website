@@ -14,3 +14,5 @@ Existing grade/import/publication action tests additionally cover batch limits, 
 Business rules deliberately preserved: mixed AB/passing required grades pass; all required AB grades mean Absent; missing required grades win over W; optional W does not fail a result; no required subjects with any recorded grade means Passed. Publication warns through `ceil(studentCount * 0.1)` incomplete students and blocks above that threshold. Import missing required grades are warnings; duplicate file identifiers are errors; existing database identifiers generate update warnings. Readiness of an already-published exam is separate from permission to publish it again.
 
 `test:db`, `*:live` and `*:browser` are opt-in operational checks, excluded from `npm test`. Build is a separate Next.js check and may load local build configuration; it is not part of the offline unit suite.
+
+Phase 15.2 real-database tests are separate: see [integration/README.md](integration/README.md). `npm run test:integration` requires the dedicated local test stack and fails closed without it; `npm run test:integration:mock` is explicitly a mocked fallback.

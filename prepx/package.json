@@ -22,7 +22,13 @@
     "test:health-errors:live": "node scripts/test-health-errors-live.cjs",
     "test:health-errors:browser": "node scripts/test-health-errors-browser.cjs",
     "test": "node scripts/test-unit.cjs",
-    "test:validators": "node scripts/test-validators.cjs && node scripts/test-grade-logic.cjs && node scripts/test-import-publication-rules.cjs && node scripts/test-public-result-rules.cjs"
+    "test:validators": "node scripts/test-validators.cjs && node scripts/test-grade-logic.cjs && node scripts/test-import-publication-rules.cjs && node scripts/test-public-result-rules.cjs",
+    "test:unit": "npm test",
+    "test:integration": "node scripts/integration/run.cjs",
+    "test:integration:setup": "node scripts/integration/setup.cjs",
+    "test:integration:teardown": "node scripts/integration/teardown.cjs",
+    "test:integration:safety": "node scripts/integration/test-safety.cjs",
+    "test:integration:mock": "node scripts/integration/fallback.cjs"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
