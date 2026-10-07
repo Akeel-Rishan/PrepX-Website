@@ -7,9 +7,9 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { getAdminUserId } from '@/lib/auth/admin';
 import type { Grade } from '@/lib/constants';
 import { isExamEditable } from '@/lib/constants';
+import { gradeSchema } from '@/lib/validations/grade';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const VALID_GRADES = new Set<string>(['A', 'B', 'C', 'S', 'W', 'AB']);
 
 type SaveReviewGradeResult =
   | { status: 'no_change'; resultId: string; oldGrade: Grade; newGrade: Grade }
@@ -49,9 +49,9 @@ export async function saveReviewGradeAction(
   ) {
     return { status: 'error', error: 'Invalid grade data.' };
   }
-  if (!VALID_GRADES.has(grade)) return { status: 'error', error: 'Select a valid grade.' };
-
-  const newGrade = grade as Grade;
+  const parsedGrade = gradeSchema.safeParse(grade);
+  if (!parsedGrade.success) return { status: 'error', error: 'Select a valid grade.' };
+  const newGrade = parsedGrade.data;
   const client = createAdminClient();
   try {
     const [examResult, studentResult, subjectResult] = await Promise.all([
@@ -146,7 +146,10 @@ export async function saveReviewGradeAction(
             .eq('id', resultId)
             .eq('updated_at', savedVersion);
       if (rollback.error) console.error('[Review Grade Rollback Error]', { code: rollback.error.code });
-      return { status: 'error', error: 'The grade could not be audited, so the save was cancelled.' };
+      revalidateTag('results');
+      revalidatePath('/admin/review');
+      revalidatePath('/admin/results');
+      return { status: 'error', error: 'The audit failed and a rollback was attempted. Refresh to confirm the current grade before retrying.' };
     }
 
     revalidateTag('results');

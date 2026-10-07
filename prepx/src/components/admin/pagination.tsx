@@ -47,7 +47,7 @@ export function Pagination({
     totalCount === 0
       ? 'No results'
       : `Showing ${(page - 1) * pageSize + 1} to ${Math.min(page * pageSize, totalCount)} of ${totalCount}`;
-  const control = 'rounded-lg border px-3 py-1.5 text-sm transition-colors';
+  const control = 'inline-flex min-h-11 items-center rounded-lg border px-3 py-1.5 sm:min-h-8 text-sm transition-colors';
   const href = (target: number) => buildPageUrl(target, basePath, currentParams);
   return (
     <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 px-1 py-3 sm:flex-row dark:border-slate-800">
@@ -78,11 +78,14 @@ export function Pagination({
               ← Prev
             </Link>
           )}
+          <span className="px-1 text-xs text-gray-600 sm:hidden dark:text-slate-300" aria-live="polite">
+            Page {page} of {totalPages}
+          </span>
           {getPaginationRange(page, totalPages).map((p, i) =>
             p === '…' ? (
               <span
                 key={`ellipsis-${i}`}
-                className="px-2 text-sm text-gray-400 dark:text-slate-500"
+                className="hidden px-2 text-sm text-gray-400 sm:inline dark:text-slate-500"
               >
                 …
               </span>
@@ -93,7 +96,7 @@ export function Pagination({
                 aria-label={`Page ${p}`}
                 aria-current={p === page ? 'page' : undefined}
                 className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-lg border text-sm transition-colors',
+                  'hidden h-8 w-8 items-center justify-center rounded-lg border text-sm transition-colors sm:flex',
                   p === page
                     ? 'border-blue-600 bg-blue-600 font-medium text-white'
                     : 'border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'

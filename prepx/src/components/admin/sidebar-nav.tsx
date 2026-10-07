@@ -28,6 +28,8 @@ export function SidebarNav({ onNavClick }: SidebarNavProps): React.JSX.Element {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onMouseEnter={() => router.prefetch(item.href)}
+                  onFocus={() => router.prefetch(item.href)}
                   onClick={(event) => {
                     // Preserve native new-tab and modified-click behavior.
                     if (
@@ -39,7 +41,7 @@ export function SidebarNav({ onNavClick }: SidebarNavProps): React.JSX.Element {
                     )
                       return;
                     event.preventDefault();
-                    if (active) {
+                    if (pathname === item.href && !window.location.search) {
                       onNavClick?.();
                       return;
                     }

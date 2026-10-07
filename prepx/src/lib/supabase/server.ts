@@ -1,9 +1,25 @@
+import 'server-only';
 import { cookies } from 'next/headers';
 
 import { createServerClient } from '@supabase/ssr';
 import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/database';
+
+/** Anonymous, cookie-free reads of published data. RLS still applies. */
+export function createPublicClient(): SupabaseClient<Database> {
+  return createSupabaseClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false,
+      },
+    }
+  );
+}
 
 /** Session-aware server client. Use for authenticated admin operations. */
 export async function createClient(): Promise<SupabaseClient<Database>> {

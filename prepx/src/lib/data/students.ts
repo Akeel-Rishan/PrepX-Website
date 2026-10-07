@@ -4,6 +4,7 @@ import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/server';
 import type { Student, Examination } from '@/types';
+import { plainTextSchema } from '@/lib/security/input';
 
 export type StudentWithExam = Student & {
   examination: Pick<Examination, 'id' | 'name' | 'year' | 'status'> | null;
@@ -43,11 +44,14 @@ async function queryStudentsWithPagination(
       : 25;
   const page = Number.isSafeInteger(filters.page) && filters.page! > 0 ? filters.page! : 1;
   const empty = { students: [], totalCount: 0, totalPages: 0, currentPage: page, pageSize };
+  const searchInput = plainTextSchema(200).safeParse(filters.search ?? '');
+  const schoolInput = plainTextSchema(200).safeParse(filters.school ?? '');
+  if (!searchInput.success || !schoolInput.success) return empty;
   try {
     const supabase = createAdminClient();
     const makeQuery = (head = false) => {
       let query = supabase.from('students').select(selection, { count: 'exact', head });
-      const search = filters.search?.trim();
+      const search = searchInput.data;
       if (search) {
         const pattern = JSON.stringify(contains(search));
         query = query.or(
@@ -57,8 +61,8 @@ async function queryStudentsWithPagination(
       if (filters.examinationId && uuid.test(filters.examinationId)) {
         query = query.eq('examination_id', filters.examinationId);
       }
-      if (filters.school?.trim())
-        query = query.ilike('school_name', contains(filters.school.trim()));
+      if (schoolInput.data)
+        query = query.ilike('school_name', contains(schoolInput.data));
       return query.order('created_at', { ascending: false }).order('id', { ascending: false });
     };
     const from = (page - 1) * pageSize;
@@ -105,7 +109,7 @@ const readStudentsWithPagination = unstable_cache(
   ): Promise<PaginatedStudents> =>
     queryStudentsWithPagination({ page, pageSize, search, examinationId, school }),
   ['students-with-pagination-v1'],
-  { revalidate: 30, tags: ['students'] }
+  { revalidate: 30, tags: ['students', 'examinations'] }
 );
 
 export async function getStudentsWithPagination(
@@ -180,7 +184,7 @@ const readStudentById = unstable_cache(
   }
   },
   ['student-by-id-v1'],
-  { revalidate: 30, tags: ['students', 'results'] }
+  { revalidate: 30, tags: ['students', 'results', 'examinations'] }
 );
 
 // Metadata and the page share one lookup during this server render only.

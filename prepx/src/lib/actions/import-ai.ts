@@ -1,6 +1,8 @@
 'use server';
 
 import { z } from 'zod';
+import '@/lib/security/zod';
+import { plainTextSchema } from '@/lib/security/input';
 import { getAdminUserId } from '@/lib/auth/admin';
 import { createAdminClient } from '@/lib/supabase/server';
 import { requestImportAssistantSuggestions } from '@/lib/ai/import-assistant';
@@ -9,11 +11,11 @@ import type { ImportAiActionResult } from '@/types/import';
 
 const requestSchema = z.object({
   examinationId: z.uuid(),
-  sourceColumns: z.array(z.string().trim().min(1).max(200)).max(250),
-  detectedBaseColumns: z.array(z.string().trim().min(1).max(200)).max(5),
-  detectedSubjects: z.array(z.string().trim().min(1).max(200)).max(250),
-  missingRequiredColumns: z.array(z.string().trim().min(1).max(200)).max(5),
-  issueSummaries: z.array(z.string().trim().min(1).max(300)).max(20),
+  sourceColumns: z.array(plainTextSchema(200, 1)).max(250),
+  detectedBaseColumns: z.array(plainTextSchema(200, 1)).max(5),
+  detectedSubjects: z.array(plainTextSchema(200, 1)).max(250),
+  missingRequiredColumns: z.array(plainTextSchema(200, 1)).max(5),
+  issueSummaries: z.array(plainTextSchema(300, 1)).max(20),
 });
 
 export type ImportAiRequest = z.infer<typeof requestSchema>;
@@ -77,9 +79,9 @@ export async function getImportAiSuggestionsAction(
       issueSummaries: parsed.data.issueSummaries,
     });
     return { success: true, suggestion };
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : 'unknown';
-    console.error('[Gemini Import Assistant Error]', { reason });
+  } catch {
+    // Provider errors can contain request data and credentials.
+    console.error('[Gemini Import Assistant Error]', { reason: 'provider-request-failed' });
     return {
       success: false,
       error: 'The AI assistant is temporarily unavailable. The normal validator is still active.',

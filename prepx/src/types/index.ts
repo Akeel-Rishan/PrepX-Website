@@ -32,7 +32,6 @@ export interface SearchInput {
 
 /** One subject's grade entry within a student's result */
 export interface GradeEntry {
-  subjectId: string;
   subjectName: string;
   subjectCode: string | null;
   displayOrder: number;

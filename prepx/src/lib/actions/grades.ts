@@ -7,9 +7,9 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { getAdminUserId } from '@/lib/auth/admin';
 import type { Json } from '@/types/database';
 import { isExamEditable } from '@/lib/constants';
+import { gradeOrNullSchema } from '@/lib/validations/grade';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const VALID_GRADES = new Set(['A', 'B', 'C', 'S', 'W', 'AB']);
 
 function refreshGradeViews(): void {
   revalidateTag('results');
@@ -27,17 +27,22 @@ export async function saveGradesAction(
   if (!Array.isArray(changes) || changes.length === 0) return { error: 'No changes to save.' };
   if (changes.length > 1000) return { error: 'Too many changes in a single request.' };
 
+  const cleanChanges: GradeChange[] = [];
   for (const change of changes) {
-    if (!UUID_REGEX.test(change.studentId) || !UUID_REGEX.test(change.subjectId)) {
+    if (!change || typeof change !== 'object' ||
+      typeof change.studentId !== 'string' || typeof change.subjectId !== 'string' ||
+      !UUID_REGEX.test(change.studentId) || !UUID_REGEX.test(change.subjectId)) {
       return { error: 'Invalid data format.' };
     }
-    if (change.grade !== null && !VALID_GRADES.has(change.grade)) {
-      return { error: `Invalid grade value: "${change.grade}".` };
+    const parsedGrade = gradeOrNullSchema.safeParse(change.grade);
+    if (!parsedGrade.success) {
+      return { error: 'Invalid grade value.' };
     }
+    cleanChanges.push({ studentId: change.studentId, subjectId: change.subjectId, grade: parsedGrade.data });
   }
 
   const uniqueChanges = new Map<string, GradeChange>();
-  for (const change of changes) uniqueChanges.set(`${change.studentId}|${change.subjectId}`, change);
+  for (const change of cleanChanges) uniqueChanges.set(`${change.studentId}|${change.subjectId}`, change);
   const normalized = Array.from(uniqueChanges.values());
   const studentIds = Array.from(new Set(normalized.map((change) => change.studentId)));
   const subjectIds = Array.from(new Set(normalized.map((change) => change.subjectId)));

@@ -1,4 +1,5 @@
 import { maskNIC } from '@/lib/utils';
+import { calculateResultStatus } from '@/lib/result-utils';
 import type { ExamStatus } from '@/lib/constants';
 
 /** Status assigned to one publication validation check. */
@@ -109,14 +110,10 @@ export function computeOverallStatus(
   grades: Record<string, string>,
   requiredSubjectIds: string[]
 ): StudentCompletionRow['overallStatus'] {
-  const requiredGrades = requiredSubjectIds.map((id) => grades[id] ?? '');
-  const enteredGrades = Object.values(grades);
-  if (enteredGrades.length > 0 && enteredGrades.every((grade) => grade === 'AB')) {
-    return 'ABSENT';
-  }
-  if (requiredGrades.some((grade) => grade === '')) return 'INCOMPLETE';
-  if (requiredGrades.some((grade) => grade === 'W')) return 'NOT_PASSED';
-  return 'PASSED';
+  const statuses = {
+    Passed: 'PASSED', 'Not Passed': 'NOT_PASSED', Absent: 'ABSENT', Incomplete: 'INCOMPLETE',
+  } as const;
+  return statuses[calculateResultStatus(new Map(Object.entries(grades)), new Set(requiredSubjectIds))];
 }
 
 function duplicateGroups<T>(items: T[], keyFor: (item: T) => string): Map<string, T[]> {

@@ -8,7 +8,7 @@ import { CompletionProgress } from '@/app/admin/(protected)/review/_components/c
 import { ReviewManager } from '@/app/admin/(protected)/review/_components/review-manager';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { getExaminationById, getExaminationsWithCounts } from '@/lib/data/examinations';
+import { getExaminationById, getExaminationOptions } from '@/lib/data/examinations';
 import {
   getReviewData,
   type ReviewData,
@@ -60,7 +60,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
         })
     : Promise.resolve({ data: null, error: false });
   const [examinations, selectedExam, reviewResult] = await Promise.all([
-    getExaminationsWithCounts(),
+    getExaminationOptions(),
     validExamId ? getExaminationById(examId) : Promise.resolve(null),
     reviewPromise,
   ]);

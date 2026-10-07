@@ -37,13 +37,13 @@ export default async function StudentDetailPage({
   const pageTitle = isNew ? 'Create Student' : student!.full_name;
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Link href="/admin/students" className="flex items-center gap-1 hover:text-gray-700">
+      <div className="flex min-w-0 items-center gap-2 text-sm text-gray-500">
+        <Link href="/admin/students" className="flex shrink-0 items-center gap-1 hover:text-gray-700">
           <ChevronLeft aria-hidden="true" className="h-4 w-4" />
           Students
         </Link>
         <span>/</span>
-        <span className="max-w-[200px] truncate font-medium text-gray-900">{pageTitle}</span>
+        <span className="min-w-0 flex-1 truncate font-medium text-gray-900">{pageTitle}</span>
       </div>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>

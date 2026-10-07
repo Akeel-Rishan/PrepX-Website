@@ -39,7 +39,7 @@ function form(values) {
   return data;
 }
 
-function harness({ user = true, profile = true, status = 'DRAFT', exists = true } = {}) {
+function harness({ user = true, profile = true, status = 'DRAFT', exists = true, auditFailure = false, rollbackFailure = false } = {}) {
   let version = 1;
   let examination = exists ? {
     id: examinationId,
@@ -53,6 +53,7 @@ function harness({ user = true, profile = true, status = 'DRAFT', exists = true 
     updated_at: 'v1',
   } : null;
   const audits = [];
+  const invalidated = [];
 
   const session = {
     auth: { getClaims: async () => ({ data: user ? { claims: { sub: 'admin-id' } } : null, error: null }) },
@@ -88,6 +89,7 @@ function harness({ user = true, profile = true, status = 'DRAFT', exists = true 
       function execute(requireRow) {
         if (table !== 'examinations') return { data: null, error: null };
         if (operation === 'select') return { data: examination, error: null };
+        if (auditFailure && rollbackFailure && audits.length) return { data: null, error: { code: 'ROLLBACK_FAILED' } };
         if (operation === 'insert') {
           examination = {
             id: examinationId,
@@ -119,16 +121,25 @@ function harness({ user = true, profile = true, status = 'DRAFT', exists = true 
 
   const actions = load('src/lib/actions/examinations.ts', {
     '@/lib/supabase/server': { createClient: async () => session, createAdminClient: () => admin },
-    '@/lib/audit': { createAuditLog: async entry => audits.push(entry) },
-    'next/cache': { revalidatePath() {}, revalidateTag() {} },
+    '@/lib/audit': { createAuditLog: async entry => { audits.push(entry); if (auditFailure) throw new Error('Audit unavailable'); } },
+    'next/cache': { revalidatePath() {}, revalidateTag(tag) { invalidated.push(tag); } },
     'next/navigation': {
       redirect(destination) { throw Object.assign(new Error('REDIRECT'), { destination }); },
     },
   });
-  return { ...actions, audits, examination: () => examination };
+  return { ...actions, audits, invalidated, examination: () => examination };
 }
 
 async function main() {
+  for (const rollbackFailure of [true, false]) {
+    const failed = harness({ auditFailure: true, rollbackFailure });
+    const result = await failed.archiveExaminationAction(examinationId);
+    assert.match(result.error, /audit failed/i);
+    assert.ok(!result.error.includes('cancelled'));
+    assert.equal(failed.examination().status, rollbackFailure ? 'ARCHIVED' : 'DRAFT');
+    assert.ok(failed.invalidated.includes('examinations'));
+    assert.ok(failed.invalidated.includes('students'));
+  }
   const { examinationSchema } = load('src/lib/validations/examination.ts');
   assert.equal(examinationSchema.safeParse({ ...valid, name: 'a' }).success, false);
   assert.equal(examinationSchema.safeParse({ ...valid, year: 'abc' }).success, false);

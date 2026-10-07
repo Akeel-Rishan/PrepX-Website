@@ -159,6 +159,20 @@ function harness({
 }
 
 async function main() {
+  // Transition permissions are independent of the pure readiness report.
+  for (const status of ['DRAFT', 'READY', 'PUBLISHED', 'ARCHIVED']) {
+    const publishing = harness({ status });
+    const publishResult = await publishing.actions.publishExaminationAction(examId);
+    const canPublish = status === 'DRAFT' || status === 'READY';
+    assert.equal(Boolean(publishResult.error), !canPublish, `publish ${status}`);
+    assert.equal(publishing.updateCalls(), canPublish ? 1 : 0);
+    assert.equal(publishing.examination().status, canPublish ? 'PUBLISHED' : status);
+    const unpublishing = harness({ status });
+    const unpublishResult = await unpublishing.actions.unpublishExaminationAction(examId);
+    assert.equal(Boolean(unpublishResult.error), status !== 'PUBLISHED', `unpublish ${status}`);
+    assert.equal(unpublishing.updateCalls(), status === 'PUBLISHED' ? 1 : 0);
+    assert.equal(unpublishing.examination().status, status === 'PUBLISHED' ? 'DRAFT' : status);
+  }
   const unauthorized = harness({ adminId: null });
   assert.deepEqual(await unauthorized.actions.publishExaminationAction(examId), {
     error: 'Authentication required.',

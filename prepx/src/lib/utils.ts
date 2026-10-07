@@ -15,7 +15,7 @@ export function cn(...inputs: ClassValue[]): string {
 export function maskNIC(nic: string | null | undefined): string | null {
   if (!nic || nic.trim() === '') return null;
   const trimmed = nic.trim();
-  if (trimmed.length <= 4) return trimmed;
+  if (trimmed.length <= 4) return '*'.repeat(trimmed.length);
   const visible = trimmed.slice(-4);
   const masked = '*'.repeat(trimmed.length - 4);
   return masked + visible;

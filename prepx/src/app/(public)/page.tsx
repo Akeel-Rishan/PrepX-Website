@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
-import { AlertTriangle, BadgeCheck, Clock3, Info, LockKeyhole, School } from 'lucide-react';
-import { createClient } from '@/lib/supabase/server';
+import { AlertTriangle, BadgeCheck, CalendarDays, Clock3, Info, LockKeyhole, School } from 'lucide-react';
+import { createPublicClient } from '@/lib/supabase/server';
 import { SearchForm } from './_components/search-form';
+import { AnimatedBackground } from '@/components/public/animated-background';
+import { YearOrbit } from '@/components/public/year-orbit';
 
 export const metadata: Metadata = {
   title: 'Results Portal',
@@ -18,14 +20,15 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
     year: number;
     organization_name: string;
     result_notice: string | null;
+    publication_date: string | null;
   } | null = null;
   let queryFailed = false;
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from('examinations')
-      .select('id, name, year, organization_name, result_notice')
+      .select('id, name, year, organization_name, result_notice, publication_date')
       .eq('status', 'PUBLISHED')
       .order('year', { ascending: false })
       .order('publication_date', { ascending: false })
@@ -42,27 +45,37 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
     console.warn('[Public Examination Query]', { code: 'NETWORK_ERROR' });
   }
 
+  const publishedAt = currentExam?.publication_date ? new Date(currentExam.publication_date) : null;
+  const publicationLabel = publishedAt && !Number.isNaN(publishedAt.getTime())
+    ? new Intl.DateTimeFormat('en-GB', {
+        day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Colombo',
+      }).format(publishedAt)
+    : null;
+
   return (
-    <div className="flex flex-1 items-center px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-      <div className="mx-auto grid w-full max-w-6xl items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.78fr)] lg:gap-14">
-        <section className="pt-1 lg:sticky lg:top-8 lg:pt-6" aria-labelledby="portal-heading">
+    <div className="public-results-hero relative isolate flex flex-1 flex-col overflow-hidden px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-16">
+      <AnimatedBackground />
+      <div className="relative z-20 mx-auto grid w-full min-w-0 max-w-2xl items-start gap-6 sm:gap-8 lg:max-w-6xl lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.78fr)] lg:gap-14">
+        <section className="min-w-0 pt-1 lg:pt-6" aria-labelledby="portal-heading">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
             Official result service
           </p>
           <h1
             id="portal-heading"
-            className="mt-4 max-w-2xl text-3xl font-bold leading-[1.15] tracking-tight text-slate-950 dark:text-white sm:text-4xl"
+            className="mt-3 max-w-2xl text-2xl font-bold leading-[1.15] tracking-tight text-slate-950 dark:text-white sm:mt-4 sm:text-4xl"
           >
             {currentExam?.name ?? 'Examination Results Portal'}
           </h1>
 
           {currentExam ? (
-            <div className="mt-6 flex items-center gap-4 border-l-4 border-blue-600 pl-5">
-              <p className="text-5xl font-extrabold tracking-[-0.05em] text-blue-600 dark:text-blue-400 sm:text-6xl">
-                {currentExam.year}
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3 border-l-4 border-blue-600 pl-4 sm:mt-6 sm:pl-5">
+              <p className="relative isolate shrink-0 text-4xl font-extrabold tracking-[-0.05em] text-blue-600 dark:text-blue-400 min-[375px]:text-5xl sm:text-6xl">
+                <YearOrbit />
+                <span className="relative z-[15]">{currentExam.year}</span>
               </p>
-              <div>
-                <p className="font-semibold text-slate-900 dark:text-slate-100">
+              <div className="min-w-0 flex-1 basis-32">
+                <p className="inline-flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+                  <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-blue-500 dark:bg-blue-400" />
                   Published results
                 </p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -77,7 +90,25 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
             </p>
           )}
 
-          <div className="mt-8 hidden max-w-xl border-y border-slate-200 py-5 dark:border-slate-800 sm:block">
+          {currentExam && (
+            <div className="mt-5 max-w-md sm:mt-7">
+              <p className="hidden text-base font-medium text-slate-800 dark:text-slate-200 sm:block">
+                Your performance. Your next step.
+              </p>
+              <p className="text-sm leading-6 text-slate-600 dark:text-slate-400 sm:mt-2">
+                Access your published examination record using the index number or NIC
+                registered for this examination.
+              </p>
+              {publicationLabel && (
+                <p className="mt-4 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <CalendarDays aria-hidden="true" className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <span>Published <time dateTime={currentExam.publication_date!}>{publicationLabel}</time></span>
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="mt-8 hidden max-w-xl border-y border-slate-200 py-5 dark:border-slate-800 lg:block">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               <div className="flex items-start gap-3">
                 <BadgeCheck
@@ -133,9 +164,9 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
 
         <section
           aria-labelledby="result-search-heading"
-          className="public-portal-surface overflow-hidden rounded-2xl border border-white/90 bg-white/[0.88] shadow-[0_28px_80px_-34px_rgba(30,64,175,0.34)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/[0.88] dark:shadow-[0_28px_80px_-34px_rgba(0,0,0,0.88)]"
+          className="public-portal-surface min-w-0 overflow-hidden rounded-2xl border border-white/90 bg-white/[0.88] shadow-[0_28px_80px_-34px_rgba(30,64,175,0.34)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/[0.88] dark:shadow-[0_28px_80px_-34px_rgba(0,0,0,0.88)]"
         >
-          <div className="border-b border-slate-200/80 bg-slate-50/65 px-6 py-5 dark:border-slate-800 dark:bg-slate-900/70 sm:px-7">
+          <div className="border-b border-slate-200/80 bg-slate-50/65 px-4 py-5 sm:px-6 dark:border-slate-800 dark:bg-slate-900/70 sm:px-7">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm dark:bg-blue-500">
                 <School aria-hidden="true" strokeWidth={1.8} className="h-5 w-5" />
@@ -154,7 +185,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
             </div>
           </div>
 
-          <div className="p-6 sm:p-7">
+          <div className="p-4 sm:p-7">
             {queryFailed ? (
               <div className="flex flex-col items-center py-8 text-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300">
@@ -189,7 +220,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
             )}
           </div>
 
-          <div className="border-t border-slate-200/80 bg-slate-50/60 px-6 py-4 dark:border-slate-800 dark:bg-slate-950/[0.45] sm:px-7">
+          <div className="border-t border-slate-200/80 bg-slate-50/60 px-4 py-4 sm:px-6 dark:border-slate-800 dark:bg-slate-950/[0.45] sm:px-7">
             <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
               Need help? Contact your school&apos;s examination coordinator. Never share your NIC
               with anyone outside the official process.

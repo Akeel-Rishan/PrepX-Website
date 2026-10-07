@@ -3,6 +3,8 @@ import 'server-only';
 import { Readable } from 'node:stream';
 import ExcelJS from 'exceljs';
 import type { ImportHeaderMapping, RawImportRow } from '@/types/import';
+import { MAX_IMPORT_BYTES, validateXlsxArchive, safeImportCell } from '@/lib/security/import-file';
+import { plainTextSchema } from '@/lib/security/input';
 
 type ImportBaseColumn =
   | 'index_number'
@@ -62,7 +64,7 @@ export function applyHeaderMappings(
   const headers = parsed.headers.map(remap);
   const subjectNames = expectedSubjects.map((subject) => subject.subject_name);
   const rows = parsed.rows.map((row) => {
-    const rawValues: Record<string, string> = {};
+    const rawValues: Record<string, string> = Object.create(null);
     for (const [source, value] of Object.entries(row.rawValues)) {
       rawValues[remap(source)] = value;
     }
@@ -86,34 +88,43 @@ export function applyHeaderMappings(
 function cellString(value: ExcelJS.CellValue): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    return String(value).trim();
+    return safeImportCell(String(value));
   }
   if (value instanceof Date) return value.toISOString();
-  if ('result' in value) return cellString(value.result ?? null);
-  if ('richText' in value) return value.richText.map((part) => part.text).join('').trim();
-  if ('text' in value) return value.text.trim();
+  if ('formula' in value || 'sharedFormula' in value || 'hyperlink' in value) throw new Error('Invalid import cell.');
+  if ('richText' in value) return safeImportCell(value.richText.map((part) => part.text).join(''));
+  if ('text' in value && typeof value.text === 'string') return safeImportCell(value.text);
   return '';
 }
 
 function normalizeHeader(header: string, subjects: Map<string, string>): string {
-  const trimmed = header.trim();
+  // Our CSV template prefixes formula-like subject headers with an apostrophe.
+  // Match that literal header to a known subject without evaluating anything.
+  const trimmed = header.trim().replace(/^'(?=[=+@-])/, '');
   const lower = trimmed.toLocaleLowerCase();
   const base = BASE_ALIAS_TO_COLUMN.get(lower);
   return base ?? subjects.get(lower) ?? trimmed;
 }
 
 function stripLeadingCsvComments(source: string): string {
-  const lines = source.replace(/^\uFEFF/, '').split(/\r?\n/);
-  while (lines.length && (!lines[0].trim() || lines[0].trimStart().startsWith('#'))) {
-    lines.shift();
+  const text = source.replace(/^\uFEFF/, '');
+  let start = 0;
+  while (start < text.length) {
+    const newline = text.indexOf('\n', start);
+    const end = newline < 0 ? text.length : newline + 1;
+    const line = text.slice(start, end).trim();
+    if (line && !line.startsWith('#')) break;
+    start = end;
   }
-  return lines.join('\n');
+  return text.slice(start);
 }
 
 async function readMatrix(fileBuffer: Buffer, fileType: 'xlsx' | 'csv'): Promise<ExcelJS.CellValue[][]> {
+  if (fileBuffer.length > MAX_IMPORT_BYTES) throw new Error('Invalid import file.');
   const workbook = new ExcelJS.Workbook();
   let worksheet: ExcelJS.Worksheet | undefined;
   if (fileType === 'xlsx') {
+    validateXlsxArchive(fileBuffer);
     const workbookBytes = fileBuffer.buffer.slice(
       fileBuffer.byteOffset,
       fileBuffer.byteOffset + fileBuffer.byteLength
@@ -121,8 +132,14 @@ async function readMatrix(fileBuffer: Buffer, fileType: 'xlsx' | 'csv'): Promise
     await workbook.xlsx.load(workbookBytes);
     worksheet = workbook.worksheets[0];
   } else {
-    const source = stripLeadingCsvComments(fileBuffer.toString('utf8'));
+    const source = stripLeadingCsvComments(new TextDecoder('utf-8', { fatal: true }).decode(fileBuffer));
+    if ((source.match(/\n/g)?.length ?? 0) > 1100 || (source.match(/,/g)?.length ?? 0) > 275000) {
+      throw new Error('Import file contains too many rows or cells.');
+    }
     worksheet = await workbook.csv.read(Readable.from([source]), {
+      // Identifiers are text: ExcelJS's default mapper removes leading zeros
+      // and turns date-like school/centre values into dates.
+      map: (value: string) => value,
       parserOptions: { ignoreEmpty: true, trim: false },
     });
   }
@@ -138,7 +155,9 @@ async function readMatrix(fileBuffer: Buffer, fileType: 'xlsx' | 'csv'): Promise
   worksheet.eachRow({ includeEmpty: false }, (row) => {
     const values: ExcelJS.CellValue[] = [];
     for (let column = 1; column <= worksheet!.columnCount; column += 1) {
-      values.push(row.getCell(column).value);
+      const value = row.getCell(column).value;
+      cellString(value); // Inspect every cell, including unknown columns.
+      values.push(value);
     }
     matrix.push(values);
   });
@@ -164,7 +183,7 @@ export async function parseImportFile(
       }
     }
     const expectedSubjectNames = expectedSubjects.map((subject) => subject.subject_name);
-    const headers = matrix[0].map((cell) => normalizeHeader(cellString(cell), subjectMap));
+    const headers = matrix[0].map((cell) => normalizeHeader(plainTextSchema(200).parse(cellString(cell)), subjectMap));
     const rows: RawImportRow[] = [];
 
     for (const values of matrix.slice(1)) {
@@ -172,7 +191,7 @@ export async function parseImportFile(
       if (rows.length >= 1000) {
         throw new Error('Import file contains too many rows (max 1000). Please split the file.');
       }
-      const rawValues: Record<string, string> = {};
+      const rawValues: Record<string, string> = Object.create(null);
       headers.forEach((header, index) => {
         if (header) rawValues[header] = cellString(values[index]);
       });

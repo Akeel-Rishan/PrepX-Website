@@ -67,7 +67,7 @@ export function AdminShell({ userEmail, children }: AdminShellProps): React.JSX.
           isLoggingOut={isLoggingOut}
           drawerOpen={drawerOpen}
         />
-        <main className="min-w-0 flex-1 p-4 sm:p-6 xl:p-8">
+        <main className="min-w-0 flex-1 [overflow-wrap:anywhere] p-4 sm:p-6 xl:p-8">
           {logoutError && (
             <Alert variant="error" className="mb-6" onClose={() => setLogoutError(undefined)}>
               {logoutError}

@@ -36,3 +36,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Dedicated integration credentials and generated local stack/run manifests
+.env.test
+/.integration/
+
+# Private load-test settings and aggregate/time-series artifacts
+.env.load
+/tests/load/results/

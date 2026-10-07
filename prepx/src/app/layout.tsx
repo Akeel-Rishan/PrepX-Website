@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import { headers } from 'next/headers';
 
 import './globals.css';
 
@@ -31,13 +32,16 @@ export const metadata: Metadata = {
   description: 'O/L Model Examination Results Portal by PrepX.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{ children: ReactNode }>): React.JSX.Element {
+}: Readonly<{ children: ReactNode }>): Promise<React.JSX.Element> {
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* Browsers hide the nonce content attribute before hydration while
+            retaining script.nonce for CSP. Suppress only this expected mismatch. */}
+        <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${inter.variable} font-sans`}>{children}</body>
     </html>

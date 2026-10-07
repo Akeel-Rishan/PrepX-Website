@@ -23,7 +23,7 @@ const CARDS = [
 export function ValidationSummary({ result }: ValidationSummaryProps): React.JSX.Element {
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:grid-cols-3 2xl:grid-cols-5">
         {CARDS.map(({ key, label, classes, icon: Icon }) => (
           <div key={key} className={`rounded-xl border p-3 ${classes}`}>
             <div className="flex items-center gap-1.5">

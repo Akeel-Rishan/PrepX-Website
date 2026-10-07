@@ -36,6 +36,13 @@ async function main() {
   ];
 
   const template = generateCsvTemplate(subjects);
+  const identifiers = await parseImportFile(Buffer.from(
+    'index_number,nic_number,full_name,school_name,examination_center,MAT\n000123,001234567890,Student,2026-01-01,001,A'
+  ), 'csv', subjects);
+  assert.equal(identifiers.rows[0].index_number, '000123');
+  assert.equal(identifiers.rows[0].nic_number, '001234567890');
+  assert.equal(identifiers.rows[0].school_name, '2026-01-01');
+  assert.equal(identifiers.rows[0].examination_center, '001');
   const parsedTemplate = await parseImportFile(Buffer.from(template), 'csv', subjects);
   assert.deepEqual(parsedTemplate.headers.slice(0, 5), [
     'index_number', 'nic_number', 'full_name', 'school_name', 'examination_center',

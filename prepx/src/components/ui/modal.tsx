@@ -71,7 +71,7 @@ export function Modal({
           size === 'lg' && 'max-w-lg'
         )}
       >
-        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-gray-100 p-6 dark:border-slate-800">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 p-4 sm:gap-4 sm:p-6 dark:border-slate-800">
           <div className="min-w-0">
             <h3 id={titleId} className="text-base font-semibold text-gray-900 dark:text-slate-100">
               {title}
@@ -86,12 +86,12 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="shrink-0 rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+            className="shrink-0 rounded-lg p-2.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
           >
             <X aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
-        <div className="overflow-y-auto p-6">{children}</div>
+        <div className="min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6">{children}</div>
       </div>
     </dialog>,
     document.body

@@ -134,9 +134,12 @@ export function Dropdown({
       Math.max(trigger.width, menuRef.current?.offsetWidth ?? trigger.width),
       window.innerWidth - viewportPadding * 2
     );
-    const menuHeight = menuRef.current?.offsetHeight ?? Math.min(options.length * 44 + 12, 288);
+    const desiredHeight = Math.min(options.length * 44 + 12, 288);
     const roomBelow = window.innerHeight - trigger.bottom - viewportPadding;
-    const showAbove = roomBelow < menuHeight + 6 && trigger.top > roomBelow;
+    const roomAbove = trigger.top - viewportPadding;
+    const showAbove = roomBelow < desiredHeight + 6 && roomAbove > roomBelow;
+    const maxHeight = Math.max(0, Math.min(288, (showAbove ? roomAbove : roomBelow) - 6));
+    const menuHeight = Math.min(menuRef.current?.scrollHeight ?? desiredHeight, maxHeight);
     const preferredLeft = align === 'right' ? trigger.right - menuWidth : trigger.left;
     const left = Math.min(
       Math.max(viewportPadding, preferredLeft),
@@ -149,8 +152,9 @@ export function Dropdown({
     setMenuPosition({
       top,
       left,
-      minWidth: trigger.width,
+      minWidth: Math.min(trigger.width, window.innerWidth - viewportPadding * 2),
       maxWidth: window.innerWidth - viewportPadding * 2,
+      maxHeight,
     });
   }, [align, open, options.length]);
 
@@ -326,7 +330,7 @@ export function Dropdown({
         onClick={() => (open ? close() : openMenu())}
         onKeyDown={handleKeyDown}
         className={cn(
-          'inline-flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-left text-sm font-medium text-slate-800 shadow-sm transition-[background-color,border-color,box-shadow] hover:border-slate-400 focus-visible:border-blue-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/15 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 disabled:opacity-70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600 dark:focus-visible:border-blue-400 dark:focus-visible:ring-blue-400/20 dark:disabled:bg-slate-950 dark:disabled:text-slate-500',
+          'inline-flex min-h-11 min-w-0 w-full items-center justify-between gap-3 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-left text-sm font-medium text-slate-800 shadow-sm transition-[background-color,border-color,box-shadow] hover:border-slate-400 focus-visible:border-blue-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/15 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 disabled:opacity-70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600 dark:focus-visible:border-blue-400 dark:focus-visible:ring-blue-400/20 dark:disabled:bg-slate-950 dark:disabled:text-slate-500',
           compact && 'min-h-9 rounded-lg px-2.5 py-1.5 text-xs',
           className
         )}

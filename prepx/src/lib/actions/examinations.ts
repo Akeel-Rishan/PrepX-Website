@@ -3,6 +3,8 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import '@/lib/security/zod';
+import { isSmallFormData } from '@/lib/security/input';
 import { createAuditLog } from '@/lib/audit';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getAdminUserId } from '@/lib/auth/admin';
@@ -14,6 +16,7 @@ import type { Json } from '@/types/database';
 
 function refreshExamination(id: string): void {
   revalidateTag('examinations');
+  revalidateTag('students');
   revalidateTag('student-lookups');
   revalidatePath('/admin/examinations');
   revalidatePath(`/admin/examinations/${id}`);
@@ -32,6 +35,7 @@ export async function saveExaminationAction(
   const adminId = await getAdminUserId();
   if (!adminId) return { error: 'Authentication required.' };
   const rawId = formData.get('id');
+  if (!isSmallFormData(formData)) return { error: 'Invalid form data.' };
   if (rawId !== null && typeof rawId !== 'string') return { error: 'Invalid examination ID.' };
   const id = rawId?.trim();
   if (id && !z.uuid().safeParse(id).success) return { error: 'Invalid examination ID.' };
@@ -90,7 +94,8 @@ export async function saveExaminationAction(
         .eq('id', id)
         .eq('updated_at', updated.updated_at);
       if (rollbackError) console.error('[Examination Update Rollback Error]', { code: rollbackError.code });
-      return { error: 'The update could not be audited, so it was cancelled.' };
+      refreshExamination(id);
+      return { error: 'The audit failed and a rollback was attempted. Refresh to confirm the current examination before retrying.' };
     }
 
     refreshExamination(id);
@@ -114,7 +119,8 @@ export async function saveExaminationAction(
   } catch {
     const { error: rollbackError } = await admin.from('examinations').delete().eq('id', created.id);
     if (rollbackError) console.error('[Examination Create Rollback Error]', { code: rollbackError.code });
-    return { error: 'The examination could not be audited, so creation was cancelled.' };
+    refreshExamination(created.id);
+    return { error: 'The audit failed and a rollback was attempted. Check the examination list before creating it again.' };
   }
   refreshExamination(created.id);
   redirect(`/admin/examinations/${created.id}`);
@@ -163,7 +169,8 @@ export async function archiveExaminationAction(id: string): Promise<{ error?: st
       .eq('id', id)
       .eq('updated_at', updated.updated_at);
     if (rollbackError) console.error('[Examination Archive Rollback Error]', { code: rollbackError.code });
-    return { error: 'The archive action could not be audited, so it was cancelled.' };
+    refreshExamination(id);
+    return { error: 'The audit failed and a rollback was attempted. Refresh to confirm the current examination status.' };
   }
   refreshExamination(id);
   redirect('/admin/examinations');
@@ -209,7 +216,8 @@ export async function unarchiveExaminationAction(id: string): Promise<{ error?: 
       .eq('id', id)
       .eq('updated_at', updated.updated_at);
     if (rollbackError) console.error('[Examination Restore Rollback Error]', { code: rollbackError.code });
-    return { error: 'The restore action could not be audited, so it was cancelled.' };
+    refreshExamination(id);
+    return { error: 'The audit failed and a rollback was attempted. Refresh to confirm the current examination status.' };
   }
   refreshExamination(id);
   return {};

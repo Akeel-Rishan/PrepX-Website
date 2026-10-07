@@ -4,7 +4,7 @@ import { Lock, PenLine } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { getExamStatusBadgeVariant, getExamStatusLabel } from '@/lib/exam-utils';
-import { getExaminationById, getExaminationsWithCounts } from '@/lib/data/examinations';
+import { getExaminationById, getExaminationOptions } from '@/lib/data/examinations';
 import { getGradeGridData, type GradeGridData } from '@/lib/data/grades';
 import type { Examination } from '@/types';
 import { isExamEditable } from '@/lib/constants';
@@ -25,7 +25,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps): P
   const validExamId =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(examId);
   const [examinations, selectedExam, loadedGradeData] = await Promise.all([
-    getExaminationsWithCounts(),
+    getExaminationOptions(),
     validExamId ? getExaminationById(examId) : Promise.resolve<Examination | null>(null),
     validExamId
       ? getGradeGridData({ examinationId: examId, page, search })
@@ -42,7 +42,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps): P
     normalized.set('page', String(gradeData.currentPage));
     redirect(`/admin/results?${normalized.toString()}`);
   }
-  const summary = gradeData?.completeSummary;
+  const summary = gradeData?.error ? null : gradeData?.completeSummary;
 
   return (
     <div className="max-w-full space-y-5">
@@ -67,6 +67,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps): P
         initialSearch={search}
       />
 
+      {gradeData?.error && <Alert variant="error">{gradeData.error}</Alert>}
       {summary && gradeData && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-gray-200 bg-white p-4">
@@ -94,7 +95,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps): P
         </div>
       )}
       {examId && !selectedExam && <Alert variant="error">Examination not found.</Alert>}
-      {selectedExam && gradeData && (
+      {selectedExam && gradeData && !gradeData.error && (
         <GradeGrid
           data={gradeData}
           examinationId={examId}
