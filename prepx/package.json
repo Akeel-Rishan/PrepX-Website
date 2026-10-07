@@ -28,7 +28,13 @@
     "test:integration:setup": "node scripts/integration/setup.cjs",
     "test:integration:teardown": "node scripts/integration/teardown.cjs",
     "test:integration:safety": "node scripts/integration/test-safety.cjs",
-    "test:integration:mock": "node scripts/integration/fallback.cjs"
+    "test:integration:mock": "node scripts/integration/fallback.cjs",
+    "load:validate": "node tests/load/validate.cjs",
+    "load:smoke": "node tests/load/run.cjs smoke",
+    "load:normal": "node tests/load/run.cjs load",
+    "load:stress": "node tests/load/run.cjs stress",
+    "load:soak": "node tests/load/run.cjs soak",
+    "load:rate-limit": "node tests/load/run.cjs rate-limit"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
