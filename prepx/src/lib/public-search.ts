@@ -1,6 +1,7 @@
 export const NIC_REGEX = /^([0-9]{9}[VvXx]|[0-9]{12})$/;
+export const INDEX_NUMBER_REGEX = /^[A-Z0-9]+$/;
 
-/** Canonical form shared by validation, lookup inputs and rate-limit fingerprints. */
+/** Canonical form shared by validation, lookup inputs, and rate-limit fingerprints. */
 export function normalizeSearchIdentifier(value: string): string {
   return value.trim().toUpperCase();
 }
@@ -14,12 +15,13 @@ export const PUBLIC_SEARCH_ERROR_MESSAGES = {
   VALIDATION_ERROR: 'Please enter your Index Number or NIC Number.',
   INVALID_NIC:
     'Please enter a valid NIC number. Use 9 digits followed by V or X, or enter 12 digits.',
+  INVALID_INDEX: 'Please enter a valid Index Number using letters and numbers only.',
   SERVER_ERROR: 'Something went wrong. Please try again.',
 } as const;
 
 export type PublicSearchApiErrorCode = Exclude<
   keyof typeof PUBLIC_SEARCH_ERROR_MESSAGES,
-  'INVALID_NIC'
+  'INVALID_NIC' | 'INVALID_INDEX'
 >;
 
 export type PreparedPublicSearch =
@@ -38,13 +40,19 @@ export function preparePublicSearch(indexNumber: string, nicNumber: string): Pre
   const normalizedIndex = normalizeSearchIdentifier(indexNumber);
   const normalizedNic = normalizeSearchIdentifier(nicNumber);
 
-  if (/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/.test(indexNumber + nicNumber) ||
-    normalizedIndex.length > 50 || (normalizedIndex && !/^[A-Z0-9]+$/.test(normalizedIndex))) {
+  if (!normalizedIndex && !normalizedNic) {
     return { ok: false, message: PUBLIC_SEARCH_ERROR_MESSAGES.VALIDATION_ERROR };
   }
 
-  if (!normalizedIndex && !normalizedNic) {
+  if (normalizedIndex && normalizedNic) {
     return { ok: false, message: PUBLIC_SEARCH_ERROR_MESSAGES.VALIDATION_ERROR };
+  }
+
+  if (
+    normalizedIndex &&
+    (normalizedIndex.length > 50 || !INDEX_NUMBER_REGEX.test(normalizedIndex))
+  ) {
+    return { ok: false, message: PUBLIC_SEARCH_ERROR_MESSAGES.INVALID_INDEX };
   }
 
   if (normalizedNic && !NIC_REGEX.test(normalizedNic)) {
@@ -62,8 +70,9 @@ export function preparePublicSearch(indexNumber: string, nicNumber: string): Pre
 export function getPublicSearchErrorMessage(code: unknown): string {
   if (
     typeof code === 'string' &&
-    Object.hasOwn(PUBLIC_SEARCH_ERROR_MESSAGES, code) &&
-    code !== 'INVALID_NIC'
+    code in PUBLIC_SEARCH_ERROR_MESSAGES &&
+    code !== 'INVALID_NIC' &&
+    code !== 'INVALID_INDEX'
   ) {
     return PUBLIC_SEARCH_ERROR_MESSAGES[code as PublicSearchApiErrorCode];
   }

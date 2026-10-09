@@ -1,9 +1,18 @@
 import type { Metadata } from 'next';
-import { AlertTriangle, BadgeCheck, CalendarDays, Clock3, Info, LockKeyhole, School } from 'lucide-react';
-import { createPublicClient } from '@/lib/supabase/server';
+import type { LucideIcon } from 'lucide-react';
+import {
+  AlertTriangle,
+  BadgeCheck,
+  Building2,
+  CalendarDays,
+  Clock3,
+  Info,
+  LockKeyhole,
+  Search,
+  ShieldCheck,
+} from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 import { SearchForm } from './_components/search-form';
-import { AnimatedBackground } from '@/components/public/animated-background';
-import { YearOrbit } from '@/components/public/year-orbit';
 
 export const metadata: Metadata = {
   title: 'Results Portal',
@@ -12,23 +21,25 @@ export const metadata: Metadata = {
 
 // Publication state must always be read at request time, never captured during a production build.
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+interface PublishedExamination {
+  id: string;
+  name: string;
+  year: number;
+  organization_name: string;
+  result_notice: string | null;
+}
 
 export default async function PublicHomePage(): Promise<React.JSX.Element> {
-  let currentExam: {
-    id: string;
-    name: string;
-    year: number;
-    organization_name: string;
-    result_notice: string | null;
-    publication_date: string | null;
-  } | null = null;
+  let currentExam: PublishedExamination | null = null;
   let queryFailed = false;
 
   try {
-    const supabase = createPublicClient();
+    const supabase = await createClient();
     const { data, error } = await supabase
       .from('examinations')
-      .select('id, name, year, organization_name, result_notice, publication_date')
+      .select('id, name, year, organization_name, result_notice')
       .eq('status', 'PUBLISHED')
       .order('year', { ascending: false })
       .order('publication_date', { ascending: false })
@@ -45,189 +56,236 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
     console.warn('[Public Examination Query]', { code: 'NETWORK_ERROR' });
   }
 
-  const publishedAt = currentExam?.publication_date ? new Date(currentExam.publication_date) : null;
-  const publicationLabel = publishedAt && !Number.isNaN(publishedAt.getTime())
-    ? new Intl.DateTimeFormat('en-GB', {
-        day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Colombo',
-      }).format(publishedAt)
-    : null;
+  // Only a row with PUBLISHED status can reach this value because public RLS and the query both
+  // enforce that state. The newest published examination year becomes the public search target.
+  const publishedExam = currentExam;
 
   return (
-    <div className="public-results-hero relative isolate flex flex-1 flex-col overflow-hidden px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-16">
-      <AnimatedBackground />
-      <div className="relative z-20 mx-auto grid w-full min-w-0 max-w-2xl items-start gap-6 sm:gap-8 lg:max-w-6xl lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.78fr)] lg:gap-14">
-        <section className="min-w-0 pt-1 lg:pt-6" aria-labelledby="portal-heading">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
+    <div className="flex flex-1 px-5 py-10 sm:px-8 lg:px-10 lg:py-14">
+      <div className="mx-auto grid w-full max-w-[1380px] items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(430px,530px)] lg:gap-16 xl:gap-24">
+        <section className="max-w-[700px]" aria-labelledby="portal-heading">
+          {publishedExam && (
+            <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-blue-300/60 bg-blue-100/60 px-3.5 py-2 text-blue-800 shadow-sm shadow-blue-900/[0.03] dark:border-blue-400/15 dark:bg-blue-400/[0.07] dark:text-blue-200 dark:shadow-none">
+              <span
+                aria-hidden="true"
+                className="h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/10 dark:bg-emerald-400"
+              />
+              <span className="text-xs font-semibold uppercase tracking-[0.12em]">
+                Results are now available
+              </span>
+            </div>
+          )}
+
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-400">
             Official result service
           </p>
           <h1
             id="portal-heading"
-            className="mt-3 max-w-2xl text-2xl font-bold leading-[1.15] tracking-tight text-slate-950 dark:text-white sm:mt-4 sm:text-4xl"
+            className="mt-4 max-w-[680px] text-[38px] font-bold leading-[1.08] tracking-[-0.04em] text-slate-950 dark:text-white sm:text-[50px] lg:text-[56px]"
           >
-            {currentExam?.name ?? 'Examination Results Portal'}
+            <span className="block">{publishedExam?.name ?? 'Examination Results Portal'}</span>
+            {publishedExam && (
+              <span className="block bg-gradient-to-r from-blue-700 to-slate-600 bg-clip-text text-transparent dark:from-white dark:to-slate-400">
+                {publishedExam.year} Results
+              </span>
+            )}
           </h1>
+          <p className="mt-6 max-w-[590px] text-base leading-7 text-slate-600 dark:text-slate-400">
+            Access your officially published examination results securely using your candidate index
+            number or NIC number.
+          </p>
 
-          {currentExam ? (
-            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3 border-l-4 border-blue-600 pl-4 sm:mt-6 sm:pl-5">
-              <p className="relative isolate shrink-0 text-4xl font-extrabold tracking-[-0.05em] text-blue-600 dark:text-blue-400 min-[375px]:text-5xl sm:text-6xl">
-                <YearOrbit />
-                <span className="relative z-[15]">{currentExam.year}</span>
-              </p>
-              <div className="min-w-0 flex-1 basis-32">
-                <p className="inline-flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
-                  <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-blue-500 dark:bg-blue-400" />
-                  Published results
-                </p>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  {currentExam.organization_name}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <p className="mt-5 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300">
-              A secure place for students and parents to access officially published examination
-              results.
-            </p>
-          )}
-
-          {currentExam && (
-            <div className="mt-5 max-w-md sm:mt-7">
-              <p className="hidden text-base font-medium text-slate-800 dark:text-slate-200 sm:block">
-                Your performance. Your next step.
-              </p>
-              <p className="text-sm leading-6 text-slate-600 dark:text-slate-400 sm:mt-2">
-                Access your published examination record using the index number or NIC
-                registered for this examination.
-              </p>
-              {publicationLabel && (
-                <p className="mt-4 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                  <CalendarDays aria-hidden="true" className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <span>Published <time dateTime={currentExam.publication_date!}>{publicationLabel}</time></span>
-                </p>
-              )}
+          {publishedExam && (
+            <div className="mt-8 flex flex-wrap gap-3">
+              <ExamFact
+                icon={CalendarDays}
+                label="Examination"
+                value={String(publishedExam.year)}
+              />
+              <ExamFact icon={BadgeCheck} label="Status" value="Published" />
+              <ExamFact
+                icon={Building2}
+                label="Organized by"
+                value={publishedExam.organization_name}
+              />
             </div>
           )}
 
-          <div className="mt-8 hidden max-w-xl border-y border-slate-200 py-5 dark:border-slate-800 lg:block">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <div className="flex items-start gap-3">
-                <BadgeCheck
-                  aria-hidden="true"
-                  strokeWidth={1.8}
-                  className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                    Official records
-                  </p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                    Results appear only after formal publication.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <LockKeyhole
-                  aria-hidden="true"
-                  strokeWidth={1.8}
-                  className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                    Private lookup
-                  </p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                    Use one identifier and keep it confidential.
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="mt-9 grid max-w-[650px] gap-5 border-t border-slate-300/70 pt-7 dark:border-white/[0.08] sm:grid-cols-2">
+            <TrustItem
+              icon={ShieldCheck}
+              title="Official records"
+              description="Only formally published examination records are displayed."
+            />
+            <TrustItem
+              icon={LockKeyhole}
+              title="Secure lookup"
+              description="Your details are used only to retrieve your examination result."
+            />
           </div>
 
-          {currentExam?.result_notice && (
-            <aside className="mt-6 flex max-w-xl items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/70 dark:bg-blue-950/30">
+          {publishedExam?.result_notice && (
+            <aside className="mt-6 flex max-w-[650px] items-start gap-3 rounded-2xl border border-blue-200/80 bg-blue-50/75 p-4 backdrop-blur-sm dark:border-blue-400/15 dark:bg-blue-400/[0.07]">
               <Info
                 aria-hidden="true"
                 strokeWidth={1.8}
-                className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-300"
+                className="mt-0.5 h-4 w-4 shrink-0 text-blue-700 dark:text-blue-300"
               />
               <div>
-                <p className="text-xs font-semibold text-blue-900 dark:text-blue-100">
+                <p className="text-xs font-semibold text-blue-950 dark:text-blue-100">
                   Result notice
                 </p>
                 <p className="mt-1 text-sm leading-6 text-blue-800 dark:text-blue-200">
-                  {currentExam.result_notice}
+                  {publishedExam.result_notice}
                 </p>
               </div>
             </aside>
           )}
         </section>
 
-        <section
-          aria-labelledby="result-search-heading"
-          className="public-portal-surface min-w-0 overflow-hidden rounded-2xl border border-white/90 bg-white/[0.88] shadow-[0_28px_80px_-34px_rgba(30,64,175,0.34)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/[0.88] dark:shadow-[0_28px_80px_-34px_rgba(0,0,0,0.88)]"
-        >
-          <div className="border-b border-slate-200/80 bg-slate-50/65 px-4 py-5 sm:px-6 dark:border-slate-800 dark:bg-slate-900/70 sm:px-7">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm dark:bg-blue-500">
-                <School aria-hidden="true" strokeWidth={1.8} className="h-5 w-5" />
+        <div className="w-full">
+          <section
+            aria-labelledby="result-search-heading"
+            className="public-portal-surface relative isolate overflow-hidden rounded-3xl border border-slate-200/90 bg-white/95 shadow-[0_28px_80px_-34px_rgba(30,64,175,0.45)] backdrop-blur-xl dark:border-white/[0.1] dark:bg-[#0b1424]/95 dark:shadow-[0_30px_90px_-36px_rgba(0,0,0,0.9)]"
+          >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_10%_0%,rgba(37,99,235,0.08),transparent_34%)] dark:bg-[radial-gradient(circle_at_10%_0%,rgba(59,130,246,0.1),transparent_38%)]"
+            />
+
+            <div className="border-b border-slate-200/80 px-6 py-6 dark:border-white/[0.07] sm:px-7">
+              <div className="flex items-start justify-between gap-5">
+                <div className="flex min-w-0 items-start gap-3.5">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blue-500/20 bg-blue-600 text-white shadow-[0_10px_30px_-12px_rgba(37,99,235,0.8)]">
+                    <Search aria-hidden="true" strokeWidth={1.8} className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2
+                      id="result-search-heading"
+                      className="text-xl font-bold tracking-tight text-slate-950 dark:text-white"
+                    >
+                      Find your result
+                    </h2>
+                    <p className="mt-1 text-sm leading-5 text-slate-600 dark:text-slate-400">
+                      {publishedExam
+                        ? `Search the published ${publishedExam.year} examination records.`
+                        : 'Published examination records will appear here.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="hidden shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white/70 px-2.5 py-2 text-[11px] font-semibold text-slate-600 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.035] dark:text-slate-300 sm:flex">
+                  <ShieldCheck
+                    aria-hidden="true"
+                    strokeWidth={1.8}
+                    className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
+                  />
+                  Secure portal
+                </div>
               </div>
-              <div>
-                <h2
-                  id="result-search-heading"
-                  className="text-base font-bold text-slate-950 dark:text-white"
-                >
-                  Find your result
-                </h2>
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  Use your index number or NIC number.
+            </div>
+
+            <div className="px-6 py-6 sm:px-7 sm:py-7">
+              {queryFailed ? (
+                <StatusMessage
+                  icon={AlertTriangle}
+                  title="Result service temporarily unavailable"
+                  description="We could not connect to the result service. Please wait a moment and try again."
+                />
+              ) : publishedExam ? (
+                <SearchForm
+                  examinationId={publishedExam.id}
+                  examName={`${publishedExam.name} ${publishedExam.year}`}
+                />
+              ) : (
+                <StatusMessage
+                  icon={Clock3}
+                  title="Results Not Yet Published"
+                  description="No results have been released yet. Please check back after the official announcement."
+                />
+              )}
+            </div>
+
+            <div className="border-t border-slate-200/80 bg-slate-50/80 px-6 py-4 dark:border-white/[0.07] dark:bg-[#101b2d] sm:px-7">
+              <div className="flex items-start gap-3">
+                <LockKeyhole
+                  aria-hidden="true"
+                  strokeWidth={1.8}
+                  className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400"
+                />
+                <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  Your information is used only for result verification. Never share your NIC or
+                  index number with unauthorized persons.
                 </p>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="p-4 sm:p-7">
-            {queryFailed ? (
-              <div className="flex flex-col items-center py-8 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300">
-                  <AlertTriangle aria-hidden="true" strokeWidth={1.8} className="h-7 w-7" />
-                </div>
-                <h3 className="mt-4 text-base font-semibold text-slate-950 dark:text-white">
-                  Results portal is temporarily unavailable
-                </h3>
-                <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  We could not connect to the result service. Please wait a moment and refresh this
-                  page.
-                </p>
-              </div>
-            ) : currentExam ? (
-              <SearchForm
-                examinationId={currentExam.id}
-                examName={`${currentExam.name} ${currentExam.year}`}
-              />
-            ) : (
-              <div className="flex flex-col items-center py-8 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300">
-                  <Clock3 aria-hidden="true" strokeWidth={1.8} className="h-7 w-7" />
-                </div>
-                <h3 className="mt-4 text-base font-semibold text-slate-950 dark:text-white">
-                  Results Not Yet Published
-                </h3>
-                <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  No results have been released yet. Please check back after the official result
-                  announcement.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="border-t border-slate-200/80 bg-slate-50/60 px-4 py-4 sm:px-6 dark:border-slate-800 dark:bg-slate-950/[0.45] sm:px-7">
-            <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
-              Need help? Contact your school&apos;s examination coordinator. Never share your NIC
-              with anyone outside the official process.
-            </p>
-          </div>
-        </section>
+          <p className="mt-5 text-center text-xs text-slate-500 dark:text-slate-400">
+            Need assistance? Contact your school examination coordinator.
+          </p>
+        </div>
       </div>
+    </div>
+  );
+}
+
+interface IconTextProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+function TrustItem({ icon: Icon, title, description }: IconTextProps): React.JSX.Element {
+  return (
+    <div className="flex gap-3.5">
+      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-300/60 bg-blue-100/60 text-blue-700 dark:border-blue-400/15 dark:bg-blue-400/[0.06] dark:text-blue-400">
+        <Icon aria-hidden="true" strokeWidth={1.8} className="h-5 w-5" />
+      </div>
+      <div>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-200">{title}</h2>
+        <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-400">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+interface ExamFactProps {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+}
+
+function ExamFact({ icon: Icon, label, value }: ExamFactProps): React.JSX.Element {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-white/90 bg-white/60 px-4 py-3 shadow-sm shadow-blue-950/[0.03] backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.035] dark:shadow-none">
+      <Icon
+        aria-hidden="true"
+        strokeWidth={1.8}
+        className="h-4 w-4 text-blue-700 dark:text-blue-400"
+      />
+      <div>
+        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+          {label}
+        </p>
+        <p className="mt-0.5 max-w-[13rem] truncate text-xs font-semibold text-slate-800 dark:text-slate-300">
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function StatusMessage({ icon: Icon, title, description }: IconTextProps): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center py-8 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100/70 text-blue-700 dark:bg-blue-400/[0.08] dark:text-blue-300">
+        <Icon aria-hidden="true" strokeWidth={1.8} className="h-7 w-7" />
+      </div>
+      <h3 className="mt-4 text-base font-semibold text-slate-950 dark:text-white">{title}</h3>
+      <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
+        {description}
+      </p>
     </div>
   );
 }
