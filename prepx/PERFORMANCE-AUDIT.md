@@ -88,3 +88,69 @@ Do not run next build and next dev concurrently against the same .next directory
 - Supabase embedded relation queries: https://supabase.com/docs/guides/database/joins-and-nesting
 - Inter 4.1 font source and license: https://github.com/rsms/inter/tree/v4.1
 
+# Follow-up navigation review — 2026-10-09
+
+## Baseline and scope
+
+Reviewed the installed-version lockfile, App Router navigation, public search
+request path, Supabase indexes, layouts, loading boundaries, and available
+verification tooling. The lockfile pins Next.js 15.5.26 and React 19.3.0.
+
+The previous production-browser measurements and their limits are recorded in
+`DEEP-AUDIT.md` (2026-09-30): first-load shared JavaScript was about 103 kB, and
+warmed navigation medians ranged from 269 ms to 476 ms for the measured routes.
+Those measurements were not repeated in this environment.
+
+The workspace initially had an incomplete `node_modules`; `npm ci` restored the
+507 lockfile packages without changing `package-lock.json`. Lint, TypeScript,
+`npm test`, and the production build all passed. The build reported 103 kB shared
+first-load JavaScript, 141 kB for `/`, and 153 kB for `/results`. These are
+Next.js build figures, not browser transfer or Core Web Vitals measurements.
+
+The offline load validator initially exposed a k6 2.x environment issue: k6
+does not expose inherited variables to `inspect` by default, so native `inspect`
+rejected its missing `BASE_URL` ([k6 environment-variable docs](https://grafana.com/docs/k6/latest/using-k6/environment-variables/)).
+The launcher passes only its allowlisted load settings; it now opts k6 into
+reading that child environment, and the validator uses the same flag.
+`npm run load:validate` now passes both its offline checks and native
+`k6 inspect`; no HTTP requests are sent by either.
+
+No browser/API timings, Core Web Vitals, or capacity results were collected.
+Although `.env.load` is configured for a loopback smoke target and fictional
+fixture, `.env.local` points the app at a remote Supabase project. I did not
+start the app or send even read-only search traffic to that shared database.
+There was no production or other external service traffic.
+
+## Prioritized finding and change
+
+| Priority | Finding | Evidence | Change |
+| --- | --- | --- | --- |
+| Medium | The shared admin sidebar renders nine route links with Next's default viewport prefetch enabled, while also explicitly prefetching a destination on hover/focus. This can request route payloads for destinations the administrator has not chosen, adding background traffic on slower connections. | `src/components/admin/sidebar-nav.tsx` has nine links; all omitted the `prefetch` prop. [Next.js 15](https://nextjs.org/docs/15/app/guides/prefetching) automatically prefetches visible `Link`s in production. | Set `prefetch={false}` on sidebar links. Existing hover/focus `router.prefetch` and client-side navigation remain, so likely destinations can still warm on intent. |
+
+The expected reduction in unsolicited sidebar prefetches is based on framework
+behavior and source inspection; it was not quantified in a browser because the
+local app cannot currently start. The change does not establish a navigation
+latency improvement or alter initial bundle size.
+
+## Search and database review
+
+The public search route still checks publication before reading a student,
+uses exact examination-scoped index/NIC equality against existing indexes, and
+loads subject and grade rows concurrently after finding the student. Search
+responses remain uncached and the publication check remains live. No query or
+schema change was justified without live database latency evidence.
+
+## Remaining verification
+
+The public homepage still waits for a live published-examination query before
+returning its first JSX. This is a concrete TTFB dependency, though its current
+latency was not measured. Publication status must stay fresh, so it was left
+unchanged; measure it on an isolated target before considering streaming or any
+other change.
+
+To measure navigation and exercise the smoke profile, point `.env.local` at an
+isolated local/staging Supabase project with the dedicated fictional fixture,
+then run the production browser measurements and `npm run load:smoke`. A
+100–500 VU capacity run still needs an isolated performance target, reviewed
+rate limits, and its explicit high-load configuration; no such run was attempted
+here.

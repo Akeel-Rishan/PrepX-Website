@@ -35,7 +35,13 @@ try {
       env[key] = value;
   env.K6_NO_USAGE_REPORT = 'true';
   fs.mkdirSync(path.join(__dirname, 'results'), { recursive: true });
-  const args = ['run', '--no-usage-report', '--config', path.join(__dirname, 'k6.json')];
+  const args = [
+    'run',
+    '--no-usage-report',
+    '--include-system-env-vars',
+    '--config',
+    path.join(__dirname, 'k6.json'),
+  ];
   if (supplied.LOAD_TEST_EXPORT === 'true')
     args.push('--out', 'json=tests/load/results/metrics.json');
   args.push('tests/load/search.js');

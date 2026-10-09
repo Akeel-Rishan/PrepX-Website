@@ -28,6 +28,7 @@ export function SidebarNav({ onNavClick }: SidebarNavProps): React.JSX.Element {
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={false}
                   onMouseEnter={() => router.prefetch(item.href)}
                   onFocus={() => router.prefetch(item.href)}
                   onClick={(event) => {
