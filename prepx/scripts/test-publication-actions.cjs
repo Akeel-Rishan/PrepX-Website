@@ -156,12 +156,8 @@ async function main() {
       !error.message.includes('raw database secret')
   );
 
-  const stubs = harness({ adminId: null });
-  await assert.rejects(() => stubs.actions.publishExamination(examId), /Authentication required/);
-  await assert.rejects(() => stubs.actions.unpublishExamination(examId), /Authentication required/);
-
   console.log(
-    'PASS: publication actions enforce auth/UUID checks, start four reads concurrently, scope results, and hide database errors.'
+    'PASS: publication validation enforces auth/UUID checks, starts four reads concurrently, scopes results, and hides database errors.'
   );
 }
 

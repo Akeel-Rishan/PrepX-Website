@@ -117,26 +117,3 @@ export async function runPublicationValidation(
     throw new Error('Publication validation could not be completed. Please try again.');
   }
 }
-
-async function validatePublicationStub(examinationId: string): Promise<void> {
-  try {
-    if (!(await getAdminUserId())) throw new Error('unauthorized');
-    if (!UUID_REGEX.test(examinationId)) throw new Error('invalid-id');
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : 'unknown';
-    if (reason === 'unauthorized') throw new Error('Authentication required.');
-    if (reason === 'invalid-id') throw new Error('Invalid examination.');
-    console.error('[Publication Auth Error]', { reason });
-    throw new Error('Unable to verify the administrator session.');
-  }
-}
-
-/** Authenticated placeholder for Step 9.2 publication. */
-export async function publishExamination(examinationId: string): Promise<void> {
-  await validatePublicationStub(examinationId);
-}
-
-/** Authenticated placeholder for Step 9.2 unpublication. */
-export async function unpublishExamination(examinationId: string): Promise<void> {
-  await validatePublicationStub(examinationId);
-}

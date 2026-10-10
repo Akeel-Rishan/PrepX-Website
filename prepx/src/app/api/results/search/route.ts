@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { buildPublicStudentResult } from '@/lib/public-result';
 import { checkResultSearchRateLimit } from '@/lib/rate-limit';
 import { readSearchBody } from '@/lib/rate-limit/request-body';
 import { createAdminClient } from '@/lib/supabase/server';
-import { searchSchema } from '@/lib/validations/search';
+import { searchRequestSchema } from '@/lib/validations/search';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-const examinationIdSchema = z.uuid();
 
 type ErrorCode =
   'VALIDATION_ERROR' | 'RATE_LIMITED' | 'NOT_PUBLISHED' | 'NOT_FOUND' | 'SERVER_ERROR';
@@ -69,10 +66,6 @@ export async function OPTIONS(): Promise<NextResponse> {
   return methodNotAllowed();
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
 export async function POST(request: Request): Promise<NextResponse> {
   const payload = await readSearchBody(request);
   const rateLimit = await checkResultSearchRateLimit(request.headers, payload);
@@ -86,25 +79,22 @@ export async function POST(request: Request): Promise<NextResponse> {
   const limitedError = (code: ErrorCode, status: number) =>
     errorResponse(code, status, rateLimit.headers);
   const contentType = request.headers.get('content-type')?.split(';')[0].trim().toLowerCase();
-  if (contentType !== 'application/json' || !isRecord(payload)) {
+  if (contentType !== 'application/json') {
     return limitedError('VALIDATION_ERROR', 400);
   }
 
-  const examinationId = examinationIdSchema.safeParse(payload.examinationId);
-  const search = searchSchema.safeParse({
-    indexNumber: payload.indexNumber,
-    nicNumber: payload.nicNumber,
-  });
-  if (!examinationId.success || !search.success) {
+  const validation = searchRequestSchema.safeParse(payload);
+  if (!validation.success) {
     return limitedError('VALIDATION_ERROR', 400);
   }
+  const { examinationId, indexNumber, nicNumber } = validation.data;
 
   try {
     const admin = createAdminClient();
     const { data: examination, error: examinationError } = await admin
       .from('examinations')
       .select('id, name, year, status')
-      .eq('id', examinationId.data)
+      .eq('id', examinationId)
       .maybeSingle();
 
     if (examinationError) {
@@ -122,9 +112,9 @@ export async function POST(request: Request): Promise<NextResponse> {
       .from('students')
       .select('id, full_name, index_number, nic_number, school_name, examination_center')
       .eq('examination_id', examination.id);
-    studentQuery = search.data.indexNumber
-      ? studentQuery.eq('index_number', search.data.indexNumber)
-      : studentQuery.eq('nic_number', search.data.nicNumber!);
+    studentQuery = indexNumber
+      ? studentQuery.eq('index_number', indexNumber)
+      : studentQuery.eq('nic_number', nicNumber!);
 
     const { data: student, error: studentError } = await studentQuery.maybeSingle();
     if (studentError) {

@@ -223,41 +223,9 @@ export type Database = {
           created_at?: string;
         };
       };
-      result_search_rate_limits: {
-        Relationships: [];
-        Row: {
-          key_hash: string;
-          window_started_at: string;
-          request_count: number;
-          expires_at: string;
-        };
-        Insert: {
-          key_hash: string;
-          window_started_at: string;
-          request_count: number;
-          expires_at: string;
-        };
-        Update: {
-          key_hash?: string;
-          window_started_at?: string;
-          request_count?: number;
-          expires_at?: string;
-        };
-      };
     };
     Views: { [_ in never]: never };
     Functions: {
-      check_result_search_rate_limit: {
-        Args: {
-          p_key_hash: string;
-          p_max_requests: number;
-          p_window_seconds: number;
-        };
-        Returns: Array<{
-          allowed: boolean;
-          retry_after_seconds: number;
-        }>;
-      };
       import_exam_results: {
         Args: {
           p_admin_id: string;

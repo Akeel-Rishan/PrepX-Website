@@ -79,7 +79,7 @@ function isNullableString(value: unknown): value is string | null {
   return value === null || typeof value === 'string';
 }
 
-/** Treat sessionStorage as untrusted and validate it before rendering student information. */
+/** Treat every client-side result payload as untrusted before rendering student information. */
 export function isPublicStudentResult(value: unknown): value is PublicStudentResult {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const result = value as Record<string, unknown>;

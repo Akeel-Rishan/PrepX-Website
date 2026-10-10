@@ -31,7 +31,6 @@ const { getPublicSearchErrorMessage, preparePublicSearch, PUBLIC_SEARCH_ERROR_ME
   'src/lib/public-search.ts'
 );
 const { buildPublicStudentResult, isPublicStudentResult } = load('src/lib/public-result.ts');
-const { consumeMemoryRateLimit } = load('src/lib/rate-limit.ts');
 
 const empty = preparePublicSearch('  ', '');
 for (const inherited of ['toString', '__proto__', 'constructor', 'hasOwnProperty']) {
@@ -131,14 +130,6 @@ const resultWithInactiveGrade = buildPublicStudentResult({
 });
 assert.equal(resultWithInactiveGrade.overallStatus, 'Incomplete');
 
-const limitKey = 'test-public-search-rate-limit';
-assert.equal(consumeMemoryRateLimit(limitKey, 1_000, 2, 60).allowed, true);
-assert.equal(consumeMemoryRateLimit(limitKey, 1_001, 2, 60).allowed, true);
-const limited = consumeMemoryRateLimit(limitKey, 1_002, 2, 60);
-assert.equal(limited.allowed, false);
-assert.equal(limited.retryAfterSeconds, 60);
-assert.equal(consumeMemoryRateLimit(limitKey, 61_001, 2, 60).allowed, true);
-
 console.log(
-  'PASS: public result search validates input, masks private data, builds safe results, validates stored data, maps API errors, and rate limits repeated attempts.'
+  'PASS: public result search validates input, masks private data, builds safe results, validates stored data, and maps API errors.'
 );

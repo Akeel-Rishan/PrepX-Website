@@ -36,7 +36,7 @@ for (const input of [...wrongTypes, {}, { indexNumber: '' }, { nicNumber: ' ' },
   { indexNumber: 'FAKE1', extra: true }, { indexNumber: 'FAKE1', nicNumber: 'bad' }, { indexNumber: 1 }, { nicNumber: null }]) {
   assert.equal(searchSchema.safeParse(input).success, false);
 }
-assert.deepEqual(searchSchema.parse({ indexNumber: ' fake1 ', nicNumber: ' 000000000v ' }), { indexNumber: 'FAKE1', nicNumber: old });
+assert.equal(searchSchema.safeParse({ indexNumber: ' fake1 ', nicNumber: ' 000000000v ' }).success, false);
 for (const examinationId of [...wrongTypes, '', 'bad', ' '+id, id+'x']) assert.equal(searchRequestSchema.safeParse({ examinationId, indexNumber: 'FAKE1' }).success, false);
 assert.equal(searchRequestSchema.parse({ examinationId: id, nicNumber: modern }).examinationId, id);
 for (const [index, nic] of [['',''],[' ',' '],['bad/index',''],['FAKE1','bad'],['FAKE1\n',''],['','000000000V\n']]) assert.equal(preparePublicSearch(index,nic).ok, false);

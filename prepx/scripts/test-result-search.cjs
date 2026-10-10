@@ -158,6 +158,7 @@ async function main() {
     for (const input of ['{', null, [], {}, { ...valid, indexNumber: ' ' },
       { ...valid, nicNumber: '12345' }, { ...valid, examinationId: 'bad' },
       { indexNumber: 'OL2026001' }, { ...valid, indexNumber: 123 },
+      { ...valid, nicNumber: nic },
       { examinationId: examId, nicNumber: '200312345678v' }]) {
       const invalid = harness();
       const result = await search(invalid, input);
@@ -173,10 +174,10 @@ async function main() {
     }
     originalLog('PASS 6: GET/PUT/DELETE blocked');
     const normalized = harness();
-    await search(normalized, { ...valid, indexNumber: ' ol2026001 ', nicNumber: nic });
+    await search(normalized, { ...valid, indexNumber: ' ol2026001 ' });
     assert.equal(normalized.calls[1].filters.index_number, valid.indexNumber);
     assert.ok(!Object.hasOwn(normalized.calls[1].filters, 'nic_number'));
-    originalLog('PASS 7: whitespace/case normalization and index priority');
+    originalLog('PASS 7: whitespace/case normalization and unambiguous lookup');
     originalLog('PASS 8: status precedence, optional subjects and empty-required edge cases');
     originalLog('PASS 9: no-cache headers on success and errors');
     for (const table of ['examinations', 'students', 'subjects', 'student_results']) {
