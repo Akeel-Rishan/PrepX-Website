@@ -1,8 +1,9 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
 import { Dropdown } from '@/components/ui/dropdown';
+import { LoadingProgress } from '@/components/ui/loading-primitives';
 
 interface StudentsFilterBarProps {
   examinations: Array<{ id: string; name: string; year: number }>;
@@ -22,6 +23,7 @@ export function StudentsFilterBar({
   const router = useRouter();
   const pathname = usePathname();
   const [searchValue, setSearchValue] = useState(initialSearch);
+  const [isPending, startTransition] = useTransition();
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const filters = useRef({ search: initialSearch, examId: initialExamId, school: initialSchool });
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -33,7 +35,7 @@ export function StudentsFilterBar({
     for (const [key, value] of Object.entries(filters.current)) {
       if (value.trim()) params.set(key, value.trim());
     }
-    router.push(params.size ? pathname + '?' + params : pathname);
+    startTransition(() => router.push(params.size ? pathname + '?' + params : pathname));
   }
 
   function handleSearch(value: string) {
@@ -46,7 +48,10 @@ export function StudentsFilterBar({
   const inputClass =
     'rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-blue-500';
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    <div
+      aria-busy={isPending || undefined}
+      className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <div className="relative min-w-0 flex-1 sm:min-w-[220px]">
           <Search
@@ -103,6 +108,7 @@ export function StudentsFilterBar({
           </button>
         )}
       </div>
+      {isPending && <LoadingProgress className="absolute inset-x-0 bottom-0" />}
     </div>
   );
 }

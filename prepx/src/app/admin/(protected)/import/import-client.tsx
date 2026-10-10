@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { ArrowRight, FileCheck2 } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { LoadingStatus } from '@/components/ui/loading-primitives';
 import { parseAndValidateImportAction } from '@/lib/actions/import';
 import type { ImportHeaderMapping, ImportPreviewResult } from '@/types/import';
 import { ExaminationSelector, type ImportExamination } from './_components/examination-selector';
@@ -232,9 +233,10 @@ export function ImportClient({
             {selectedFile && <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4"><FileCheck2 aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-700" /><div><p className="text-sm font-semibold text-blue-900">Ready to Parse</p><p className="mt-0.5 text-sm text-blue-800">The file passed initial checks and is ready for server-side validation.</p></div></div>}
             {parseError && <Alert variant="error" onClose={() => setParseError(null)}>{parseError}</Alert>}
             {isParsing && (
-              <p role="status" className="text-center text-sm text-gray-500 motion-safe:animate-pulse">
-                Parsing and validating the file, please wait…
-              </p>
+              <LoadingStatus
+                label="Parsing and validating your file"
+                detail="Checking rows, subjects, and grade formats."
+              />
             )}
             <div className="flex justify-end border-t border-gray-100 pt-5">
               <Button onClick={() => void parseFile()} disabled={!selectedExaminationId || !selectedFile || subjects.length === 0} loading={isParsing} className="w-full md:w-auto">{isParsing ? 'Parsing...' : 'Parse & Preview'} {!isParsing && <ArrowRight aria-hidden="true" className="h-4 w-4" />}</Button>

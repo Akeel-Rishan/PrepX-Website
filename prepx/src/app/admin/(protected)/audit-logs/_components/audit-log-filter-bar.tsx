@@ -4,6 +4,7 @@ import { useRef, useTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { Dropdown, type DropdownOption } from '@/components/ui/dropdown';
+import { LoadingProgress } from '@/components/ui/loading-primitives';
 import { AUDIT_ACTION_GROUPS, AUDIT_ACTION_META, ENTITY_TYPE_OPTIONS } from '@/lib/audit-actions';
 
 interface AuditLogFilterBarProps {
@@ -58,7 +59,7 @@ export function AuditLogFilterBar({
 
   return (
     <div
-      className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900"
+      className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900"
       aria-busy={isPending || undefined}
     >
       <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-end">
@@ -128,6 +129,7 @@ export function AuditLogFilterBar({
           </button>
         )}
       </div>
+      {isPending && <LoadingProgress className="absolute inset-x-0 bottom-0" />}
     </div>
   );
 }

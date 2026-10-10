@@ -6,6 +6,7 @@ import { AlertTriangle, EyeOff, Globe, RefreshCw } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ConfirmModal } from '@/components/ui/modal';
+import { LoadingProgress } from '@/components/ui/loading-primitives';
 import { publishExaminationAction, unpublishExaminationAction } from '@/lib/actions/publication';
 import type { ExamStatus } from '@/lib/constants';
 
@@ -115,7 +116,8 @@ export function PublicationControls({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" aria-busy={isPending || undefined}>
+      {isPending && <LoadingProgress />}
       {error && (
         <Alert variant="error" onClose={() => setError(null)}>
           {error}

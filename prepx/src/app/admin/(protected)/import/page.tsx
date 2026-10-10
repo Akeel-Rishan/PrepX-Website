@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getExaminationsWithCounts, type ExaminationWithCount } from '@/lib/data/examinations';
 import { getSubjectsByExamination } from '@/lib/data/subjects';
+import { Skeleton, LoadingProgress } from '@/components/ui/loading-primitives';
 import { ImportClient } from './import-client';
 
 export const metadata: Metadata = { title: 'Import Results | PrepX Admin' };
@@ -13,7 +14,19 @@ function isImportable(
 }
 
 function ImportSkeleton(): React.JSX.Element {
-  return <div aria-label="Loading import workflow" className="space-y-4"><div className="h-28 animate-pulse rounded-xl bg-gray-100" /><div className="h-96 animate-pulse rounded-xl bg-gray-100" /></div>;
+  return (
+    <div role="status" aria-live="polite" aria-busy="true" className="app-loading-enter space-y-4">
+      <span className="sr-only">Loading import workflow...</span>
+      <LoadingProgress />
+      <Skeleton className="h-28" rounded="xl" />
+      <div className="space-y-4 rounded-2xl border border-slate-200/90 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <Skeleton className="h-7 w-44" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-52 w-full" rounded="xl" />
+        <Skeleton className="ml-auto h-10 w-40" />
+      </div>
+    </div>
+  );
 }
 
 async function ImportPageContent({ examId }: { examId: string }): Promise<React.JSX.Element> {

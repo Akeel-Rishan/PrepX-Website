@@ -4,6 +4,7 @@ import { useTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { CalendarDays } from 'lucide-react';
 import { Dropdown } from '@/components/ui/dropdown';
+import { Spinner } from '@/components/ui/spinner';
 
 interface YearSelectorProps {
   years: number[];
@@ -22,7 +23,10 @@ export function YearSelector({ years, selectedYear }: YearSelectorProps): React.
         <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-200/70">
           Reporting year
         </span>
-        <span className="block text-sm font-medium">{isPending ? 'Updating…' : selectedYear}</span>
+        <span className="flex items-center gap-2 text-sm font-medium">
+          {isPending && <Spinner size="sm" />}
+          {isPending ? 'Updating...' : selectedYear}
+        </span>
       </span>
       <Dropdown
         ariaLabel="Dashboard year"

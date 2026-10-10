@@ -7,7 +7,6 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
-  LoaderCircle,
   Pencil,
   PlusCircle,
   Trash2,
@@ -15,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { ConfirmModal } from '@/components/ui/modal';
+import { Spinner } from '@/components/ui/spinner';
 import {
   deleteSubjectAction,
   moveSubjectAction,
@@ -165,10 +165,7 @@ export function SubjectsManager({
                               }
                             >
                               {pending?.id === subject.id && pending.action === direction ? (
-                                <LoaderCircle
-                                  aria-hidden="true"
-                                  className="h-3.5 w-3.5 animate-spin"
-                                />
+                                <Spinner size="sm" className="h-3.5 w-3.5" />
                               ) : (
                                 <Icon aria-hidden="true" className="h-3.5 w-3.5" />
                               )}

@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AlertTriangle, CheckCircle2, CircleDashed, Search } from 'lucide-react';
 import { Pagination } from '@/components/admin/pagination';
 import { Button } from '@/components/ui/button';
+import { LoadingProgress } from '@/components/ui/loading-primitives';
 import type { ReviewData, ReviewStudentRow, StatusFilter } from '@/lib/data/review';
 import { cn } from '@/lib/utils';
 import { StudentGradeEditorModal } from './student-grade-editor-modal';
@@ -71,6 +72,7 @@ export function ReviewManager({
   const pathname = usePathname();
   const [editingStudent, setEditingStudent] = useState<ReviewStudentRow | null>(null);
   const [searchValue, setSearchValue] = useState(initialSearch);
+  const [isPending, startTransition] = useTransition();
   useEffect(() => setSearchValue(initialSearch), [initialSearch]);
   useEffect(() => {
     if (searchValue === initialSearch) return;
@@ -79,7 +81,7 @@ export function ReviewManager({
       params.set('examId', examinationId);
       if (initialStatusFilter !== 'needs_attention') params.set('status', initialStatusFilter);
       if (searchValue.trim()) params.set('search', searchValue.trim());
-      router.push(`${pathname}?${params}`);
+      startTransition(() => router.push(`${pathname}?${params}`));
     }, 350);
     return () => clearTimeout(timer);
   }, [examinationId, initialSearch, initialStatusFilter, pathname, router, searchValue]);
@@ -88,7 +90,7 @@ export function ReviewManager({
     const params = new URLSearchParams({ examId: examinationId });
     if (status !== 'needs_attention') params.set('status', status);
     if (searchValue.trim()) params.set('search', searchValue.trim());
-    router.push(`${pathname}?${params}`);
+    startTransition(() => router.push(`${pathname}?${params}`));
   }
   const pills: Array<{ value: StatusFilter; label: string; count: number }> = [
     {
@@ -103,15 +105,17 @@ export function ReviewManager({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" aria-busy={isPending || undefined}>
+      {isPending && <LoadingProgress />}
       <div className="flex flex-wrap gap-2">
         {pills.map((pill) => (
           <button
             key={pill.value}
             type="button"
+            disabled={isPending}
             onClick={() => changeStatus(pill.value)}
             className={cn(
-              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-[background-color,border-color,color,opacity,transform] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60',
               initialStatusFilter === pill.value
                 ? 'border-blue-600 bg-blue-600 text-white'
                 : 'border-gray-300 bg-white text-gray-700 hover:border-blue-400'
@@ -229,7 +233,7 @@ export function ReviewManager({
       <StudentGradeEditorModal
         isOpen={Boolean(editingStudent) && !isReadOnly}
         onClose={() => setEditingStudent(null)}
-        onSuccess={() => router.refresh()}
+        onSuccess={() => startTransition(() => router.refresh())}
         student={editingStudent}
         allSubjects={data.allSubjects}
         examinationId={examinationId}

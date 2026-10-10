@@ -3,6 +3,7 @@
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Dropdown } from '@/components/ui/dropdown';
+import { Spinner } from '@/components/ui/spinner';
 
 interface ExamSelectorBarProps {
   examinations: Array<{ id: string; name: string; year: number }>;
@@ -53,7 +54,8 @@ export function ExamSelectorBar({
         className="min-w-0 sm:min-w-[240px]"
       />
       {pending && (
-        <span role="status" className="text-xs text-gray-500">
+        <span role="status" className="inline-flex items-center gap-2 text-xs font-medium text-gray-500">
+          <Spinner size="sm" />
           {loadingLabel}
         </span>
       )}

@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { Dropdown } from '@/components/ui/dropdown';
+import { LoadingProgress } from '@/components/ui/loading-primitives';
 
 interface ResultsFilterBarProps {
   examinations: Array<{ id: string; name: string; year: number }>;
@@ -19,6 +20,7 @@ export function ResultsFilterBar({
   const router = useRouter();
   const pathname = usePathname();
   const [searchValue, setSearchValue] = useState(initialSearch);
+  const [isPending, startTransition] = useTransition();
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export function ResultsFilterBar({
       const params = new URLSearchParams();
       if (selectedExamId) params.set('examId', selectedExamId);
       if (searchValue.trim()) params.set('search', searchValue.trim());
-      router.push(params.size ? `${pathname}?${params}` : pathname);
+      startTransition(() => router.push(params.size ? `${pathname}?${params}` : pathname));
     }, 350);
     return () => clearTimeout(timer.current);
   }, [initialSearch, pathname, router, searchValue, selectedExamId]);
@@ -42,11 +44,14 @@ export function ResultsFilterBar({
     setSearchValue('');
     const params = new URLSearchParams();
     if (examId) params.set('examId', examId);
-    router.push(params.size ? `${pathname}?${params}` : pathname);
+    startTransition(() => router.push(params.size ? `${pathname}?${params}` : pathname));
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
+    <div
+      aria-busy={isPending || undefined}
+      className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4"
+    >
       <div className="flex flex-col gap-3 xl:flex-row">
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center xl:flex-1">
           <label
@@ -66,6 +71,7 @@ export function ResultsFilterBar({
               })),
             ]}
             onValueChange={handleExamChange}
+            disabled={isPending}
             ariaLabel="Examination"
             className="min-w-0 sm:flex-1"
           />
@@ -87,6 +93,7 @@ export function ResultsFilterBar({
           </div>
         )}
       </div>
+      {isPending && <LoadingProgress className="absolute inset-x-0 bottom-0" />}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FileSearch, ShieldCheck } from 'lucide-react';
 import { usePublicResult } from '@/components/public/result-provider';
 import { PublicStatusPage } from '@/components/public/public-status-page';
+import { ResultPageSkeleton } from '@/components/ui/loading';
 import { PrintActions } from './_components/print-actions';
 import { PrintHeader } from './_components/print-header';
 import { GradesTable, OverallStatusCard } from './_components/result-details';
@@ -39,12 +40,7 @@ export default function ResultsPage(): React.JSX.Element {
   if (!ready) {
     return (
       <>
-        <div
-          role="status"
-          className="result-loading px-4 py-12 text-center text-sm text-slate-600 dark:text-slate-300"
-        >
-          Loading result…
-        </div>
+        <ResultPageSkeleton />
         <noscript>
           <style>{'.result-loading { display: none; }'}</style>
           <div className="px-4 py-12 text-center">

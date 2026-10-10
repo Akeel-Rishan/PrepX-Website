@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { LoaderCircle } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 
@@ -60,7 +60,7 @@ export function SidebarNav({ onNavClick }: SidebarNavProps): React.JSX.Element {
                 >
                   <span aria-hidden="true">
                     {isPending && pendingHref === item.href ? (
-                      <LoaderCircle className="h-4 w-4 flex-shrink-0 motion-safe:animate-spin" />
+                      <Spinner size="sm" />
                     ) : (
                       <item.icon className="h-4 w-4 flex-shrink-0" />
                     )}

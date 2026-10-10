@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { AlertCircle, ArrowRight, Hash, IdCard, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowRight, Hash, IdCard } from 'lucide-react';
 import {
   getPublicSearchErrorMessage,
   preparePublicSearch,
   PUBLIC_SEARCH_ERROR_MESSAGES,
 } from '@/lib/public-search';
 import { usePublicResult } from '@/components/public/result-provider';
+import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 
 interface SearchFormProps {
@@ -217,11 +218,7 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
       >
         {isLoading ? (
           <>
-            <Loader2
-              aria-hidden="true"
-              strokeWidth={1.8}
-              className="h-[18px] w-[18px] animate-spin"
-            />
+            <Spinner size="sm" className="h-[18px] w-[18px]" />
             Searching...
           </>
         ) : (
