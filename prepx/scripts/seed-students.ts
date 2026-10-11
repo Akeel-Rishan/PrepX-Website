@@ -1,5 +1,7 @@
 ﻿import { loadEnvConfig } from '@next/env';
 import { createClient } from '@supabase/supabase-js';
+
+// Synthetic local-development fixtures only. Never run against Preview or Production.
 loadEnvConfig(process.cwd());
 async function main() {
   const supabase = createClient(
@@ -17,16 +19,21 @@ async function main() {
     .single();
   if (error || !exam)
     throw new Error('Published 2026 examination not found; run the dashboard seed first.');
-  const schools = ['Zahira College', 'Royal College', 'Visakha Vidyalaya', 'Muslim Ladies College'];
+  const schools = [
+    'Example Academy Alpha',
+    'Example Academy Beta',
+    'Example Academy Gamma',
+    'Example Academy Delta',
+  ];
   const students = Array.from({ length: 55 }, (_, i) => {
     const n = i + 6;
     return {
       examination_id: exam.id,
-      full_name: 'Student ' + n,
+      full_name: 'Fictional Student ' + String(n).padStart(3, '0'),
       index_number: 'OL2026' + String(n).padStart(3, '0'),
-      nic_number: String(2003 + (n % 5)) + String(n).padStart(8, '0'),
+      nic_number: String(n).padStart(12, '0'),
       school_name: schools[n % 4],
-      examination_center: n % 2 === 0 ? 'Centre A' : 'Centre B',
+      examination_center: n % 2 === 0 ? 'Example Centre A' : 'Example Centre B',
     };
   });
   const { error: insertError } = await supabase

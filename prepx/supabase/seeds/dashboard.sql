@@ -1,4 +1,5 @@
--- Development/test data requested for Step 3.2. This is not a migration.
+-- Synthetic development/test data only. This is not a migration and must not
+-- be applied to Preview or Production projects.
 -- Stable IDs and conflict handling make reruns safe without overwriting rows.
 -- The matching scripts/seed-dashboard.ts provides an alternative via the API.
 BEGIN;
@@ -12,11 +13,11 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.students (examination_id, full_name, index_number, nic_number, school_name)
 VALUES
-  ('3a320000-0000-4000-8000-000000002026', 'Mohamed Akeel', 'OL2026001', '200312345678', 'Zahira College'),
-  ('3a320000-0000-4000-8000-000000002026', 'Amali Perera', 'OL2026002', '200456789012', 'Visakha Vidyalaya'),
-  ('3a320000-0000-4000-8000-000000002026', 'Kasun Fernando', 'OL2026003', '200387654321', 'Royal College'),
-  ('3a320000-0000-4000-8000-000000002026', 'Fathima Rizna', 'OL2026004', '200398765432', 'Muslim Ladies College'),
-  ('3a320000-0000-4000-8000-000000002026', 'Dinusha Silva', 'OL2026005', '200312398765', 'Mahanama College')
+  ('3a320000-0000-4000-8000-000000002026', 'Fictional Student 001', 'OL2026001', '000000000001', 'Example Academy Alpha'),
+  ('3a320000-0000-4000-8000-000000002026', 'Fictional Student 002', 'OL2026002', '000000000002', 'Example Academy Beta'),
+  ('3a320000-0000-4000-8000-000000002026', 'Fictional Student 003', 'OL2026003', '000000000003', 'Example Academy Gamma'),
+  ('3a320000-0000-4000-8000-000000002026', 'Fictional Student 004', 'OL2026004', '000000000004', 'Example Academy Delta'),
+  ('3a320000-0000-4000-8000-000000002026', 'Fictional Student 005', 'OL2026005', '000000000005', 'Example Academy Epsilon')
 ON CONFLICT (examination_id, index_number) DO NOTHING;
 
 COMMIT;

@@ -16,7 +16,7 @@ Requested checklist (automated checks are not browser visual confirmation):
 | 2 Pagination | Queries return 25/25/10 distinct rows; all three summaries and URL parameter preservation pass. Out-of-range pages recover to page 3. Browser clicks remain unverified. |
 | 3 Search | Name and school search queries pass; index search passes in combined filters. Browser debounce timing remains unverified. |
 | 4 Examination | Query filters by examination; examination-scoped schools verified. Dropdown interaction remains unverified. |
-| 5 School | Royal College filtering passes. Dropdown interaction remains unverified. |
+| 5 School | Example Academy Gamma filtering passes. Dropdown interaction remains unverified. |
 | 6 Combined / Clear | Combined search/examination/school query passes. Clear interaction remains unverified. |
 | 7 NIC | Rendered student table HTML contains no full NIC values. |
 | 8 Add | Empty-state Add link verified in rendered HTML; new route handled by detail placeholder. Browser navigation remains unverified. |

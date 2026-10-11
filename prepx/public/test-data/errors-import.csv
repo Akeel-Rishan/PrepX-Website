@@ -1,6 +1,6 @@
 index_number,nic_number,full_name,school_name,TML,ENG
-OL2026200,200312345678,Valid Student,Good School,A,B
-,200456789012,Missing Index,Good School,B,B
-OL2026200,200312345678,Duplicate Index,School B,C,S
+OL2026200,000000000200,Fictional Valid Student,Example School,A,B
+,000000000201,Fictional Missing Index,Example School,B,B
+OL2026200,000000000200,Fictional Duplicate Index,Example School B,C,S
 OL2026202,BADNIC,Invalid NIC,School C,A,X
-OL2026203,200399900203,Good Again,School D,B,C
+OL2026203,000000000203,Fictional Valid Student 2,Example School D,B,C

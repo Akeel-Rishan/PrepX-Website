@@ -128,6 +128,9 @@ Open [http://localhost:3000/admin/login](http://localhost:3000/admin/login) and 
 | `npm start` | Serve the production build |
 | `npm run lint` | Run ESLint |
 | `npm run type-check` | Check TypeScript without emitting files |
+| `npm run typecheck` | Alias used by deployment/CI instructions |
+| `npm run env:check` | Validate local environment names and shapes without printing values |
+| `npm run audit:deployment` | Audit tracked env files, credential patterns, browser bundles, and health output |
 | `npm run test:db` | Check database connectivity and table read access |
 
 Additional development, verification, and measurement scripts live in [prepx/scripts/](prepx/scripts/). Some require a running server, configured accounts, or test data; inspect each script before running it.
@@ -168,6 +171,8 @@ npm start
 ```
 
 For hosting, set the application root to **`prepx`**, configure the environment variables above, and use the production URL for `NEXT_PUBLIC_APP_URL`. Apply the database migrations and provision the administrator account for the target Supabase project.
+
+The complete Vercel settings, environment classification, Supabase Auth configuration, preview checklist, promotion, rollback, and secret-rotation procedures are in the [Vercel deployment guide](prepx/docs/deployment/vercel.md).
 
 `GET /api/health` returns the service status and timestamp. It checks that the application responds; it does not check database connectivity. The unfinished workflows listed above remain unavailable in a deployed build.
 

@@ -2,7 +2,8 @@ import { loadEnvConfig } from '@next/env';
 import { createClient } from '@supabase/supabase-js';
 import type { ExaminationInsert, StudentInsert } from '../src/types';
 
-// Stable IDs make this development seed repeatable without changing existing rows.
+// Synthetic fixtures only. Stable IDs make this development seed repeatable
+// without changing existing rows. Never run against Preview or Production.
 const examinations: ExaminationInsert[] = [
   {
     id: '3a320000-0000-4000-8000-000000002026',
@@ -29,34 +30,34 @@ const examinations: ExaminationInsert[] = [
 
 const students: StudentInsert[] = [
   {
-    full_name: 'Mohamed Akeel',
+    full_name: 'Fictional Student 001',
     index_number: 'OL2026001',
-    nic_number: '200312345678',
-    school_name: 'Zahira College',
+    nic_number: '000000000001',
+    school_name: 'Example Academy Alpha',
   },
   {
-    full_name: 'Amali Perera',
+    full_name: 'Fictional Student 002',
     index_number: 'OL2026002',
-    nic_number: '200456789012',
-    school_name: 'Visakha Vidyalaya',
+    nic_number: '000000000002',
+    school_name: 'Example Academy Beta',
   },
   {
-    full_name: 'Kasun Fernando',
+    full_name: 'Fictional Student 003',
     index_number: 'OL2026003',
-    nic_number: '200387654321',
-    school_name: 'Royal College',
+    nic_number: '000000000003',
+    school_name: 'Example Academy Gamma',
   },
   {
-    full_name: 'Fathima Rizna',
+    full_name: 'Fictional Student 004',
     index_number: 'OL2026004',
-    nic_number: '200398765432',
-    school_name: 'Muslim Ladies College',
+    nic_number: '000000000004',
+    school_name: 'Example Academy Delta',
   },
   {
-    full_name: 'Dinusha Silva',
+    full_name: 'Fictional Student 005',
     index_number: 'OL2026005',
-    nic_number: '200312398765',
-    school_name: 'Mahanama College',
+    nic_number: '000000000005',
+    school_name: 'Example Academy Epsilon',
   },
 ].map((student) => ({ ...student, examination_id: '3a320000-0000-4000-8000-000000002026' }));
 

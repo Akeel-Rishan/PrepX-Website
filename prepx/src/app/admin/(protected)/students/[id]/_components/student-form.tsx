@@ -112,7 +112,7 @@ function FormFields({
             id="full_name"
             name="full_name"
             label="Full Name"
-            placeholder="e.g. Mohamed Akeel"
+            placeholder="e.g. Fictional Student 001"
             defaultValue={student?.full_name ?? ''}
             error={state.fieldErrors?.full_name?.[0]}
             required
@@ -147,7 +147,7 @@ function FormFields({
             id="school_name"
             name="school_name"
             label="School Name"
-            placeholder="e.g. Zahira College"
+            placeholder="e.g. Example Academy"
             defaultValue={student?.school_name ?? ''}
             error={state.fieldErrors?.school_name?.[0]}
             required

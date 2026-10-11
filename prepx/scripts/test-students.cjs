@@ -50,11 +50,11 @@ async function main() {
   const filtered = await data.getStudentsWithPagination({ search: 'Zahira' });
   assert.ok(filtered.students.length > 0);
   assert.ok(filtered.students.every(s => s.school_name.includes('Zahira')));
-  const byName = await data.getStudentsWithPagination({ search: 'Mohamed Akeel' });
+  const byName = await data.getStudentsWithPagination({ search: 'Fictional Student 001' });
   assert.equal(byName.totalCount, 1);
-  const combined = await data.getStudentsWithPagination({ search: 'OL2026', examinationId: examId, school: 'Royal College' });
+  const combined = await data.getStudentsWithPagination({ search: 'OL2026', examinationId: examId, school: 'Example Academy Gamma' });
   assert.ok(combined.students.length > 0);
-  assert.ok(combined.students.every(s => s.examination_id === examId && s.school_name === 'Royal College'));
+  assert.ok(combined.students.every(s => s.examination_id === examId && s.school_name === 'Example Academy Gamma'));
   const schools = await data.getDistinctSchools(examId);
   assert.equal(schools.length, 5);
   assert.deepEqual(schools, [...schools].sort());

@@ -6,6 +6,8 @@ Audit date: 2026-10-11
 
 The repository is **ready to move to Vercel project and environment configuration**. The production build, deterministic suites, live database checks, linked migration history, and a Vercel-mode Upstash smoke test pass. Local secrets are configured and ignored by Git; their values were not printed or committed.
 
+Phase 16.1 configuration and verification details are recorded in `STEP-16.1-VERIFICATION.md`; operational instructions are in `docs/deployment/vercel.md`.
+
 This is not yet approval for a public production launch. A Vercel preview deployment, a dedicated published staging fixture, and operational checks remain.
 
 ## Completed before Vercel configuration

@@ -11,7 +11,7 @@ import {
   Search,
   ShieldCheck,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/server';
 import { SearchForm } from './_components/search-form';
 
 export const metadata: Metadata = {
@@ -36,7 +36,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
   let queryFailed = false;
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from('examinations')
       .select('id, name, year, organization_name, result_notice')

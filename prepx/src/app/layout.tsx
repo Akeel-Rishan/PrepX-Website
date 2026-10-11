@@ -24,12 +24,27 @@ const inter = localFont({
   variable: '--font-inter',
 });
 
+const appName = process.env.NEXT_PUBLIC_APP_NAME?.trim() || 'PrepX';
+const configuredAppUrl =
+  process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+let metadataBase: URL | undefined;
+if (configuredAppUrl) {
+  try {
+    metadataBase = new URL(configuredAppUrl);
+  } catch {
+    // The production environment audit rejects invalid URLs. Keeping metadata
+    // renderable here gives error boundaries and /api/health a chance to report.
+  }
+}
+
 export const metadata: Metadata = {
+  metadataBase,
   title: {
-    default: 'PrepX | Examination Results',
-    template: '%s | PrepX',
+    default: `${appName} | Examination Results`,
+    template: `%s | ${appName}`,
   },
-  description: 'O/L Model Examination Results Portal by PrepX.',
+  description: `O/L Model Examination Results Portal by ${appName}.`,
 };
 
 export default async function RootLayout({
