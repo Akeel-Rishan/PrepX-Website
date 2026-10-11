@@ -7,6 +7,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { LoadingStatus } from '@/components/ui/loading-primitives';
 import { parseAndValidateImportAction } from '@/lib/actions/import';
+import { MAX_IMPORT_BYTES, MAX_IMPORT_SIZE_LABEL } from '@/lib/constants';
 import type { ImportHeaderMapping, ImportPreviewResult } from '@/types/import';
 import { ExaminationSelector, type ImportExamination } from './_components/examination-selector';
 import { FileDropzone } from './_components/file-dropzone';
@@ -18,7 +19,6 @@ import { StepIndicator } from './_components/step-indicator';
 import { TemplateDownloadButton } from './_components/template-download-button';
 import { UpcomingSteps } from './_components/upcoming-steps';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const STEPS = [
   { label: 'Select File', description: 'Choose exam and file' },
   { label: 'Preview', description: 'Validate rows' },
@@ -89,9 +89,9 @@ export function ImportClient({
       setFileError('Only .xlsx and .csv files are supported.');
       return;
     }
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > MAX_IMPORT_BYTES) {
       setSelectedFile(null);
-      setFileError(`File is too large. Maximum size is 10 MB (this file is ${(file.size / (1024 * 1024)).toFixed(1)} MB).`);
+      setFileError(`File is too large. Maximum size is ${MAX_IMPORT_SIZE_LABEL} (this file is ${(file.size / (1024 * 1024)).toFixed(1)} MB).`);
       return;
     }
     if (file.size === 0) {

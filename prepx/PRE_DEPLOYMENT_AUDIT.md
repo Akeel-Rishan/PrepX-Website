@@ -1,25 +1,39 @@
 # PrepX Pre-Deployment Audit
 
-Audit date: 2026-10-10
+Audit date: 2026-10-11
 
 ## Status
 
-The application code builds and its deterministic security, validation, business-logic, and integration-safety suites pass. It is **not ready for a production launch yet** because the production rate limiter is not configured and the final staging/browser checks need an approved published-result fixture.
+The repository is **ready to move to Vercel project and environment configuration**. The production build, deterministic suites, live database checks, linked migration history, and a Vercel-mode Upstash smoke test pass. Local secrets are configured and ignored by Git; their values were not printed or committed.
 
-## Required before deployment (P0)
+This is not yet approval for a public production launch. A Vercel preview deployment, a dedicated published staging fixture, and operational checks remain.
 
-- [ ] Configure `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, and a random `RATE_LIMIT_HASH_SECRET` of at least 32 characters in every preview and production environment. Keep `RATE_LIMIT_PROVIDER=upstash` and fail-closed behavior for production.
-- [ ] Configure the production Supabase URL, publishable key, and secret key in the hosting platform. Never expose the secret key to client code.
-- [ ] Confirm migrations `001` through `005` are recorded and applied on the production Supabase project. The linked migration-history check could not complete because the direct PostgreSQL connection was terminated. Migration `006_public_result_rate_limits.sql` was removed because the active design uses Upstash and did not use that table/RPC.
-- [ ] Deploy to a preview environment and require `/api/health` to return HTTP 200. It correctly returns HTTP 503 locally while the required production rate-limit credentials are absent.
-- [ ] Create dedicated, non-production staging data with one approved `PUBLISHED` examination, then run the live public-search, browser-security, result-navigation, and print/PDF tests. The current linked data has no published examination, so these tests cannot exercise the result form without changing real data.
-- [ ] Smoke-test the complete authenticated admin flow on staging: login, examination setup, subjects, student create/edit, import, grade entry, review, publish, public lookup, unpublish, and audit logs.
+## Completed before Vercel configuration
+
+- [x] Required local Supabase, Upstash, rate-limit secret, application, and optional Gemini settings are present; values remain hidden.
+- [x] `.env.local`, `.env.test`, `.env.load`, and `.vercel` are ignored; no real environment file appears in Git history.
+- [x] Linked Supabase migrations `001` through `005` exactly match the repository.
+- [x] All six tables are reachable; `import_exam_results` is installed and rejects unknown administrators.
+- [x] Production dependencies report 0 vulnerabilities.
+- [x] Node.js is pinned to `22.x`, matching the verified local build and an available Vercel runtime.
+- [x] Direct import uploads now fit Vercel's 4.5 MB request ceiling: 4,000,000-byte file cap and 4.2 MiB Server Action envelope.
+- [x] Obsolete empty `/api/admin/import` and `/api/admin/students` route stubs were removed.
+- [x] Vercel-mode local smoke test: health 200, home 200, live Upstash-backed invalid search 400, HSTS/CSP/no-store headers present.
+
+## Required in Vercel and staging (P0)
+
+- [ ] Commit and push the audit fixes listed below.
+- [ ] Create/import the Vercel project with **Root Directory** set to `prepx`. Keep framework detection and the default build command (`npm run build`).
+- [ ] Add the production Supabase and Upstash settings to Vercel Preview and Production. Use distinct rate-limit storage/secrets between environments when possible. Never expose `SUPABASE_SECRET_KEY`, Upstash token, Gemini key, or rate-limit secret with a `NEXT_PUBLIC_` prefix.
+- [ ] Set `NEXT_PUBLIC_APP_URL` to the canonical HTTPS production domain (and an appropriate preview value if the application begins consuming it). Leave Vercel proxy and HSTS override variables unset.
+- [ ] Deploy a preview and require `/api/health` to return HTTP 200.
+- [ ] Create dedicated non-production staging data with one approved `PUBLISHED` examination, then rerun live public-search, browser-security, result-navigation, and print/PDF tests. The currently linked data has no published examination, so the browser suite correctly stops before the result form.
+- [ ] Smoke-test the authenticated admin flow on staging: login, examination setup, subjects, student create/edit, import, grade entry, review, publish, public lookup, unpublish, and audit logs.
 
 ## Required operational checks (P1)
 
 - [ ] Verify HTTPS, domain redirects, HSTS, CSP nonces, `noindex` on admin/error pages, and trusted-proxy settings on the deployed host.
 - [ ] Verify Upstash quotas across multiple application instances and confirm provider outages fail closed without exposing whether an identifier exists.
-- [ ] Confirm the hosting request-body limit supports the documented import size. If it does not, move large imports to a storage-backed upload flow.
 - [ ] Run smoke and stress load profiles against isolated staging. The load definitions pass offline validation, but native `k6` is not installed locally.
 - [ ] Test database backup and restore, monitoring, alerting, log retention/redaction, admin account recovery, and incident ownership.
 - [ ] Manually verify the browser's native Print / Save as PDF output, including multi-page result tables.
@@ -32,6 +46,10 @@ The application code builds and its deterministic security, validation, business
 
 ## Corrections made during this audit
 
+- Reduced direct import uploads from 10 MB to a Vercel-safe 4 MB and centralized the file limit across client, action, parser, tests, and documentation.
+- Pinned Node.js to `22.x` for repeatable local/Vercel builds.
+- Removed two obsolete empty API routes that were appearing in the production route manifest.
+- Corrected the root README's stale Next.js/React versions and completed-feature status.
 - Restored the privacy-preserving in-memory public-result handoff and removed student-result persistence from `sessionStorage`.
 - Restored accessible result rendering, status/table semantics, no-JavaScript fallback, and print/PDF controls.
 - Made public-search request validation strict, rejected unknown properties and ambiguous dual-identifier searches, and rejected unsafe control characters.
@@ -49,7 +67,8 @@ The application code builds and its deterministic security, validation, business
 - `npm run test:integration:safety` — pass
 - `npm run load:validate` — pass (native k6 check skipped because k6 is not installed)
 - `npm run test:db` — pass against the currently linked project
+- `npx supabase migration list --linked` — pass; local and remote are `001` through `005`
 - `npm audit --omit=dev --audit-level=moderate` — 0 vulnerabilities
 - `npm run build` — pass with Next.js 15.5.27
-- Production HTTP/header/error-path smoke tests — pass; health intentionally returns 503 until the P0 limiter credentials are supplied
-
+- Production HTTP/header/error-path smoke tests — pass with live configured Supabase and Upstash credentials
+- Browser security suite — header/CSP checks pass, then stops because the linked data has no published examination fixture

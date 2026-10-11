@@ -2,6 +2,7 @@
 
 import { useRef, type DragEvent } from 'react';
 import { FileSpreadsheet, Upload, X } from 'lucide-react';
+import { MAX_IMPORT_SIZE_LABEL } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
 interface FileDropzoneProps {
@@ -139,7 +140,9 @@ export function FileDropzone({
           {!disabled && !isDragging && (
             <p className="mt-1 text-sm text-gray-600">or click to browse</p>
           )}
-          <p className="mt-3 text-xs text-gray-500">Accepted: .xlsx and .csv, up to 10 MB</p>
+          <p className="mt-3 text-xs text-gray-500">
+            Accepted: .xlsx and .csv, up to {MAX_IMPORT_SIZE_LABEL}
+          </p>
         </button>
       </div>
       {error && (

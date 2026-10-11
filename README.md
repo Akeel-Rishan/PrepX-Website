@@ -4,9 +4,9 @@
 
 PrepX is a web application for managing O/L model examination records and building a student-facing results portal. It brings student records, examination listings, and subject management into an authenticated admin workspace.
 
-Built with **Next.js 14**, **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase**.
+Built with **Next.js 15**, **React 19**, **TypeScript**, **Tailwind CSS**, and **Supabase**.
 
-> **Status: In development.** The admin foundation is implemented. Public result lookup, grade entry, imports, and publication workflows are still being developed.
+> **Status: Pre-deployment.** The primary public and administrative workflows are implemented. Production configuration, staging verification, and operational readiness checks remain.
 
 ## Features
 
@@ -17,17 +17,16 @@ Built with **Next.js 14**, **React 18**, **TypeScript**, **Tailwind CSS**, and *
 - **Examination listings:** Status filtering and student counts.
 - **Student management:** Create, edit, delete, search, filter, and paginate student records, with per-examination identifier validation.
 - **Subject management:** Configure examination subjects, including display order and active/required settings.
+- **Results workflow:** Import spreadsheets, enter grades, review completeness, publish/unpublish examinations, and search published results publicly.
+- **Audit history:** Filter and inspect administrative changes.
 - **Responsive interface:** Desktop sidebar, mobile navigation, and loading feedback.
 - **Database foundation:** SQL migrations, row-level security policies, and server-side audit logging for student and subject changes.
 
-### Planned / in progress
+### Pre-launch work
 
-- Public result search and result cards.
-- Examination creation and editing forms.
-- Grade entry and result review.
-- Spreadsheet imports.
-- Publication management and audit-log viewer.
-- Further deployment monitoring and abuse protection.
+- Configure the Vercel production and preview environments.
+- Verify all Supabase migrations and the first production administrator.
+- Run staging browser, workflow, load, backup/restore, monitoring, and recovery checks.
 
 ## Tech stack
 
@@ -118,9 +117,7 @@ A Supabase Auth account must also have an `admin_profiles` row to access the adm
 npm run dev
 ```
 
-Open [http://localhost:3000/admin/login](http://localhost:3000/admin/login) and sign in with the administrator account. The public homepage currently displays a placeholder.
-
-Examination creation is still in progress. To explore student and subject management, create an examination in Supabase or use the supplied development fixtures.
+Open [http://localhost:3000/admin/login](http://localhost:3000/admin/login) and sign in with the administrator account. The public homepage provides published-examination result lookup.
 
 ## Commands
 

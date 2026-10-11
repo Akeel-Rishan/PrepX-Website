@@ -73,14 +73,14 @@ Publish/unpublish actions accept validated IDs and use server-owned statuses. Au
 | --- | --- |
 | Search JSON | 8 KiB, two-second body-read deadline, `application/json` (charset parameter accepted) |
 | Small admin/login forms | 16 KiB total UTF-8 keys/values; file entries rejected |
-| Server-action transport | Existing 11 MiB framework envelope, necessary for multipart imports |
-| Import upload / parser input | 10 MiB, `.csv` or `.xlsx`; actual content parsed and validated |
+| Server-action transport | 4.2 MiB framework envelope; remains below Vercel's 4.5 MB Function payload ceiling |
+| Import upload / parser input | 4,000,000 bytes (shown as 4 MB), `.csv` or `.xlsx`; actual content parsed and validated |
 | XLSX expansion | 32 MiB actual total uncompressed bytes, at most 2000 archive entries |
 | Spreadsheet | 1000 data rows, 250 columns, 1024 characters per raw cell; narrower field limits still apply |
 | Header mapping JSON | 64 KiB text, at most 100 mappings with 200-character fields |
 | Grade/import submission | Existing 1000 changes/rows and 100 subject entries per submitted import row |
 
-The 16 KiB form check runs after framework parsing; 11 MiB remains the hard transport envelope for server actions. Hosting platform request limits can be lower. In particular, verify Vercel's deployed body limit before promising 10 MiB uploads; this step preserves the existing import architecture rather than introducing storage-backed uploads.
+The 16 KiB form check runs after framework parsing. Imports are capped at 4,000,000 bytes and the 4.2 MiB Server Action envelope leaves room for multipart metadata while remaining below the [Vercel Function 4.5 MB request limit](https://vercel.com/docs/functions/limitations#request-body-size). Larger future imports must use a direct, storage-backed client upload rather than passing through a Vercel Function.
 
 Before ExcelJS loads XLSX, archive contents are decompressed with an actual output cap. Encrypted archives, ZIP64, unsupported compression, macros, embedded objects, external-link parts, duplicate members, unsafe paths and XML entity declarations are rejected. Formula cells (including cached results) and hyperlink cells are rejected. CSV is decoded as UTF-8 and bounded before parsing. Formula-like cells beginning with `=`, `+`, `-` or `@` are rejected in imports, including ignored columns. This spreadsheet-specific rule does not remove punctuation from ordinary names in forms. Template subject headers are escaped as literal CSV cells when needed.
 

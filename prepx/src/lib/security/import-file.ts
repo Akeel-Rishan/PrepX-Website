@@ -1,7 +1,7 @@
 import 'server-only';
 import { inflateRawSync } from 'node:zlib';
+import { MAX_IMPORT_BYTES } from '@/lib/constants';
 
-export const MAX_IMPORT_BYTES = 10 * 1024 * 1024;
 const MAX_EXPANDED_BYTES = 32 * 1024 * 1024;
 
 /** Bound actual ZIP expansion before ExcelJS constructs a workbook in memory.

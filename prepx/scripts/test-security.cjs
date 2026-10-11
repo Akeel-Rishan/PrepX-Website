@@ -138,10 +138,10 @@ async function main() {
   assert.equal(validateImportRows(markup.rows, [], [], [])[0].isValid, false);
   const controlGrade = { ...multilingual.rows[0], grades: { Maths: '\n' } };
   assert.equal(validateImportRows([controlGrade], [{ subject_name: 'Maths', required: false }], [], [])[0].isValid, false);
-  await assert.rejects(parseImportFile(Buffer.alloc(10 * 1024 * 1024 + 1), 'xlsx', []));
+  await assert.rejects(parseImportFile(Buffer.alloc(4_000_001), 'xlsx', []));
   const bomb = new ExcelJS.Workbook(); bomb.addWorksheet('Data').getCell('A1').value = 'x'.repeat(33 * 1024 * 1024);
   const compressedBomb = Buffer.from(await bomb.xlsx.writeBuffer());
-  assert(compressedBomb.length < 10 * 1024 * 1024);
+  assert(compressedBomb.length < 4_000_000);
   await assert.rejects(parseImportFile(compressedBomb, 'xlsx', []), /Could not read/);
   // A forged small declared size must not bypass the actual decompression cap.
   let cursor = compressedBomb.readUInt32LE(compressedBomb.length - 6);

@@ -3,9 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   experimental: {
-    // Multipart requests add a small envelope around the 10 MB import file.
-    // The action still enforces the authoritative 10 MB file-size limit.
-    serverActions: { bodySizeLimit: '11mb' },
+    // A 4 MB import plus its multipart envelope stays below Vercel's 4.5 MB
+    // Function request limit. The action enforces the authoritative file cap.
+    serverActions: { bodySizeLimit: '4.2mb' },
   },
 };
 

@@ -3,7 +3,8 @@ import 'server-only';
 import { Readable } from 'node:stream';
 import ExcelJS from 'exceljs';
 import type { ImportHeaderMapping, RawImportRow } from '@/types/import';
-import { MAX_IMPORT_BYTES, validateXlsxArchive, safeImportCell } from '@/lib/security/import-file';
+import { MAX_IMPORT_BYTES } from '@/lib/constants';
+import { validateXlsxArchive, safeImportCell } from '@/lib/security/import-file';
 import { plainTextSchema } from '@/lib/security/input';
 
 type ImportBaseColumn =

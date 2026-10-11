@@ -8,7 +8,7 @@ import { importRowSchema } from '@/lib/validations/import';
 import { gradeSchema } from '@/lib/validations/grade';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getAdminUserId, isAdmin } from '@/lib/auth/admin';
-import { isExamEditable } from '@/lib/constants';
+import { isExamEditable, MAX_IMPORT_BYTES, MAX_IMPORT_SIZE_LABEL } from '@/lib/constants';
 import { applyHeaderMappings, parseImportFile } from '@/lib/import-parser';
 import {
   IMPORT_BASE_COLUMNS,
@@ -150,7 +150,9 @@ export async function parseAndValidateImportAction(formData: FormData): Promise<
     return emptyPreview('Select a valid examination.');
   }
   if (!(file instanceof File) || file.size === 0) return emptyPreview('Select a non-empty import file.');
-  if (file.size > 10 * 1024 * 1024) return emptyPreview('File size must be under 10 MB.');
+  if (file.size > MAX_IMPORT_BYTES) {
+    return emptyPreview(`File size must be ${MAX_IMPORT_SIZE_LABEL} or smaller.`);
+  }
   const lowerName = file.name.toLocaleLowerCase();
   const fileType = lowerName.endsWith('.xlsx') ? 'xlsx' : lowerName.endsWith('.csv') ? 'csv' : null;
   if (!fileType) return emptyPreview('Only .xlsx and .csv files are accepted.');
