@@ -2,6 +2,8 @@
 
 This guide covers configuration only. Do not deploy until the Preview checklist passes. Never commit `.env.local`, `.env.production`, `.env.test`, `.env.load`, `.vercel/`, database credentials, or downloaded Vercel environment files.
 
+Use [`../pre-launch-checklist.md`](../pre-launch-checklist.md) as the release record. It separates automated evidence from manual, blocked, operational, and post-deployment gates.
+
 ## Project settings
 
 | Setting | Value |

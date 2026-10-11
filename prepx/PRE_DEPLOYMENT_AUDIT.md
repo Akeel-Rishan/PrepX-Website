@@ -8,6 +8,8 @@ The repository is **ready to move to Vercel project and environment configuratio
 
 Phase 16.1 configuration and verification details are recorded in `STEP-16.1-VERIFICATION.md`; operational instructions are in `docs/deployment/vercel.md`.
 
+Phase 16.2's evidence-backed release gate, ownership record, operating procedures, and post-deployment checks are in `docs/pre-launch-checklist.md`.
+
 This is not yet approval for a public production launch. A Vercel preview deployment, a dedicated published staging fixture, and operational checks remain.
 
 ## Completed before Vercel configuration
