@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, Clock3 } from 'lucide-react';
+import { PUBLIC_ORGANIZATION_NAME, PUBLIC_SUPPORT_EMAIL } from '@/lib/public-support';
 
 export const metadata: Metadata = {
   title: 'Results Not Published',
@@ -22,8 +23,11 @@ export default function ResultsNotPublishedPage(): React.JSX.Element {
         </p>
         <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/70 dark:bg-amber-950/30">
           <p className="text-xs leading-5 text-amber-800 dark:text-amber-200">
-            Contact your school or examination center for information about when results will be
-            available.
+            Contact the {PUBLIC_ORGANIZATION_NAME} at{' '}
+            <a className="underline underline-offset-2" href={`mailto:${PUBLIC_SUPPORT_EMAIL}`}>
+              {PUBLIC_SUPPORT_EMAIL}
+            </a>{' '}
+            for information about when results will be available.
           </p>
         </div>
         <Link

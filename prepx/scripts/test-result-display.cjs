@@ -38,7 +38,7 @@ let html = render(valid);
 assert(html.includes('Print / Save as PDF'));
 assert(html.includes('aria-describedby="print-result-help"'));
 assert(!html.includes('Download PDF'));
-assert(html.includes('Organized by UGSM'));
+assert(html.includes('Organized by Undergraduate Society of Mawanella'));
 for (const text of [fixture.studentName, fixture.indexNumber, fixture.maskedNic, fixture.schoolName, fixture.examinationName, '2026']) assert(html.includes(text));
 for (const meaning of ['Distinction', 'Very Good', 'Credit', 'Pass', 'Fail', 'Absent', 'Not available']) assert(html.includes(meaning));
 assert.equal((html.match(/scope="row"/g) || []).length, 8);

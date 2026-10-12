@@ -3,6 +3,7 @@ import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { ResultProvider } from '@/components/public/result-provider';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { PUBLIC_ORGANIZATION_NAME, PUBLIC_SUPPORT_EMAIL } from '@/lib/public-support';
 
 export const metadata: Metadata = {
   title: {
@@ -61,8 +62,12 @@ export default function PublicLayout({
       <footer className="public-portal-surface relative z-10 border-t border-white/80 bg-white/70 px-4 py-6 backdrop-blur-xl dark:border-white/[0.07] dark:bg-[#050a14]/80">
         <div className="mx-auto flex max-w-[1380px] flex-col gap-2 text-center sm:px-4 md:flex-row md:items-end md:justify-between md:text-left">
           <p className="max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400">
-            Results displayed here are official and final as published. Contact your school&apos;s
-            examination coordinator for queries or corrections.
+            Results displayed here are official and final as published. Contact the{' '}
+            {PUBLIC_ORGANIZATION_NAME} at{' '}
+            <a className="underline underline-offset-2 hover:text-blue-600" href={`mailto:${PUBLIC_SUPPORT_EMAIL}`}>
+              {PUBLIC_SUPPORT_EMAIL}
+            </a>{' '}
+            for queries or corrections.
           </p>
           <p className="shrink-0 text-xs text-slate-400 dark:text-slate-500">
             &copy; {currentYear} PrepX Examination System. All rights reserved.

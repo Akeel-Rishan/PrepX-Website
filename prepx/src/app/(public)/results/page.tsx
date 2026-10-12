@@ -6,6 +6,7 @@ import { FileSearch, ShieldCheck } from 'lucide-react';
 import { usePublicResult } from '@/components/public/result-provider';
 import { PublicStatusPage } from '@/components/public/public-status-page';
 import { ResultPageSkeleton } from '@/components/ui/loading';
+import { PUBLIC_SUPPORT_CONTACT } from '@/lib/public-support';
 import { PrintActions } from './_components/print-actions';
 import { PrintHeader } from './_components/print-header';
 import { GradesTable, OverallStatusCard } from './_components/result-details';
@@ -134,8 +135,8 @@ export default function ResultsPage(): React.JSX.Element {
           <GradesTable grades={result.grades} />
           <OverallStatusCard status={result.overallStatus} />
           <div className="print-notice print-only">
-            * Results are official as published. Contact your school or examination center for
-            queries, corrections, or official certified copies.
+            * Results are official as published. Contact the {PUBLIC_SUPPORT_CONTACT} for queries,
+            corrections, or official certified copies.
           </div>
         </div>
       </article>

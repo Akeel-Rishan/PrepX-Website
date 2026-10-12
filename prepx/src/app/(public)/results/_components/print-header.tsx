@@ -10,7 +10,7 @@ export function PrintHeader({ examName, examYear }: PrintHeaderProps) {
       <h1>
         {examName} — {examYear}
       </h1>
-      <p>Organized by UGSM</p>
+      <p>Organized by Undergraduate Society of Mawanella</p>
       <p className="print-doc-title">Examination Result</p>
       <p id="print-date-stamp" />
     </div>

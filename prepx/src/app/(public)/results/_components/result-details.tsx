@@ -2,6 +2,7 @@
 import { GRADE_LABELS, type Grade, type ResultStatus } from '@/lib/constants';
 import { getResultStatusStyle } from '@/lib/result-utils';
 import { cn } from '@/lib/utils';
+import { PUBLIC_SUPPORT_CONTACT } from '@/lib/public-support';
 import type { GradeEntry } from '@/types';
 
 const GRADE_BADGE_STYLES: Record<Grade, string> = {
@@ -15,10 +16,9 @@ const GRADE_BADGE_STYLES: Record<Grade, string> = {
 const STATUS_ICONS = { check: CheckCircle2, x: XCircle, clock: Clock, alert: AlertCircle };
 const STATUS_DESCRIPTIONS: Record<ResultStatus, string> = {
   Passed: 'Your published overall result is Passed.',
-  'Not Passed': 'Your published overall result is Not Passed. Contact your school for guidance.',
-  Absent: 'Your published overall result is Absent. Contact your school if you have a query.',
-  Incomplete:
-    'Your published result is incomplete. Contact your school or examination center for assistance.',
+  'Not Passed': `Your published overall result is Not Passed. Contact the ${PUBLIC_SUPPORT_CONTACT} for guidance.`,
+  Absent: `Your published overall result is Absent. Contact the ${PUBLIC_SUPPORT_CONTACT} if you have a query.`,
+  Incomplete: `Your published result is incomplete. Contact the ${PUBLIC_SUPPORT_CONTACT} for assistance.`,
 };
 
 export function OverallStatusCard({ status: resultStatus }: { status: ResultStatus }) {
@@ -131,7 +131,7 @@ export function GradesTable({ grades }: { grades: GradeEntry[] }) {
                   colSpan={3}
                   className="px-4 py-6 text-center text-slate-600 dark:text-slate-300"
                 >
-                  Subject grades are not available. Please contact your school.
+                  Subject grades are not available. Please contact the {PUBLIC_SUPPORT_CONTACT}.
                 </td>
               </tr>
             )}

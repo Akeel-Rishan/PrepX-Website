@@ -96,7 +96,7 @@ export function ExaminationForm({
             id="result_notice"
             name="result_notice"
             label="Notice (Optional)"
-            placeholder="e.g. Results are subject to revision. Contact your school for official documentation."
+            placeholder="e.g. Results are subject to revision. Contact the Undergraduate Society of Mawanella for official documentation."
             defaultValue={examination?.result_notice ?? ''}
             rows={4}
             maxLength={1000}

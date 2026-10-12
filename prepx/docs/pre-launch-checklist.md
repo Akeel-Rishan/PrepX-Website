@@ -180,7 +180,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm every Preview/staging record is fictional before granting testers access. **Owner:** Staging data owner.
 - [x] **VERIFIED — Required:** Application admin access requires a valid Supabase session plus an `admin_profiles` row.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm `admin_profiles` contains only currently authorized UGSM staff and establish periodic/access-termination review. **Owner:** UGSM/Supabase owner.
-- [ ] **BLOCKED — Required:** Approve production organization name, examination name/year/subjects/deadlines, result notice, school contact instructions, and public support contact. Current pages provide general school/coordinator guidance but no verified support details. **Owner:** UGSM content owner.
+- [ ] **BLOCKED — Required:** Approve production examination name/year/subjects/deadlines, result notice, and remaining release content. Public pages now identify the Undergraduate Society of Mawanella as organizer and use `ugsmaw@gmail.com` for support, as directed by the release owner. **Owner:** UGSM content owner.
 - [ ] **BLOCKED — Required:** Decide and approve terms, maintenance messaging, correction/appeal instructions, and support escalation wording. **Owner:** UGSM content/legal owner.
 - [x] **VERIFIED — Required:** Enumeration resistance includes IP and identifier quotas, generic not-found handling, HMAC-only limiter keys, and no existence check before limiting.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm production quotas/monitoring balance enumeration resistance with legitimate shared-school traffic. **Owner:** Product/security owner.

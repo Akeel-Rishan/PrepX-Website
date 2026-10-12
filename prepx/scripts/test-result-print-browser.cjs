@@ -70,7 +70,7 @@ const artifacts = process.env.PREPX_PRINT_ARTIFACTS;
       await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' });
       assert(await page.locator('.print-doc-header').isVisible());
       assert.match(await page.locator('#print-date-stamp').innerText(), /^Printed: /);
-      assert(await page.getByText('Organized by UGSM', { exact: true }).isVisible());
+      assert(await page.getByText('Organized by Undergraduate Society of Mawanella', { exact: true }).isVisible());
       assert(await page.getByText('Centre A', { exact: true }).isVisible());
       for (const element of await page.locator('.no-print, .public-portal-background a, .public-portal-background button').all()) assert.equal(await element.isVisible(), false);
       assert.equal(await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(255, 255, 255)');

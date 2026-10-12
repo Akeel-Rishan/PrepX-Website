@@ -12,6 +12,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { createPublicClient } from '@/lib/supabase/server';
+import { PUBLIC_ORGANIZATION_NAME, PUBLIC_SUPPORT_EMAIL } from '@/lib/public-support';
 import { SearchForm } from './_components/search-form';
 
 export const metadata: Metadata = {
@@ -27,7 +28,6 @@ interface PublishedExamination {
   id: string;
   name: string;
   year: number;
-  organization_name: string;
   result_notice: string | null;
 }
 
@@ -39,7 +39,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
     const supabase = createPublicClient();
     const { data, error } = await supabase
       .from('examinations')
-      .select('id, name, year, organization_name, result_notice')
+      .select('id, name, year, result_notice')
       .eq('status', 'PUBLISHED')
       .order('year', { ascending: false })
       .order('publication_date', { ascending: false })
@@ -106,7 +106,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
               <ExamFact
                 icon={Building2}
                 label="Organized by"
-                value={publishedExam.organization_name}
+                value={PUBLIC_ORGANIZATION_NAME}
               />
             </div>
           )}
@@ -222,7 +222,11 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
           </section>
 
           <p className="mt-5 text-center text-xs text-slate-500 dark:text-slate-400">
-            Need assistance? Contact your school examination coordinator.
+            Need assistance? Contact the {PUBLIC_ORGANIZATION_NAME} at{' '}
+            <a className="underline underline-offset-2 hover:text-blue-600" href={`mailto:${PUBLIC_SUPPORT_EMAIL}`}>
+              {PUBLIC_SUPPORT_EMAIL}
+            </a>
+            .
           </p>
         </div>
       </div>
