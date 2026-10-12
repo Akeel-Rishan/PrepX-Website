@@ -46,9 +46,9 @@ export function Alert({
   return (
     <div
       role="alert"
-      className={cn('flex gap-3 rounded-xl border p-4 shadow-sm', classes, className)}
+      className={cn('flex gap-3 rounded-xl border p-4 shadow-xs', classes, className)}
     >
-      <Icon aria-hidden="true" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+      <Icon aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0" />
       <div className="min-w-0 flex-1">
         {title && <p className="mb-1 text-sm font-semibold">{title}</p>}
         <div className="text-sm">{children}</div>
@@ -58,7 +58,7 @@ export function Alert({
           type="button"
           onClick={onClose}
           aria-label="Dismiss alert"
-          className="self-start rounded p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
+          className="self-start rounded-sm p-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-current"
         >
           <X aria-hidden="true" className="h-4 w-4" />
         </button>

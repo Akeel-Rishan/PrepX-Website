@@ -10,7 +10,7 @@ interface LoadingMarkProps {
 const markSizes = {
   sm: { frame: 'h-9 w-9', image: 22 },
   md: { frame: 'h-14 w-14', image: 34 },
-  lg: { frame: 'h-[4.5rem] w-[4.5rem]', image: 44 },
+  lg: { frame: 'h-18 w-18', image: 44 },
 };
 
 export function LoadingMark({ size = 'md', className }: LoadingMarkProps): React.JSX.Element {
@@ -42,12 +42,12 @@ export function AppLoadingScreen(): React.JSX.Element {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      className="app-loading-enter grid min-h-[100dvh] place-items-center bg-[var(--app-canvas)] px-5 text-center text-[var(--app-text)]"
+      className="app-loading-enter grid min-h-dvh place-items-center bg-(--app-canvas) px-5 text-center text-(--app-text)"
     >
       <div className="flex max-w-xs flex-col items-center">
         <LoadingMark size="lg" />
         <p className="mt-6 text-base font-bold tracking-tight">Preparing PrepX</p>
-        <p className="mt-1 text-sm text-[var(--app-text-muted)]">Loading your secure workspace...</p>
+        <p className="mt-1 text-sm text-(--app-text-muted)">Loading your secure workspace...</p>
         <LoadingProgress className="mt-5 w-48" />
       </div>
     </main>
@@ -82,7 +82,7 @@ export function PublicPageSkeleton(): React.JSX.Element {
             <Skeleton className="h-20" rounded="xl" />
           </div>
         </div>
-        <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/75 shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900/75">
+        <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/75 shadow-(--app-shadow) dark:border-slate-800 dark:bg-slate-900/75">
           <div className="flex items-center gap-4 border-b border-slate-200/80 p-6 dark:border-slate-800">
             <Skeleton className="h-11 w-11 shrink-0" rounded="xl" />
             <div className="flex-1 space-y-2">
@@ -146,7 +146,7 @@ export function ResultPageSkeleton({ className }: { className?: string }): React
       className={cn('result-loading app-loading-enter mx-auto w-full max-w-3xl px-3 py-6 sm:px-6 sm:py-10', className)}
     >
       <span className="sr-only">Loading result...</span>
-      <div aria-hidden="true" className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900/80">
+      <div aria-hidden="true" className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/80 shadow-(--app-shadow) dark:border-slate-800 dark:bg-slate-900/80">
         <div className="space-y-3 bg-[#17204f] px-5 py-7 sm:px-7">
           <Skeleton className="app-skeleton-inverse h-5 w-24" rounded="full" />
           <Skeleton className="app-skeleton-inverse h-8 w-56" />

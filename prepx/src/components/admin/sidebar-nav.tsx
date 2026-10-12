@@ -52,9 +52,9 @@ export function SidebarNav({ onNavClick }: SidebarNavProps): React.JSX.Element {
                   aria-busy={isPending && pendingHref === item.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-[background-color,color,transform] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 lg:py-2',
+                    'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-[background-color,color,transform] active:scale-[0.99] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-400 lg:py-2',
                     active
-                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-950/20'
+                      ? 'bg-blue-600 text-white shadow-xs shadow-blue-950/20'
                       : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
                   )}
                 >
@@ -62,7 +62,7 @@ export function SidebarNav({ onNavClick }: SidebarNavProps): React.JSX.Element {
                     {isPending && pendingHref === item.href ? (
                       <Spinner size="sm" />
                     ) : (
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <item.icon className="h-4 w-4 shrink-0" />
                     )}
                   </span>
                   <span>{item.label}</span>

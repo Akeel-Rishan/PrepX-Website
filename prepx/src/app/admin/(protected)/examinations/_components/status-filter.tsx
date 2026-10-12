@@ -40,9 +40,9 @@ export function StatusFilter({ currentStatus }: StatusFilterProps): React.JSX.El
             onClick={() => handleFilter(option.value)}
             aria-pressed={currentStatus === option.value}
             className={cn(
-              'rounded-full px-4 py-1.5 text-sm font-medium transition-[background-color,border-color,color,opacity,transform] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60',
+              'rounded-full px-4 py-1.5 text-sm font-medium transition-[background-color,border-color,color,opacity,transform] active:scale-[0.98] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60',
               currentStatus === option.value
-                ? 'bg-blue-600 text-white shadow-sm'
+                ? 'bg-blue-600 text-white shadow-xs'
                 : 'border border-gray-300 bg-white text-gray-600 hover:border-blue-400 hover:text-blue-600'
             )}
           >

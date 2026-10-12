@@ -55,7 +55,7 @@ export default async function StudentDetailPage({
           </p>
         </div>
         {!isNew && resultCount > 0 && (
-          <div className="flex-shrink-0 pt-1">
+          <div className="shrink-0 pt-1">
             <Badge variant="info">
               {resultCount} grade {resultCount === 1 ? 'entry' : 'entries'}
             </Badge>

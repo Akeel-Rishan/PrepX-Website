@@ -46,13 +46,14 @@ The repository uses Next.js 15.5.27 rather than the older Next.js 14 target name
 - `npm run test:db` - pass against the currently linked project
 - `npx supabase migration list --linked` - pass; local/remote `001` through `005`
 - `npm audit --omit=dev --audit-level=moderate` - 0 production vulnerabilities
+- Full `npm audit` - 5 development-only findings derived from one unpatched `braces` advisory in the Next.js ESLint toolchain
 - `npm run build` - pass; 20 expected dynamic routes/pages plus middleware
 - `npm run audit:deployment` after build - pass, including browser bundle scan
 - `git diff --check` - pass; only line-ending conversion notices
 
 ## Known non-production findings
 
-Full `npm audit` reports nine development-only transitive advisories through the Tailwind CSS 3 and legacy lint/build toolchain. The available automatic fix upgrades Tailwind to 4 and is breaking; it remains a separate planned migration. npm also reports deprecation notices for legacy development transitive packages. Production dependencies report zero vulnerabilities.
+Tailwind CSS was migrated from 3 to 4.3.3, removing the original nine-item Tailwind development-toolchain advisory chain. Full `npm audit` now reports five development-only entries derived from one `braces` advisory in Next.js's ESLint stack. `braces` has no patched release as of 2026-10-12, and npm's suggested Next.js 14 downgrade is incompatible with the application, so this is documented for upstream monitoring rather than force-fixed. Production dependencies report zero vulnerabilities.
 
 The native `k6` executable is not installed, so load definitions were statically validated but not executed. Full deployed browser/result/print verification still requires a fictional `PUBLISHED` staging examination.
 

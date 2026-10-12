@@ -81,7 +81,7 @@ export function LoginForm({ redirectTo }: LoginFormProps): React.JSX.Element {
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               aria-pressed={showPassword}
               aria-controls="password"
-              className="rounded-md p-1 text-slate-400 transition-colors hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:hover:text-white"
+              className="rounded-md p-1 text-slate-400 transition-colors hover:text-slate-800 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 dark:hover:text-white"
             >
               {showPassword ? (
                 <EyeOff aria-hidden="true" className="h-5 w-5" />

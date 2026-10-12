@@ -116,7 +116,7 @@ export function ExaminationForm({
           <Link
             href="/admin/examinations"
             aria-disabled={isPending}
-            className={`inline-flex h-8 items-center justify-center rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${isPending ? 'pointer-events-none opacity-50' : ''}`}
+            className={`inline-flex h-8 items-center justify-center rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${isPending ? 'pointer-events-none opacity-50' : ''}`}
           >
             Cancel
           </Link>

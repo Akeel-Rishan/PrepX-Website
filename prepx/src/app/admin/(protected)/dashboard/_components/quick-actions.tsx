@@ -33,7 +33,7 @@ export function QuickActions(): React.JSX.Element {
   return (
     <section
       aria-labelledby="quick-actions-title"
-      className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900"
+      className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-(--app-shadow) dark:border-slate-800 dark:bg-slate-900"
     >
       <div className="mb-4">
         <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Shortcuts</p>
@@ -49,7 +49,7 @@ export function QuickActions(): React.JSX.Element {
           <Link
             key={href}
             href={href}
-            className="group flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3 transition-[background-color,border-color,box-shadow,transform] duration-150 active:scale-[0.99] hover:border-slate-300 hover:bg-white hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+            className="group flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3 transition-[background-color,border-color,box-shadow,transform] duration-150 active:scale-[0.99] hover:border-slate-300 hover:bg-white hover:shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-slate-600 dark:hover:bg-slate-800"
           >
             <div className={cn('shrink-0 rounded-lg p-2.5', iconBg)}>
               <Icon aria-hidden="true" className={cn('h-5 w-5', iconColor)} />

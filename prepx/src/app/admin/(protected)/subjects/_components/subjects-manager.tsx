@@ -69,7 +69,7 @@ export function SubjectsManager({
   }
 
   const iconButton =
-    'rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-30 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300';
+    'rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-30 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300';
   return (
     <div className="space-y-4">
       {isReadOnly && (
@@ -179,9 +179,9 @@ export function SubjectsManager({
                       className="px-4 py-3 text-left font-medium text-gray-900 dark:text-slate-100"
                     >
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="break-words">{subject.subject_name}</span>
+                        <span className="wrap-break-word">{subject.subject_name}</span>
                         {subject.subject_code && (
-                          <span className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs font-normal text-gray-600 dark:bg-slate-700 dark:text-slate-300">
+                          <span className="rounded-sm bg-gray-100 px-1.5 py-0.5 font-mono text-xs font-normal text-gray-600 dark:bg-slate-700 dark:text-slate-300">
                             {subject.subject_code}
                           </span>
                         )}

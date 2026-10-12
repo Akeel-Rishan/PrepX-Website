@@ -47,7 +47,7 @@ export function FormatGuide({ subjects }: FormatGuideProps): React.JSX.Element {
   ];
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs sm:p-6">
       <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-gray-900">
         <Info aria-hidden="true" className="h-4 w-4 text-blue-500" />
         Format Guide
@@ -61,7 +61,7 @@ export function FormatGuide({ subjects }: FormatGuideProps): React.JSX.Element {
           <div className="flex flex-wrap gap-2">
             {REQUIRED_COLUMNS.map((column) => (
               <span
-                className="rounded border border-blue-200 bg-blue-50 px-2 py-1 font-mono text-xs text-blue-700"
+                className="rounded-sm border border-blue-200 bg-blue-50 px-2 py-1 font-mono text-xs text-blue-700"
                 key={column}
               >
                 {column}
@@ -77,7 +77,7 @@ export function FormatGuide({ subjects }: FormatGuideProps): React.JSX.Element {
           <div className="flex flex-wrap gap-2">
             {OPTIONAL_COLUMNS.map((column) => (
               <span
-                className="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-gray-600"
+                className="rounded-sm border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-gray-600"
                 key={column}
               >
                 {column}
@@ -95,7 +95,7 @@ export function FormatGuide({ subjects }: FormatGuideProps): React.JSX.Element {
               {subjects.map((subject) => (
                 <span
                   className={cn(
-                    'rounded border px-2 py-1 font-mono text-xs',
+                    'rounded-sm border px-2 py-1 font-mono text-xs',
                     subject.required
                       ? 'border-amber-200 bg-amber-50 text-amber-700'
                       : 'border-gray-200 bg-gray-50 text-gray-600'
@@ -131,7 +131,7 @@ export function FormatGuide({ subjects }: FormatGuideProps): React.JSX.Element {
           {GRADES.map((grade) => (
             <span
               className={cn(
-                'rounded border px-2 py-1 font-mono text-xs font-semibold',
+                'rounded-sm border px-2 py-1 font-mono text-xs font-semibold',
                 GRADE_STYLES[grade]
               )}
               key={grade}

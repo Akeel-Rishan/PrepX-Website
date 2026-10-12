@@ -212,7 +212,7 @@ export function GradeGrid({
               <tbody className="divide-y divide-gray-100">
                 {data.students.map((student) => (
                   <tr key={student.id} className="transition-colors hover:bg-slate-50/50">
-                    <td className="sticky left-0 z-10 max-w-36 break-words border-r border-gray-100 bg-white px-3 py-3 sm:max-w-[200px] sm:px-4">
+                    <td className="sticky left-0 z-10 max-w-36 wrap-break-word border-r border-gray-100 bg-white px-3 py-3 sm:max-w-[200px] sm:px-4">
                       <div className="text-sm font-medium leading-tight text-gray-900">{student.full_name}</div>
                       <div className="mt-0.5 font-mono text-xs text-gray-400">{student.index_number}</div>
                     </td>

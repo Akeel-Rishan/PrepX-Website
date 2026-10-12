@@ -65,7 +65,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
       <div className="mx-auto grid w-full max-w-[1380px] items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(430px,530px)] lg:gap-16 xl:gap-24">
         <section className="max-w-[700px]" aria-labelledby="portal-heading">
           {publishedExam && (
-            <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-blue-300/60 bg-blue-100/60 px-3.5 py-2 text-blue-800 shadow-sm shadow-blue-900/[0.03] dark:border-blue-400/15 dark:bg-blue-400/[0.07] dark:text-blue-200 dark:shadow-none">
+            <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-blue-300/60 bg-blue-100/60 px-3.5 py-2 text-blue-800 shadow-xs shadow-blue-900/3 dark:border-blue-400/15 dark:bg-blue-400/[0.07] dark:text-blue-200 dark:shadow-none">
               <span
                 aria-hidden="true"
                 className="h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/10 dark:bg-emerald-400"
@@ -85,7 +85,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
           >
             <span className="block">{publishedExam?.name ?? 'Examination Results Portal'}</span>
             {publishedExam && (
-              <span className="block bg-gradient-to-r from-blue-700 to-slate-600 bg-clip-text text-transparent dark:from-white dark:to-slate-400">
+              <span className="block bg-linear-to-r from-blue-700 to-slate-600 bg-clip-text text-transparent dark:from-white dark:to-slate-400">
                 {publishedExam.year} Results
               </span>
             )}
@@ -111,7 +111,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
             </div>
           )}
 
-          <div className="mt-9 grid max-w-[650px] gap-5 border-t border-slate-300/70 pt-7 dark:border-white/[0.08] sm:grid-cols-2">
+          <div className="mt-9 grid max-w-[650px] gap-5 border-t border-slate-300/70 pt-7 dark:border-white/8 sm:grid-cols-2">
             <TrustItem
               icon={ShieldCheck}
               title="Official records"
@@ -125,7 +125,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
           </div>
 
           {publishedExam?.result_notice && (
-            <aside className="mt-6 flex max-w-[650px] items-start gap-3 rounded-2xl border border-blue-200/80 bg-blue-50/75 p-4 backdrop-blur-sm dark:border-blue-400/15 dark:bg-blue-400/[0.07]">
+            <aside className="mt-6 flex max-w-[650px] items-start gap-3 rounded-2xl border border-blue-200/80 bg-blue-50/75 p-4 backdrop-blur-xs dark:border-blue-400/15 dark:bg-blue-400/[0.07]">
               <Info
                 aria-hidden="true"
                 strokeWidth={1.8}
@@ -146,7 +146,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
         <div className="w-full">
           <section
             aria-labelledby="result-search-heading"
-            className="public-portal-surface relative isolate overflow-hidden rounded-3xl border border-slate-200/90 bg-white/95 shadow-[0_28px_80px_-34px_rgba(30,64,175,0.45)] backdrop-blur-xl dark:border-white/[0.1] dark:bg-[#0b1424]/95 dark:shadow-[0_30px_90px_-36px_rgba(0,0,0,0.9)]"
+            className="public-portal-surface relative isolate overflow-hidden rounded-3xl border border-slate-200/90 bg-white/95 shadow-[0_28px_80px_-34px_rgba(30,64,175,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-[#0b1424]/95 dark:shadow-[0_30px_90px_-36px_rgba(0,0,0,0.9)]"
           >
             <div
               aria-hidden="true"
@@ -174,7 +174,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
                   </div>
                 </div>
 
-                <div className="hidden shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white/70 px-2.5 py-2 text-[11px] font-semibold text-slate-600 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.035] dark:text-slate-300 sm:flex">
+                <div className="hidden shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white/70 px-2.5 py-2 text-[11px] font-semibold text-slate-600 shadow-xs dark:border-white/8 dark:bg-white/[0.035] dark:text-slate-300 sm:flex">
                   <ShieldCheck
                     aria-hidden="true"
                     strokeWidth={1.8}
@@ -239,7 +239,7 @@ interface IconTextProps {
 function TrustItem({ icon: Icon, title, description }: IconTextProps): React.JSX.Element {
   return (
     <div className="flex gap-3.5">
-      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-300/60 bg-blue-100/60 text-blue-700 dark:border-blue-400/15 dark:bg-blue-400/[0.06] dark:text-blue-400">
+      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-300/60 bg-blue-100/60 text-blue-700 dark:border-blue-400/15 dark:bg-blue-400/6 dark:text-blue-400">
         <Icon aria-hidden="true" strokeWidth={1.8} className="h-5 w-5" />
       </div>
       <div>
@@ -258,7 +258,7 @@ interface ExamFactProps {
 
 function ExamFact({ icon: Icon, label, value }: ExamFactProps): React.JSX.Element {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-white/90 bg-white/60 px-4 py-3 shadow-sm shadow-blue-950/[0.03] backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.035] dark:shadow-none">
+    <div className="flex items-center gap-3 rounded-2xl border border-white/90 bg-white/60 px-4 py-3 shadow-xs shadow-blue-950/3 backdrop-blur-xs dark:border-white/8 dark:bg-white/[0.035] dark:shadow-none">
       <Icon
         aria-hidden="true"
         strokeWidth={1.8}
@@ -268,7 +268,7 @@ function ExamFact({ icon: Icon, label, value }: ExamFactProps): React.JSX.Elemen
         <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
           {label}
         </p>
-        <p className="mt-0.5 max-w-[13rem] truncate text-xs font-semibold text-slate-800 dark:text-slate-300">
+        <p className="mt-0.5 max-w-52 truncate text-xs font-semibold text-slate-800 dark:text-slate-300">
           {value}
         </p>
       </div>
@@ -279,7 +279,7 @@ function ExamFact({ icon: Icon, label, value }: ExamFactProps): React.JSX.Elemen
 function StatusMessage({ icon: Icon, title, description }: IconTextProps): React.JSX.Element {
   return (
     <div className="flex flex-col items-center py-8 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100/70 text-blue-700 dark:bg-blue-400/[0.08] dark:text-blue-300">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100/70 text-blue-700 dark:bg-blue-400/8 dark:text-blue-300">
         <Icon aria-hidden="true" strokeWidth={1.8} className="h-7 w-7" />
       </div>
       <h3 className="mt-4 text-base font-semibold text-slate-950 dark:text-white">{title}</h3>

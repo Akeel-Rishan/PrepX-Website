@@ -63,7 +63,7 @@ export function FileDropzone({
             type="button"
             onClick={onClear}
             disabled={disabled}
-            className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-green-800 hover:bg-green-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-green-800 hover:bg-green-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-green-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <X aria-hidden="true" className="h-3.5 w-3.5" /> Remove
           </button>
@@ -116,7 +116,7 @@ export function FileDropzone({
           type="button"
           disabled={disabled}
           onClick={() => inputRef.current?.click()}
-          className="w-full cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed"
+          className="w-full cursor-pointer rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed"
         >
           <Upload
             aria-hidden="true"

@@ -123,7 +123,7 @@ export function PreviewTable({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search index, name, school…"
-            className="h-9 w-full rounded-lg border border-gray-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="h-9 w-full rounded-lg border border-gray-300 bg-white pl-9 pr-3 text-sm outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
         </label>
       </div>
@@ -250,7 +250,7 @@ export function PreviewTable({
                   type="button"
                   onClick={() => setPage(item)}
                   className={cn(
-                    'h-8 w-8 rounded border text-xs',
+                    'h-8 w-8 rounded-sm border text-xs',
                     item === currentPage
                       ? 'border-blue-600 bg-blue-600 text-white'
                       : 'border-gray-300 text-gray-700 hover:bg-gray-50'

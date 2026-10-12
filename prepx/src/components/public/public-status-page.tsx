@@ -28,8 +28,8 @@ export function PublicStatusPage({
   children,
 }: PublicStatusPageProps): React.JSX.Element {
   return (
-    <div className="flex min-h-[100dvh] items-center px-4 py-20 sm:px-6">
-      <section className="mx-auto w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900">
+    <div className="flex min-h-dvh items-center px-4 py-20 sm:px-6">
+      <section className="mx-auto w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-(--app-shadow) dark:border-slate-800 dark:bg-slate-900">
         <div className="border-b border-slate-200 bg-[#0b172a] px-6 py-5 dark:border-slate-800 sm:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-slate-950 p-1.5">
@@ -67,7 +67,7 @@ export function PublicStatusPage({
             {primaryHref && primaryLabel && (
               <Link
                 href={primaryHref}
-                className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform] active:scale-[0.98] hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus-visible:ring-offset-slate-900"
+                className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-xs transition-[background-color,transform] active:scale-[0.98] hover:bg-blue-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus-visible:ring-offset-slate-900"
               >
                 {primaryLabel}
                 <ArrowRight aria-hidden="true" className="h-4 w-4" />
@@ -75,7 +75,7 @@ export function PublicStatusPage({
             )}
             <Link
               href={secondaryHref}
-              className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,border-color,transform] active:scale-[0.98] hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
+              className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 shadow-xs transition-[background-color,border-color,transform] active:scale-[0.98] hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
             >
               <ArrowLeft aria-hidden="true" className="h-4 w-4" />
               {secondaryLabel}

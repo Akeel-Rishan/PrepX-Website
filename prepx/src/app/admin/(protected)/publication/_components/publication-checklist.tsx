@@ -55,7 +55,7 @@ export function PublicationChecklist({
 
   return (
     <div className="space-y-5">
-      <section className="flex flex-col justify-between gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:flex-row sm:items-center">
+      <section className="flex flex-col justify-between gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-xs dark:border-slate-700 dark:bg-slate-900 sm:flex-row sm:items-center">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">
             Current status
@@ -114,7 +114,7 @@ export function PublicationChecklist({
         </section>
       )}
 
-      <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xs dark:border-slate-700 dark:bg-slate-900">
         <div className="border-b border-gray-100 bg-gray-50 px-5 py-4 dark:border-slate-800 dark:bg-slate-950/60">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
             Pre-Publication Checklist
@@ -195,7 +195,7 @@ export function PublicationChecklist({
         </div>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs dark:border-slate-700 dark:bg-slate-900">
         <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
           Subject Configuration
         </h2>

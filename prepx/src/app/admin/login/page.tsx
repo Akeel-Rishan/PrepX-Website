@@ -55,15 +55,15 @@ export default async function AdminLoginPage({
       />
       <div
         aria-hidden="true"
-        className="absolute -left-48 -top-48 h-[32rem] w-[32rem] rounded-full bg-blue-500/20 blur-3xl"
+        className="absolute -left-48 -top-48 h-128 w-lg rounded-full bg-blue-500/20 blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="absolute -bottom-64 -right-40 h-[38rem] w-[38rem] rounded-full bg-indigo-500/20 blur-3xl"
+        className="absolute -bottom-64 -right-40 h-152 w-152 rounded-full bg-indigo-500/20 blur-3xl"
       />
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center p-4 sm:p-8 lg:p-12">
-        <section className="grid w-full overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.06] shadow-[0_32px_100px_rgba(0,0,0,0.38)] backdrop-blur-sm lg:min-h-[680px] lg:grid-cols-[1.08fr_0.92fr]">
+        <section className="grid w-full overflow-hidden rounded-4xl border border-white/10 bg-white/6 shadow-[0_32px_100px_rgba(0,0,0,0.38)] backdrop-blur-xs lg:min-h-[680px] lg:grid-cols-[1.08fr_0.92fr]">
           <div className="relative hidden flex-col justify-between overflow-hidden p-12 lg:flex xl:p-16">
             <div
               aria-hidden="true"

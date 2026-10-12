@@ -25,7 +25,7 @@ export default async function DashboardPage({
 
   return (
     <div className="mx-auto max-w-7xl space-y-7">
-      <section className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0b172a] px-6 py-7 text-white shadow-[var(--app-shadow)] sm:px-8 sm:py-9">
+      <section className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0b172a] px-6 py-7 text-white shadow-(--app-shadow) sm:px-8 sm:py-9">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-blue-300">

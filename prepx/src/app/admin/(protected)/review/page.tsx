@@ -101,8 +101,8 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
             </Badge>
             <Link
               className={cn(
-                'inline-flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors',
-                'hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'inline-flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-xs transition-colors',
+                'hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
               )}
               href={`/admin/results?examId=${encodeURIComponent(selectedExam.id)}`}
             >

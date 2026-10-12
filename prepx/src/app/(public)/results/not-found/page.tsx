@@ -16,7 +16,7 @@ const checks = [
 export default function ResultNotFoundPage(): React.JSX.Element {
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
-      <section className="public-portal-surface w-full max-w-md rounded-2xl border border-white/90 bg-white/[0.88] p-6 shadow-[0_28px_80px_-34px_rgba(30,64,175,0.34)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/[0.88] sm:p-8">
+      <section className="public-portal-surface w-full max-w-md rounded-2xl border border-white/90 bg-white/88 p-6 shadow-[0_28px_80px_-34px_rgba(30,64,175,0.34)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/88 sm:p-8">
         <div className="text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300">
             <SearchX aria-hidden="true" strokeWidth={1.8} className="h-8 w-8" />
@@ -49,7 +49,7 @@ export default function ResultNotFoundPage(): React.JSX.Element {
 
         <Link
           href="/"
-          className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus-visible:ring-offset-slate-900"
+          className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus-visible:ring-offset-slate-900"
         >
           <ArrowLeft aria-hidden="true" strokeWidth={1.8} className="h-4 w-4" />
           Try Again

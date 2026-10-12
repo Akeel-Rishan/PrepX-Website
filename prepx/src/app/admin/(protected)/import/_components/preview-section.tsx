@@ -47,7 +47,7 @@ export function PreviewSection({
 
   return (
     <section className="space-y-5">
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Step 2 of 4</p>
@@ -76,7 +76,7 @@ export function PreviewSection({
         />
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs sm:p-6">
         <h4 className="text-sm font-semibold text-gray-900">Detected columns</h4>
         <div className="mt-3 flex flex-wrap gap-2">
           {BASE_FIELDS.map((field) => {
@@ -132,7 +132,7 @@ export function PreviewSection({
             className="w-full sm:w-auto"
           >
             Proceed to Import
-            <span className="rounded bg-blue-500 px-1.5 py-0.5 text-xs">
+            <span className="rounded-sm bg-blue-500 px-1.5 py-0.5 text-xs">
               {result.validRows} rows
             </span>
             <ArrowRight aria-hidden="true" className="h-4 w-4" />

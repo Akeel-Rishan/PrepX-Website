@@ -50,7 +50,7 @@ export default function ResultsPage(): React.JSX.Element {
             </p>
             <Link
               href="/"
-              className="mt-4 inline-block rounded-lg px-4 py-3 font-semibold text-blue-600 underline focus-visible:outline focus-visible:outline-2"
+              className="mt-4 inline-block rounded-lg px-4 py-3 font-semibold text-blue-600 underline focus-visible:outline-solid focus-visible:outline-2"
             >
               Back to Search
             </Link>
@@ -89,7 +89,7 @@ export default function ResultsPage(): React.JSX.Element {
       <p className="no-print mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
         Examination results / Student record
       </p>
-      <article className="result-card overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[var(--app-shadow)] dark:border-slate-700 dark:bg-slate-900">
+      <article className="result-card overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-(--app-shadow) dark:border-slate-700 dark:bg-slate-900">
         <div className="no-print border-b border-blue-900 bg-[#0b172a] px-4 py-6 sm:px-7 sm:py-7">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-bold tracking-wide text-blue-200">
@@ -124,7 +124,7 @@ export default function ResultsPage(): React.JSX.Element {
                   <dt className="print-info-label shrink-0 font-medium text-slate-500 dark:text-slate-400 min-[375px]:w-[35%]">
                     {label}
                   </dt>
-                  <dd className="print-info-value min-w-0 flex-1 break-words font-semibold text-slate-900 dark:text-slate-100">
+                  <dd className="print-info-value min-w-0 flex-1 wrap-break-word font-semibold text-slate-900 dark:text-slate-100">
                     {value}
                   </dd>
                 </div>

@@ -14,7 +14,7 @@ export function RecentExamsTable({ examinations, year }: RecentExamsTableProps):
   return (
     <section
       aria-labelledby="recent-exams-title"
-      className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900"
+      className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-(--app-shadow) dark:border-slate-800 dark:bg-slate-900"
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:px-6 dark:border-slate-800">
         <div className="flex items-center gap-3">
@@ -35,7 +35,7 @@ export function RecentExamsTable({ examinations, year }: RecentExamsTableProps):
         </div>
         <Link
           href="/admin/examinations"
-          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-300"
+          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-300"
         >
           View all <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
@@ -73,7 +73,7 @@ export function RecentExamsTable({ examinations, year }: RecentExamsTableProps):
                   <th
                     key={heading}
                     scope="col"
-                    className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400 ${heading === 'Action' ? 'text-right' : 'text-left'}`}
+                    className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 ${heading === 'Action' ? 'text-right' : 'text-left'}`}
                   >
                     {heading}
                   </th>
@@ -87,7 +87,7 @@ export function RecentExamsTable({ examinations, year }: RecentExamsTableProps):
                   className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/40"
                 >
                   <td className="px-5 py-4">
-                    <div className="min-w-32 break-words font-semibold text-slate-900 dark:text-slate-100">
+                    <div className="min-w-32 wrap-break-word font-semibold text-slate-900 dark:text-slate-100">
                       {exam.name}
                     </div>
                     <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">

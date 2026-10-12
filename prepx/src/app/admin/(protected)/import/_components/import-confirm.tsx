@@ -118,7 +118,7 @@ export function ImportConfirm({
 
   if (confirmState === 'success') {
     return (
-      <section aria-live="polite" className="rounded-xl border border-green-200 bg-white p-6 shadow-sm sm:p-8">
+      <section aria-live="polite" className="rounded-xl border border-green-200 bg-white p-6 shadow-xs sm:p-8">
         <div className="flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
             <CheckCircle2 aria-hidden="true" className="h-8 w-8 text-green-600" />
@@ -156,7 +156,7 @@ export function ImportConfirm({
 
   if (confirmState === 'error') {
     return (
-      <section aria-live="assertive" className="rounded-xl border border-red-200 bg-white p-6 shadow-sm sm:p-8">
+      <section aria-live="assertive" className="rounded-xl border border-red-200 bg-white p-6 shadow-xs sm:p-8">
         <div className="flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
             <XCircle aria-hidden="true" className="h-8 w-8 text-red-600" />
@@ -195,7 +195,7 @@ export function ImportConfirm({
 
   return (
     <section className="space-y-5">
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs sm:p-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Step 3 of 4</p>
         <h3 className="mt-1 text-lg font-semibold text-gray-900">Ready to Import</h3>
         <p className="mt-1 text-sm text-gray-600">

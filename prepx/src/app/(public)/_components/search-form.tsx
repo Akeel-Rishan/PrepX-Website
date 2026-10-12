@@ -129,10 +129,10 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
       aria-describedby={errorMessage ? 'search-help search-error' : 'search-help'}
     >
       <fieldset className="mb-6">
-        <legend className="mb-2.5 text-xs font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">
+        <legend className="mb-2.5 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Search using
         </legend>
-        <div className="grid grid-cols-2 rounded-2xl border border-slate-200/90 bg-slate-100/80 p-1 dark:border-white/[0.08] dark:bg-[#070e1a]">
+        <div className="grid grid-cols-2 rounded-2xl border border-slate-200/90 bg-slate-100/80 p-1 dark:border-white/8 dark:bg-[#070e1a]">
           <SearchTypeButton
             active={isIndexSearch}
             disabled={isLoading}
@@ -185,7 +185,7 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
           }}
           disabled={isLoading}
           aria-invalid={Boolean(errorMessage)}
-          className="h-[54px] w-full rounded-2xl border border-slate-300 bg-white pl-12 pr-4 font-mono text-[15px] tracking-wide text-slate-950 shadow-sm outline-none transition-[border-color,box-shadow,background-color] placeholder:text-slate-500 hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:text-slate-400 dark:border-white/[0.11] dark:bg-[#111d30] dark:text-white dark:placeholder:text-slate-400 dark:shadow-none dark:hover:border-white/[0.18] dark:focus:border-blue-500 dark:focus:ring-blue-500/[0.1]"
+          className="h-[54px] w-full rounded-2xl border border-slate-300 bg-white pl-12 pr-4 font-mono text-[15px] tracking-wide text-slate-950 shadow-xs outline-hidden transition-[border-color,box-shadow,background-color] placeholder:text-slate-500 hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:text-slate-400 dark:border-white/11 dark:bg-[#111d30] dark:text-white dark:placeholder:text-slate-400 dark:shadow-none dark:hover:border-white/18 dark:focus:border-blue-500 dark:focus:ring-blue-500/10"
         />
       </div>
 
@@ -199,7 +199,7 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
         <div
           id="search-error"
           role="alert"
-          className="mt-5 flex items-start gap-3 rounded-2xl border border-red-300/70 bg-red-50/80 px-4 py-3.5 dark:border-red-400/20 dark:bg-red-400/[0.08]"
+          className="mt-5 flex items-start gap-3 rounded-2xl border border-red-300/70 bg-red-50/80 px-4 py-3.5 dark:border-red-400/20 dark:bg-red-400/8"
         >
           <AlertCircle
             aria-hidden="true"
@@ -214,7 +214,7 @@ export function SearchForm({ examinationId, examName }: SearchFormProps): React.
         disabled={isLoading}
         type="submit"
         aria-busy={isLoading}
-        className="group mt-6 flex h-[54px] w-full items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white shadow-[0_14px_30px_-14px_rgba(37,99,235,0.9)] transition-[background-color,box-shadow,transform] hover:bg-blue-700 hover:shadow-[0_16px_34px_-14px_rgba(37,99,235,0.95)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:translate-y-px disabled:cursor-not-allowed dark:hover:bg-blue-700 dark:focus-visible:ring-offset-[#0b1424]"
+        className="group mt-6 flex h-[54px] w-full items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white shadow-[0_14px_30px_-14px_rgba(37,99,235,0.9)] transition-[background-color,box-shadow,transform] hover:bg-blue-700 hover:shadow-[0_16px_34px_-14px_rgba(37,99,235,0.95)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:translate-y-px disabled:cursor-not-allowed dark:hover:bg-blue-700 dark:focus-visible:ring-offset-[#0b1424]"
       >
         {isLoading ? (
           <>
@@ -261,9 +261,9 @@ function SearchTypeButton({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        'flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-2 text-sm font-semibold transition-[background-color,color,box-shadow,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed',
+        'flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-2 text-sm font-semibold transition-[background-color,color,box-shadow,border-color] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed',
         active
-          ? 'border border-slate-200/80 bg-white text-slate-950 shadow-sm dark:border-white/[0.08] dark:bg-[#18253a] dark:text-white'
+          ? 'border border-slate-200/80 bg-white text-slate-950 shadow-xs dark:border-white/8 dark:bg-[#18253a] dark:text-white'
           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
       )}
     >

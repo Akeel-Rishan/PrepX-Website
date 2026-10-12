@@ -46,7 +46,7 @@ export function ExaminationsTable({
           </p>
           <Link
             href="/admin/examinations/new"
-            className="inline-flex h-8 items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            className="inline-flex h-8 items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             <PlusCircle aria-hidden="true" className="h-4 w-4" />
             Create Examination
@@ -80,7 +80,7 @@ export function ExaminationsTable({
                     <Link
                       href={getExaminationListHref(currentStatus, column.value, nextDirection)}
                       aria-label={`Sort by ${column.label.toLowerCase()}, ${nextDirection === 'asc' ? 'ascending' : 'descending'}`}
-                      className="inline-flex items-center gap-1.5 rounded hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      className="inline-flex items-center gap-1.5 rounded-sm hover:text-blue-600 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500"
                     >
                       {column.label}
                       <Icon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
@@ -122,7 +122,7 @@ export function ExaminationsTable({
                   <Link
                     href={`/admin/examinations/${exam.id}`}
                     aria-label={`Manage ${exam.name} (${exam.year})`}
-                    className="inline-flex h-8 items-center justify-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    className="inline-flex h-8 items-center justify-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                   >
                     Manage
                   </Link>

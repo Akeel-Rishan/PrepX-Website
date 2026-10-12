@@ -88,7 +88,7 @@ export function ResultsFilterBar({
               placeholder="Search by name or index number..."
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
-              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500"
             />
           </div>
         )}

@@ -60,7 +60,7 @@ export function Sidebar({
             onClick={onLogout}
             disabled={isLoggingOut}
             aria-busy={isLoggingOut}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700 py-2 text-xs font-semibold text-slate-300 transition-[background-color,border-color,color,transform] active:scale-[0.98] hover:border-slate-600 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700 py-2 text-xs font-semibold text-slate-300 transition-[background-color,border-color,color,transform] active:scale-[0.98] hover:border-slate-600 hover:bg-slate-800 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <LogOut aria-hidden="true" className="h-3.5 w-3.5" />
             {isLoggingOut ? 'Logging out...' : 'Log Out'}

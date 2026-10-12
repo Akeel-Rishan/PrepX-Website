@@ -19,7 +19,7 @@ export function ImportInstructions({
         onClick={onToggle}
         aria-expanded={isOpen}
         aria-controls="import-instructions"
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
       >
         <span className="font-semibold text-gray-900">How to Import Results</span>
         <span className="flex items-center gap-1 text-sm font-medium text-blue-700">

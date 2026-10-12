@@ -102,7 +102,8 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [x] **VERIFIED — Required:** No cross-origin client is supported; routes do not emit permissive `Access-Control-Allow-Origin` headers, so browser use remains same-origin.
 - [x] **VERIFIED — Required:** State changes use authenticated Next.js Server Actions with framework origin checks plus server-side admin authorization; no cookie-authenticated state-changing public REST endpoint exists.
 - [x] **VERIFIED — Required:** `npm audit --omit=dev --audit-level=moderate` reports zero production dependency vulnerabilities.
-- [ ] **MANUAL CHECK REQUIRED — Recommended:** Review nine known development-only transitive advisories during the planned Tailwind/toolchain migration; do not use a breaking forced audit fix during release.
+- [x] **VERIFIED — Recommended:** Tailwind CSS 3 was migrated to 4.3.3 and the original nine-item Tailwind development-toolchain audit chain was removed. Type-check, lint, unit/security tests, production build, responsive result browser tests, CSP tests, and A4 print tests pass after migration.
+- [ ] **DEFERRED — Recommended:** Monitor the new upstream `braces` advisory in Next.js's development-only ESLint stack. Full `npm audit` reports five entries derived from this one transitive package, but `npm audit --omit=dev` remains clean and no patched `braces` release exists as of 2026-10-12. Do not use npm's suggested incompatible Next.js 14 downgrade or a forced audit fix.
 
 ## 5. Environment and deployment
 
@@ -236,7 +237,7 @@ Complete first on Preview, then repeat on Production immediately after promotion
 | Technical verification performed by | **BLOCKED:** ____________________ |
 | Release approved by | **BLOCKED:** ____________________ |
 | Open risks | Real integration, deployed E2E/security/accessibility, Upstash, load, backup/restore, operations/content/privacy gates above |
-| Deferred recommended items | Tailwind/toolchain migration; 500-user stress only after baseline/approval |
+| Deferred recommended items | Upstream ESLint/`braces` advisory monitoring; 500-user stress only after baseline/approval |
 | Rollback decision/owner | **BLOCKED:** ____________________ |
 | Final go/no-go decision | **GO ONLY AFTER BLOCKERS ARE RESOLVED** |
 | Production deployment timestamp | Not deployed: ____________________ |

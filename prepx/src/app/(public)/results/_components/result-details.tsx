@@ -113,14 +113,14 @@ export function GradesTable({ grades }: { grades: GradeEntry[] }) {
               >
                 <th
                   scope="row"
-                  className="break-words px-2 py-3 text-left text-sm font-medium text-slate-900 dark:text-slate-100 sm:px-4"
+                  className="wrap-break-word px-2 py-3 text-left text-sm font-medium text-slate-900 dark:text-slate-100 sm:px-4"
                 >
                   {entry.subjectName}
                 </th>
                 <td className="print-grade-cell px-1 py-3 text-center">
                   <GradeBadge grade={entry.grade} />
                 </td>
-                <td className="break-words px-2 py-3 text-xs text-slate-600 dark:text-slate-300 sm:px-4 sm:text-sm">
+                <td className="wrap-break-word px-2 py-3 text-xs text-slate-600 dark:text-slate-300 sm:px-4 sm:text-sm">
                   {entry.grade ? GRADE_LABELS[entry.grade] : 'Not available'}
                 </td>
               </tr>

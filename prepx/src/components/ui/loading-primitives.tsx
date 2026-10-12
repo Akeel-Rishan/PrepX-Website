@@ -53,7 +53,7 @@ export function LoadingStatus({
         'app-loading-enter flex items-center gap-3 text-slate-700 dark:text-slate-200',
         compact
           ? 'py-1'
-          : 'rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80',
+          : 'rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-xs dark:border-slate-700 dark:bg-slate-900/80',
         className
       )}
     >

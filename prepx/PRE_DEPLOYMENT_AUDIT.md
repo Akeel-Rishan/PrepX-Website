@@ -44,7 +44,8 @@ This is not yet approval for a public production launch. A Vercel preview deploy
 
 ## Recommended follow-up (P2)
 
-- [ ] Migrate Tailwind CSS 3 and its development toolchain to a supported release. Full `npm audit` reports 9 development-only transitive advisories; the production dependency audit reports 0 vulnerabilities. Avoid `npm audit fix --force` without a planned Tailwind migration.
+- [x] Tailwind CSS 3 was migrated to Tailwind CSS 4.3.3 with the dedicated PostCSS plugin. The original nine-item Tailwind 3 audit chain is removed; production dependencies still report 0 vulnerabilities.
+- [ ] Monitor the upstream `braces` advisory now reported through Next.js's development-only ESLint stack. Full `npm audit` reports five entries derived from this single transitive dependency; no patched `braces` release exists as of 2026-10-12. Do not accept npm's incompatible Next.js 14 downgrade suggestion or force a major framework change solely to silence the report.
 - [ ] Run capacity tests with the largest expected examination, student, subject, and audit-log volumes.
 - [ ] Configure the optional Gemini import assistant only if that feature will be enabled in production, and document its data-handling policy.
 
@@ -64,6 +65,7 @@ This is not yet approval for a public production launch. A Vercel preview deploy
 - Hardened recursive audit-payload NIC masking and added a read-only historical audit that reports counts only.
 - Replaced the brittle native-CDP error browser harness with the existing Playwright/Edge test path and made result browser selectors accessibility-based and transition-safe.
 - Updated vulnerable production dependencies (`next`, `sharp`, and `source-map-js`) and added the missing `playwright-core` test dependency.
+- Migrated Tailwind CSS 3 to 4.3.3, moved theme configuration into CSS, updated the PostCSS plugin and utility syntax, and corrected an upgrade-tool rewrite that changed the public `Button` variant API.
 
 ## Verification completed
 
@@ -76,6 +78,7 @@ This is not yet approval for a public production launch. A Vercel preview deploy
 - `npm run audit:privacy` — pass; 49 configured audit rows checked and 0 unmasked NIC fields found
 - `npx supabase migration list --linked` — pass; local and remote are `001` through `005`
 - `npm audit --omit=dev --audit-level=moderate` — 0 vulnerabilities
+- Full `npm audit` — 5 development-only findings derived from one unpatched `braces` advisory in the Next.js ESLint toolchain; no production dependency is affected
 - `npm run build` — pass with Next.js 15.5.27
 - Production HTTP/header/error-path smoke tests — pass with live configured Supabase and Upstash credentials
 - Local production browser suites — result navigation/responsive behavior, print/A4 PDF, CSP/security, 404, and global-error recovery pass in Edge

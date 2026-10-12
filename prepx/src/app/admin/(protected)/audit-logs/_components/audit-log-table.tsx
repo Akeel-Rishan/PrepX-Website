@@ -122,7 +122,7 @@ export function AuditLogTable({
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--app-shadow)] dark:border-slate-800 dark:bg-slate-900">
+      <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-(--app-shadow) dark:border-slate-800 dark:bg-slate-900">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
             <thead className="border-b border-slate-200 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-950/50">
@@ -183,7 +183,7 @@ export function AuditLogTable({
                       <button
                         type="button"
                         onClick={() => setSelectedLog(log)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-500 dark:hover:bg-blue-950/50 dark:hover:text-blue-300"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-500 dark:hover:bg-blue-950/50 dark:hover:text-blue-300"
                         aria-label={`View details for ${meta?.label ?? log.action}`}
                         title="View details"
                       >

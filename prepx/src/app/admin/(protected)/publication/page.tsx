@@ -59,14 +59,14 @@ export default async function PublicationPage({
           </p>
           <Link
             href="/admin/examinations/new"
-            className="mt-5 inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            className="mt-5 inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             Create examination
           </Link>
         </section>
       ) : (
         <>
-          <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-5">
+          <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-xs dark:border-slate-700 dark:bg-slate-900 sm:p-5">
             <ExamSelectorBar
               id="publication-examination"
               examinations={examinations.map(({ id, name, year }) => ({ id, name, year }))}

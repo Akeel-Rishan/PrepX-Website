@@ -17,7 +17,7 @@ export function YearSelector({ years, selectedYear }: YearSelectorProps): React.
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className="flex min-w-48 items-center gap-3 rounded-xl border border-white/15 bg-white/10 p-2 pl-3 text-white shadow-sm backdrop-blur-sm">
+    <div className="flex min-w-48 items-center gap-3 rounded-xl border border-white/15 bg-white/10 p-2 pl-3 text-white shadow-xs backdrop-blur-xs">
       <CalendarDays aria-hidden="true" className="h-5 w-5 shrink-0 text-blue-300" />
       <span className="min-w-0 flex-1">
         <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-200/70">

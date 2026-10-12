@@ -42,7 +42,7 @@ export default async function ExaminationDetailPage({
       <div className="flex items-center gap-2 text-sm text-gray-500">
         <Link
           href="/admin/examinations"
-          className="flex items-center gap-1 rounded hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          className="flex items-center gap-1 rounded-sm hover:text-gray-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500"
         >
           <ChevronLeft aria-hidden="true" className="h-4 w-4" />
           Examinations

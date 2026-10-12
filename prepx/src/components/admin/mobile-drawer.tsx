@@ -63,7 +63,7 @@ export function MobileDrawer({
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-xs"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -73,13 +73,13 @@ export function MobileDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Admin menu"
-        className="absolute left-0 top-0 flex h-full w-[17rem] max-w-[calc(100vw-2rem)] flex-col bg-[#0a1220] shadow-2xl"
+        className="absolute left-0 top-0 flex h-full w-68 max-w-[calc(100vw-2rem)] flex-col bg-[#0a1220] shadow-2xl"
       >
         <button
           ref={closeRef}
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 z-10 rounded-xl p-2 text-slate-400 transition-[background-color,color,transform] active:scale-95 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          className="absolute right-3 top-3 z-10 rounded-xl p-2 text-slate-400 transition-[background-color,color,transform] active:scale-95 hover:bg-slate-800 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-400"
         >
           <X aria-hidden="true" className="h-5 w-5" />
           <span className="sr-only">Close menu</span>

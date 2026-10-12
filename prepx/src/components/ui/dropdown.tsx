@@ -257,7 +257,7 @@ export function Dropdown({
       aria-label={ariaLabel}
       aria-activedescendant={activeIndex >= 0 ? `${controlId}-option-${activeIndex}` : undefined}
       className={cn(
-        'fixed z-[100] max-h-72 overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-1.5 text-slate-900 shadow-[0_18px_48px_rgba(15,23,42,0.18)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:shadow-[0_20px_54px_rgba(0,0,0,0.45)]',
+        'fixed z-100 max-h-72 overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-1.5 text-slate-900 shadow-[0_18px_48px_rgba(15,23,42,0.18)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:shadow-[0_20px_54px_rgba(0,0,0,0.45)]',
         menuClassName
       )}
       style={menuPosition}
@@ -288,7 +288,7 @@ export function Dropdown({
             onPointerMove={() => !option.disabled && setActiveIndex(index)}
             onClick={() => choose(option)}
             className={cn(
-              'flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors focus:outline-none',
+              'flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors focus:outline-hidden',
               active && 'bg-blue-50 text-blue-900 dark:bg-blue-950/70 dark:text-blue-100',
               selected && 'font-semibold',
               option.disabled && 'cursor-not-allowed opacity-45'
@@ -330,7 +330,7 @@ export function Dropdown({
         onClick={() => (open ? close() : openMenu())}
         onKeyDown={handleKeyDown}
         className={cn(
-          'inline-flex min-h-11 min-w-0 w-full items-center justify-between gap-3 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-left text-sm font-medium text-slate-800 shadow-sm transition-[background-color,border-color,box-shadow] hover:border-slate-400 focus-visible:border-blue-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/15 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 disabled:opacity-70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600 dark:focus-visible:border-blue-400 dark:focus-visible:ring-blue-400/20 dark:disabled:bg-slate-950 dark:disabled:text-slate-500',
+          'inline-flex min-h-11 min-w-0 w-full items-center justify-between gap-3 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-left text-sm font-medium text-slate-800 shadow-xs transition-[background-color,border-color,box-shadow] hover:border-slate-400 focus-visible:border-blue-500 focus-visible:outline-hidden focus-visible:ring-4 focus-visible:ring-blue-500/15 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 disabled:opacity-70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600 dark:focus-visible:border-blue-400 dark:focus-visible:ring-blue-400/20 dark:disabled:bg-slate-950 dark:disabled:text-slate-500',
           compact && 'min-h-9 rounded-lg px-2.5 py-1.5 text-xs',
           className
         )}

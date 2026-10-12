@@ -100,7 +100,7 @@ export function DeleteButton({
               <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
                 <AlertTriangle
                   aria-hidden="true"
-                  className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-amber-600"
                 />
                 <p className="text-sm text-amber-800">
                   {resultCount} grade {resultCount === 1 ? 'entry' : 'entries'} will also be

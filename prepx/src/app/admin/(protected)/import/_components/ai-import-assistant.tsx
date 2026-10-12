@@ -99,7 +99,7 @@ export function AiImportAssistant({
   }
 
   return (
-    <div className="rounded-xl border border-blue-200 bg-blue-50 p-5 shadow-sm dark:border-blue-900/60 dark:bg-blue-950/30 sm:p-6">
+    <div className="rounded-xl border border-blue-200 bg-blue-50 p-5 shadow-xs dark:border-blue-900/60 dark:bg-blue-950/30 sm:p-6">
       <div className="flex items-start gap-3">
         <div className="rounded-lg bg-blue-100 p-2 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200">
           <Sparkles aria-hidden="true" className="h-5 w-5" />

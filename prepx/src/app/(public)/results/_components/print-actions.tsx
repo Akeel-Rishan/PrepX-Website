@@ -20,7 +20,7 @@ export function PrintActions({ className }: { className?: string }) {
         </Button>
         <Link
           href="/"
-          className="flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
+          className="flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
         >
           <ArrowLeft aria-hidden="true" className="h-4 w-4" /> Search Again
         </Link>

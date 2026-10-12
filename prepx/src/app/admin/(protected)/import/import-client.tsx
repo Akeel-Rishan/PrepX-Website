@@ -173,18 +173,18 @@ export function ImportClient({
 
   return (
     <div className="space-y-5">
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs sm:p-6">
         <StepIndicator steps={STEPS} currentStep={currentStep} />
       </section>
 
       {currentStep > 1 && currentStep < 4 && selectedExamination && selectedFile && (
-        <section className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <section className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between">
           <div><p className="text-sm font-semibold text-gray-900">{selectedExamination.name} {selectedExamination.year}</p><p className="mt-0.5 text-xs text-gray-600">{selectedFile.name}</p></div>
           <Button variant="outline" size="sm" onClick={returnToSelection}>Change file</Button>
         </section>
       )}
       {currentStep === 1 && (
-        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs sm:p-6">
           <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Step 1 of 4</p><h3 className="mt-1 text-lg font-semibold text-gray-900">Select Examination and File</h3><p className="mt-1 text-sm text-gray-600">Choose an open examination, download its template, then upload the completed file.</p></div>
           <div className="space-y-6">
             <div>
