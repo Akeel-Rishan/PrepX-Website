@@ -9,8 +9,10 @@ import './globals.css';
 const themeScript = `
   try {
     var savedTheme = localStorage.getItem('prepx-theme');
-    var isLoginPage = /^\\/admin\\/login\\/?$/.test(window.location.pathname);
-    var useDark = !isLoginPage && (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches));
+    var pathname = window.location.pathname;
+    var isAdminPage = /^\\/admin(?:\\/|$)/.test(pathname);
+    var isLoginPage = /^\\/admin\\/login\\/?$/.test(pathname);
+    var useDark = !isLoginPage && (savedTheme === 'dark' || (!savedTheme && !isAdminPage && window.matchMedia('(prefers-color-scheme: dark)').matches));
     document.documentElement.classList.toggle('dark', useDark);
     document.documentElement.style.colorScheme = useDark ? 'dark' : 'light';
   } catch (_) {}

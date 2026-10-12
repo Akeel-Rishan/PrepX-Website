@@ -154,6 +154,11 @@ async function main() {
   await assert.rejects(parseImportFile(compressedBomb, 'xlsx', []), /Could not read/);
   const root = fs.readFileSync('src/app/layout.tsx', 'utf8');
   assert.match(root, /nonce=\{nonce\} suppressHydrationWarning dangerouslySetInnerHTML=\{\{ __html: themeScript \}\}/);
+  assert.match(root, /!savedTheme && !isAdminPage/);
+  assert.match(root, /savedTheme === 'dark'/);
+  const adminShell = fs.readFileSync('src/components/admin/admin-shell.tsx', 'utf8');
+  assert.match(adminShell, /localStorage\.getItem\('prepx-theme'\)/);
+  assert.match(adminShell, /classList\.remove\('dark'\)/);
   console.log('PASS: import formula/hyperlink/oversize/ZIP-bomb rejection, safe multilingual preview and nonce on the existing fixed theme script.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

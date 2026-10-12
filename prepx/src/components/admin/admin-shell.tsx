@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useState, useTransition, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useTransition,
+  type ReactNode,
+} from 'react';
 import { usePathname } from 'next/navigation';
 import { logoutAction } from '@/lib/actions/auth';
 import { Alert } from '@/components/ui/alert';
@@ -21,6 +28,16 @@ export function AdminShell({ userEmail, children }: AdminShellProps): React.JSX.
   const pathname = usePathname();
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
   const isLoggingOut = isPending || isSubmitting;
+
+  useLayoutEffect(() => {
+    try {
+      if (localStorage.getItem('prepx-theme')) return;
+    } catch {
+      // Storage is optional; the admin fallback remains light.
+    }
+    document.documentElement.classList.remove('dark');
+    document.documentElement.style.colorScheme = 'light';
+  }, []);
 
   useEffect(() => {
     closeDrawer();

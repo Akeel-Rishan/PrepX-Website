@@ -9,7 +9,8 @@ let stage = 'launch';
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   try {
-    const page = await browser.newPage();
+    const context = await browser.newContext({ colorScheme: 'dark' });
+    const page = await context.newPage();
     const errors = [];
     page.on('pageerror', () => errors.push('pageerror'));
     page.on('console', message => {
@@ -39,6 +40,7 @@ let stage = 'launch';
       return nonce;
     }
     const first = await checkPage('/');
+    assert(await page.locator('html').evaluate(element => element.classList.contains('dark')));
     await page.getByRole('textbox', { name: 'Candidate Index Number' }).waitFor();
     const second = await checkPage('/');
     assert.notEqual(first, second);
@@ -59,6 +61,7 @@ let stage = 'launch';
     await checkPage('/results/not-published');
     await page.getByRole('heading', { name: 'Results Not Yet Published', exact: true }).waitFor();
     await checkPage('/admin/login');
+    assert(!(await page.locator('html').evaluate(element => element.classList.contains('dark'))));
     assert(await page.locator('input[type="password"]').isVisible());
     await page.locator('input[type="password"]').fill('unchanged password ');
     assert.equal(await page.locator('input[type="password"]').inputValue(), 'unchanged password ');
