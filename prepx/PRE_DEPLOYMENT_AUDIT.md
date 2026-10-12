@@ -1,6 +1,6 @@
 # PrepX Pre-Deployment Audit
 
-Audit date: 2026-10-11
+Audit date: 2026-10-11; deep-audit update: 2026-10-12
 
 ## Status
 
@@ -31,7 +31,7 @@ This is not yet approval for a public production launch. A Vercel preview deploy
 - [ ] Add the production Supabase and Upstash settings to Vercel Preview and Production. Use distinct rate-limit storage/secrets between environments when possible. Never expose `SUPABASE_SECRET_KEY`, Upstash token, Gemini key, or rate-limit secret with a `NEXT_PUBLIC_` prefix.
 - [ ] Set `NEXT_PUBLIC_APP_URL` to the canonical HTTPS production domain (and an appropriate preview value if the application begins consuming it). Leave Vercel proxy and HSTS override variables unset.
 - [ ] Deploy a preview and require `/api/health` to return HTTP 200.
-- [ ] Create dedicated non-production staging data with one approved `PUBLISHED` examination, then rerun live public-search, browser-security, result-navigation, and print/PDF tests. The currently linked data has no published examination, so the browser suite correctly stops before the result form.
+- [ ] Create dedicated non-production staging data with one approved `PUBLISHED` examination, then rerun live public-search, browser-security, result-navigation, and print/PDF tests against Preview. Local production browser suites pass against the currently configured fictional published fixture; this does not replace isolated staging evidence.
 - [ ] Smoke-test the authenticated admin flow on staging: login, examination setup, subjects, student create/edit, import, grade entry, review, publish, public lookup, unpublish, and audit logs.
 
 ## Required operational checks (P1)
@@ -60,7 +60,9 @@ This is not yet approval for a public production launch. A Vercel preview deploy
 - Fixed untrusted error-code handling so inherited JavaScript property names cannot be accepted as API error codes.
 - Consolidated the public-search rate limiter around the hardened Upstash production implementation and removed an unused database/memory limiter, migration, and types.
 - Corrected the environment template to document all production limiter, proxy, and security settings.
-- Removed obsolete duplicate publication UI/actions and empty placeholder components while retaining the real validation and state-transition implementation.
+- Aligned both publication validation paths so a required subject and complete required grades are mandatory before publication; the live publish action revalidates this rule.
+- Hardened recursive audit-payload NIC masking and added a read-only historical audit that reports counts only.
+- Replaced the brittle native-CDP error browser harness with the existing Playwright/Edge test path and made result browser selectors accessibility-based and transition-safe.
 - Updated vulnerable production dependencies (`next`, `sharp`, and `source-map-js`) and added the missing `playwright-core` test dependency.
 
 ## Verification completed
@@ -71,8 +73,9 @@ This is not yet approval for a public production launch. A Vercel preview deploy
 - `npm run test:integration:safety` — pass
 - `npm run load:validate` — pass (native k6 check skipped because k6 is not installed)
 - `npm run test:db` — pass against the currently linked project
+- `npm run audit:privacy` — pass; 49 configured audit rows checked and 0 unmasked NIC fields found
 - `npx supabase migration list --linked` — pass; local and remote are `001` through `005`
 - `npm audit --omit=dev --audit-level=moderate` — 0 vulnerabilities
 - `npm run build` — pass with Next.js 15.5.27
 - Production HTTP/header/error-path smoke tests — pass with live configured Supabase and Upstash credentials
-- Browser security suite — header/CSP checks pass, then stops because the linked data has no published examination fixture
+- Local production browser suites — result navigation/responsive behavior, print/A4 PDF, CSP/security, 404, and global-error recovery pass in Edge

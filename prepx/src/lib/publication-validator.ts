@@ -216,16 +216,7 @@ export function buildPublicationValidation(input: {
   const lowRequiredCoverage = subjectCoverage.filter(
     (subject) => subject.required && subject.totalStudents > 0 && subject.coveragePct < 50
   );
-  const incompletePct = students.length
-    ? Math.round((incompleteRows.length / students.length) * 100)
-    : 0;
-  const warningThreshold = Math.ceil(students.length * 0.1);
-  const completenessStatus: CheckStatus =
-    incompleteRows.length === 0
-      ? 'pass'
-      : incompleteRows.length <= warningThreshold
-        ? 'warn'
-        : 'fail';
+  const completenessStatus: CheckStatus = incompleteRows.length === 0 ? 'pass' : 'fail';
 
   const checks: ValidationCheck[] = [
     check(
@@ -259,10 +250,10 @@ export function buildPublicationValidation(input: {
       'check_1_4',
       'Examination Setup',
       'Required subjects configured',
-      requiredSubjects.length ? 'pass' : 'warn',
+      requiredSubjects.length ? 'pass' : 'fail',
       requiredSubjects.length
         ? `${requiredSubjects.length} required subject${requiredSubjects.length === 1 ? ' is' : 's are'} configured.`
-        : 'No required subjects are defined. Overall pass/fail status may not be meaningful.'
+        : 'No required subjects are defined. Mark at least one active subject as required before publishing.'
     ),
     check(
       'check_2_1',
@@ -316,9 +307,7 @@ export function buildPublicationValidation(input: {
       completenessStatus,
       incompleteRows.length === 0
         ? `All ${students.length} students have complete results for required subjects.`
-        : completenessStatus === 'warn'
-          ? `${incompleteRows.length} students are missing required grades. You may still publish, but their results will show as Incomplete.`
-          : `${incompleteRows.length} students (${incompletePct}%) have incomplete required-subject grades. Review and fix them before publishing.`,
+        : `${incompleteRows.length} student${incompleteRows.length === 1 ? ' is' : 's are'} missing required grades. Complete every required grade before publishing.`,
       incompleteRows.map((row) => ({
         label: `${row.fullName} (${row.indexNumber || 'no index'})`,
         detail: `Missing: ${row.missingSubjects.join(', ')}`,

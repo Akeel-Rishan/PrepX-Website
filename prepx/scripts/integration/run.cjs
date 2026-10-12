@@ -30,12 +30,23 @@ async function publicFlow(c) {
     assert.equal(response.status, 403);
     assert.equal(response.body.error, 'NOT_PUBLISHED');
   }
-  success(await publication.publishExaminationAction(exam.id));
-  assert((await publication.publishExaminationAction(exam.id)).error);
-  assert.equal((await search(route, exam)).body.overallStatus, 'Incomplete');
   const readiness = await c.app('src/lib/data/publication.ts').getPublicationValidation(exam.id);
   assert.equal(readiness.stats.emptyStudents, 1);
-  assert(readiness.warnings.length);
+  assert.equal(readiness.canPublish, false);
+  assert.equal(readiness.warnings.length, 0);
+  assert(readiness.blockingErrors.some((message) => /no grades/i.test(message)));
+  assert((await publication.publishExaminationAction(exam.id)).error);
+  assert.equal((await search(route, exam)).status, 403);
+  assert.equal(
+    (
+      await grades.saveGradesAction(exam.id, [
+        { studentId: student.id, subjectId: subject.id, grade: 'A' },
+      ])
+    ).savedCount,
+    1
+  );
+  success(await publication.publishExaminationAction(exam.id));
+  assert((await publication.publishExaminationAction(exam.id)).error);
   const unknown = await search(route, exam, { indexNumber: 'UNKNOWN' });
   assert.equal(unknown.status, 404);
   assert.equal(unknown.body.error, 'NOT_FOUND');
@@ -155,9 +166,15 @@ async function publicFlow(c) {
       ).savedCount,
       2
     );
-    success(await publication.publishExaminationAction(exam.id));
-    assert.equal((await search(route, exam)).body.overallStatus, status);
-    success(await publication.unpublishExaminationAction(exam.id));
+    const publishResult = await publication.publishExaminationAction(exam.id);
+    if (status === 'Incomplete') {
+      assert(publishResult.error);
+      assert.equal((await search(route, exam)).status, 403);
+    } else {
+      success(publishResult);
+      assert.equal((await search(route, exam)).body.overallStatus, status);
+      success(await publication.unpublishExaminationAction(exam.id));
+    }
   }
   assert((await publication.unpublishExaminationAction(exam.id)).error);
   assert(
@@ -519,8 +536,16 @@ async function importFlow(c) {
 }
 async function securityFlow(c) {
   const exam = await c.exam('Fake Rate Limit Exam');
-  await c.subject(exam);
-  await c.student(exam);
+  const subject = await c.subject(exam);
+  const student = await c.student(exam);
+  assert.equal(
+    (
+      await c.app('src/lib/actions/grades.ts').saveGradesAction(exam.id, [
+        { studentId: student.id, subjectId: subject.id, grade: 'A' },
+      ])
+    ).savedCount,
+    1
+  );
   success(await c.app('src/lib/actions/publication.ts').publishExaminationAction(exam.id));
   const route = c.searchRoute(2);
   for (const expected of [200, 200, 429]) {

@@ -54,8 +54,8 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
   const reviewPromise: Promise<{ data: ReviewData | null; error: boolean }> = validExamId
     ? getReviewData({ examinationId: examId, statusFilter: status, search, page })
         .then((data) => ({ data, error: false }))
-        .catch((error: unknown) => {
-          console.error('Unable to load review data', error);
+        .catch(() => {
+          console.error('[Review Data] Query failed.');
           return { data: null, error: true };
         })
     : Promise.resolve({ data: null, error: false });

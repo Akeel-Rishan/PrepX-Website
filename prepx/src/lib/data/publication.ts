@@ -100,7 +100,7 @@ async function loadGrades(client: AdminClient, examinationId: string): Promise<G
 
 /**
  * Loads a fresh, server-only publication readiness report for one examination.
- * Missing grades are warnings; setup failures and archived exams block publication.
+ * Missing required grades, setup failures, and archived exams block publication.
  */
 export async function getPublicationValidation(
   examinationId: string
@@ -213,18 +213,13 @@ export async function getPublicationValidation(
               ]
                 .filter(Boolean)
                 .join(', '),
-        blocking: false,
+        blocking: true,
       },
     ];
     const blockingErrors = checks
       .filter((item) => item.blocking && !item.passed)
       .map((item) => item.detail);
-    const warnings =
-      incompleteTotal > 0
-        ? [
-            `${incompleteTotal} student${incompleteTotal === 1 ? '' : 's'} will show an “Incomplete” or “No Grades” status when viewing results.`,
-          ]
-        : [];
+    const warnings: string[] = [];
 
     return {
       examination,

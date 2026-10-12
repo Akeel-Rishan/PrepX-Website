@@ -23,7 +23,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
     });
     async function search() {
       await page.goto(base);
-      await page.locator('#indexNumber').fill(fixture.indexNumber);
+      await page.getByRole('textbox', { name: 'Candidate Index Number' }).fill(fixture.indexNumber);
       await page.getByRole('button', { name: 'Search My Results' }).click();
     }
     // Legacy persisted data is discarded, never restored.
@@ -36,7 +36,10 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
     delay = true;
     await search();
     await page.waitForFunction(() => document.querySelector('button[type="submit"]')?.disabled);
-    await page.locator('form').evaluate(form => { form.requestSubmit(); form.requestSubmit(); });
+    await page.getByRole('form', { name: /Search results for/ }).evaluate(form => {
+      form.requestSubmit();
+      form.requestSubmit();
+    });
     await page.waitForTimeout(150);
     assert.equal(requests, 1);
     release();
@@ -86,7 +89,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
       body = { error: code, message: 'PRIVATE INTERNAL ERROR' }; responseStatus = status;
       await search();
       await page.waitForURL(base + route);
-      assert(await page.getByRole('heading', { name: title, exact: true }).isVisible());
+      await page.getByRole('heading', { name: title, exact: true }).waitFor();
       assert(!(await page.locator('body').innerText()).includes('PRIVATE INTERNAL ERROR'));
     }
     for (const [payload, status] of [[{ error: 'SERVER_ERROR', message: 'PRIVATE INTERNAL ERROR' }, 500], [{}, 200], [{ ...fixture, maskedNic: '200312345678' }, 200]]) {

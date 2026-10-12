@@ -134,7 +134,7 @@ function harness({
         return {
           canPublish: true,
           blockingErrors: [],
-          stats: { totalStudents: 60, completeStudents: 58 },
+          stats: { totalStudents: 60, completeStudents: 60 },
         };
       },
     },

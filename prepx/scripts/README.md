@@ -6,13 +6,15 @@ Run `npm test` from `prepx` (`npm.cmd test` in Windows PowerShell). It runs the 
 
 - `test-validators.cjs`: field schemas, normalization, UUIDs, exact length limits, malformed types, multilingual/NFC text, markup/control/formula rejection, FormData UTF-8 limits, search and masking helpers.
 - `test-grade-logic.cjs`: exact six grades/meanings, nullable removal, exhaustive two-required/one-optional grade combinations, status precedence, configurable requirements and public/admin parity.
-- `test-import-publication-rules.cjs`: duplicate identifiers, first occurrence, partial summaries, warnings versus errors, headers, publication thresholds/rounding, coverage and inconsistent records.
+- `test-import-publication-rules.cjs`: duplicate identifiers, first occurrence, partial summaries, warnings versus errors, headers, strict publication completeness, coverage and inconsistent records.
 - `test-public-result-rules.cjs`: calls the route directly with in-memory Request objects, mocked Supabase/limiter and real status logic; tests normalized lookup, publication gates and public allowlists. No HTTP request is sent.
 
 Existing grade/import/publication action tests additionally cover batch limits, last duplicate update wins, normalization/removal, invalid/missing examination references and all state transitions. Test NICs added in this phase use zero-filled format-only strings, never real student identifiers. Publication timestamps are fixed in the new pure tests.
 
-Business rules deliberately preserved: mixed AB/passing required grades pass; all required AB grades mean Absent; missing required grades win over W; optional W does not fail a result; no required subjects with any recorded grade means Passed. Publication warns through `ceil(studentCount * 0.1)` incomplete students and blocks above that threshold. Import missing required grades are warnings; duplicate file identifiers are errors; existing database identifiers generate update warnings. Readiness of an already-published exam is separate from permission to publish it again.
+Business rules deliberately preserved: mixed AB/passing required grades pass; all required AB grades mean Absent; missing required grades win over W; and optional W does not fail a result. Publication requires at least one required subject and complete required grades for every student. Import preview may warn about missing required grades, but final publication remains blocked until they are complete. Duplicate file identifiers are errors; existing database identifiers generate update warnings. Readiness of an already-published exam is separate from permission to publish it again.
 
 `test:db`, `*:live` and `*:browser` are opt-in operational checks, excluded from `npm test`. Build is a separate Next.js check and may load local build configuration; it is not part of the offline unit suite.
+
+`npm run audit:privacy` is an opt-in, read-only check of the configured `audit_logs` table. It recursively detects unmasked NIC-key variants and prints only the number of rows checked and violations found; it never prints audit payloads or identifiers.
 
 Phase 15.2 real-database tests are separate: see [integration/README.md](integration/README.md). `npm run test:integration` requires the dedicated local test stack and fails closed without it; `npm run test:integration:mock` is explicitly a mocked fallback.

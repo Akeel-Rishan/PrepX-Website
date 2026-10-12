@@ -10,14 +10,19 @@ function redact(value: Json): Json {
   if (Array.isArray(value)) return value.map(redact);
   if (value && typeof value === 'object') {
     return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [
-        key,
-        key === 'nic_number' && typeof item === 'string'
-          ? maskNIC(item)
-          : item === undefined
-            ? null
-            : redact(item),
-      ])
+      Object.entries(value).map(([key, item]) => {
+        const normalizedKey = key.replaceAll('_', '').replaceAll('-', '').toLowerCase();
+        return [
+          key,
+          normalizedKey === 'nicnumber'
+            ? typeof item === 'string'
+              ? maskNIC(item)
+              : null
+            : item === undefined
+              ? null
+              : redact(item),
+        ];
+      })
     );
   }
   return value;

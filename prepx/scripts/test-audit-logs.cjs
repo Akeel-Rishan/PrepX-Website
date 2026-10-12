@@ -178,8 +178,41 @@ async function main() {
   assert.equal(failure.totalCount, 0);
   assert.match(failure.error, /could not be loaded/i);
 
+  let insertedAudit = null;
+  const auditModule = load('src/lib/audit.ts', {
+    '@/lib/supabase/server': {
+      createAdminClient: () => ({
+        from(table) {
+          assert.equal(table, 'audit_logs');
+          return {
+            async insert(value) {
+              insertedAudit = value;
+              return { error: null };
+            },
+          };
+        },
+      }),
+    },
+  });
+  await auditModule.createAuditLog({
+    admin_id: 'admin-id',
+    action: 'STUDENT_UPDATED',
+    entity_type: 'student',
+    entity_id: 'student-id',
+    old_value: {
+      nic_number: '200312345678',
+      nested: [{ nicNumber: '991234567V' }],
+    },
+    new_value: { 'nic-number': 12345 },
+  });
+  assert.equal(insertedAudit.old_value.nic_number, '********5678');
+  assert.equal(insertedAudit.old_value.nested[0].nicNumber, '******567V');
+  assert.equal(insertedAudit.new_value['nic-number'], null);
+  assert(!JSON.stringify(insertedAudit).includes('200312345678'));
+  assert(!JSON.stringify(insertedAudit).includes('991234567V'));
+
   console.log(
-    'PASS: audit metadata, summaries, pagination, filters, transient retries, and safe query failures behave correctly.'
+    'PASS: audit metadata, summaries, recursive NIC redaction, pagination, filters, transient retries, and safe query failures behave correctly.'
   );
 }
 

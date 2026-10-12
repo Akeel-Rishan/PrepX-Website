@@ -113,10 +113,10 @@ async function main() {
     activeSubjects: 2,
     requiredSubjects: 1,
   });
-  assert.equal(result.canPublish, true);
-  assert.equal(result.blockingErrors.length, 0);
-  assert.equal(result.warnings.length, 1);
-  assert.match(result.warnings[0], /^2 students/);
+  assert.equal(result.canPublish, false);
+  assert.equal(result.blockingErrors.length, 1);
+  assert.equal(result.warnings.length, 0);
+  assert.match(result.blockingErrors[0], /incomplete|no grades/i);
 
   const noSubjects = harness({ subjects: [], grades: [] });
   const blocked = await noSubjects.publication.getPublicationValidation(examId);
@@ -128,7 +128,7 @@ async function main() {
   assert.equal((await archived.publication.getPublicationValidation(examId)).canPublish, false);
 
   console.log(
-    'PASS: publication summary handles invalid/missing exams, active-subject coverage, warnings, blocking setup issues, and archived exams.'
+    'PASS: publication summary handles invalid/missing exams, active-subject coverage, incomplete-grade blocking, setup issues, and archived exams.'
   );
 }
 

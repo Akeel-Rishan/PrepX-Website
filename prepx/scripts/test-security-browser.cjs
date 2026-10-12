@@ -39,7 +39,7 @@ let stage = 'launch';
       return nonce;
     }
     const first = await checkPage('/');
-    await page.locator('#indexNumber').waitFor();
+    await page.getByRole('textbox', { name: 'Candidate Index Number' }).waitFor();
     const second = await checkPage('/');
     assert.notEqual(first, second);
     // Inject into the response, not DevTools evaluate (which bypasses CSP).
@@ -79,7 +79,7 @@ let stage = 'launch';
     ]) {
       body = payload; status = code;
       await checkPage('/');
-      await page.locator('#indexNumber').fill(fixture.indexNumber);
+      await page.getByRole('textbox', { name: 'Candidate Index Number' }).fill(fixture.indexNumber);
       await page.getByRole('button', { name: 'Search My Results' }).click();
       await page.waitForURL(base + target);
       if (target === '/results') {

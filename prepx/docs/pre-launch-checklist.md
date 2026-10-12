@@ -1,6 +1,6 @@
 # PrepX production pre-launch checklist
 
-Checklist date: 2026-10-11  
+Checklist date: 2026-10-12
 Release candidate: `0.1.0`  
 Current recommendation: **GO ONLY AFTER BLOCKERS ARE RESOLVED**
 
@@ -44,10 +44,10 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [x] **VERIFIED — Required:** Subject create, edit, reorder, activate/deactivate, delete, and ordered retrieval paths exist with exam scoping, optimistic concurrency, and audits. **Evidence:** subject action/data modules.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Exercise all subject operations in Preview, including a subject that already has grades. **Owner:** QA/admin.
 - [x] **VERIFIED — Required:** Grade entry accepts only `A`, `B`, `C`, `S`, `W`, and `AB` in UI, validation, import RPC, and database constraint. **Evidence:** grade tests and migrations `001`/`005`.
-- [x] **VERIFIED — Required:** Missing required grades and incomplete/corrupt records are detected and represented as incomplete/warnings. **Evidence:** publication, grade-logic, and public-result tests.
+- [x] **VERIFIED — Required:** Missing required grades and incomplete/corrupt records are detected; any missing required grade blocks publication. **Evidence:** publication, grade-logic, and public-result tests.
 - [x] **VERIFIED — Required:** Import implements file selection, bounded CSV/XLSX parsing, validation, preview, per-row errors, confirmation, atomic persistence, and an `IMPORT_COMPLETED` audit record. **Evidence:** import tests and migration `005_atomic_import_results.sql`.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Run the complete Preview import UI with fictional valid and invalid files and visually inspect row errors and summary counts. **Owner:** QA/admin.
-- [x] **VERIFIED — Required:** Server-side publication validation blocks structural corruption and configured blocking conditions; publish action revalidates immediately before the status transition. **Evidence:** publication validator/action tests.
+- [x] **VERIFIED — Required:** Server-side publication validation blocks missing required subjects, every missing required grade, structural corruption, and other configured blocking conditions; publish action revalidates immediately before the status transition. **Evidence:** publication validator/action tests.
 - [x] **VERIFIED — Required:** Public search supports exactly one normalized index number or NIC and has deterministic success/error coverage. **Evidence:** result-search, public-search, validator, and integration definitions.
 - [x] **VERIFIED — Required:** Draft, ready, archived, missing, and unpublished examinations/results cannot produce a public result; not-found and not-published remain distinct. **Evidence:** public search/result rule tests.
 - [x] **VERIFIED — Required:** Public output is allowlisted to approved identity/examination fields, masked NIC, grades, and derived status. Full NIC, marks, totals, averages, ranks, database errors, and internal fields are excluded. **Evidence:** `src/lib/public-result.ts` and public result tests.
@@ -60,7 +60,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 ## 2. Data integrity and database
 
 - [ ] **BLOCKED — Required:** Apply migrations `001`–`005` to a fresh isolated local test database and complete the real integration suite. Linked-project history matches, but that does not replace a clean-database test. **Owner:** Developer.
-- [x] **VERIFIED — Required:** Linked local/remote migration history is exactly `001`–`005`, and all six configured tables plus `import_exam_results` are reachable. **Evidence:** `npx supabase migration list --linked`, `npm run test:db` on 2026-10-11.
+- [x] **VERIFIED — Required:** Linked local/remote migration history is exactly `001`–`005`, and all six configured tables plus `import_exam_results` are reachable. **Evidence:** `npx supabase migration list --linked`, `npm run test:db` on 2026-10-12.
 - [x] **VERIFIED — Required:** Migrations define primary keys, foreign keys, status/year/grade checks, result/examination consistency trigger, unique student index/NIC, unique subject name/code, unique student/subject grade, and query indexes.
 - [ ] **BLOCKED — Required:** Prove foreign-key, uniqueness, grade checks, cross-exam trigger, and RLS against real PostgreSQL through `npm run test:integration`. Deterministic tests alone are not sufficient. **Owner:** Developer.
 - [x] **VERIFIED — Required:** Publication eligibility is calculated server-side and checked again in the publish action.
@@ -95,7 +95,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [x] **VERIFIED — Required:** Admin, auth, health, and result/search responses use private/no-store policies; admin/error/result routes use `X-Robots-Tag` where intended.
 - [x] **VERIFIED — Required:** Search, action, import, UUID, text, identifier, and grade inputs are contextually validated; control characters, markup, formula/hyperlink payloads, unsafe archives, and ambiguous searches are rejected.
 - [x] **VERIFIED — Required:** Database access uses Supabase query builders/RPC parameters rather than string-built SQL from request input.
-- [x] **VERIFIED — Required:** Public search and limiter logs use fixed messages or provider codes and do not log raw NIC/index values, IPs, cookies, tokens, keys, request bodies, or provider responses in tested paths.
+- [x] **VERIFIED — Required:** Public search and limiter logs use fixed messages or provider codes and do not log raw NIC/index values, IPs, cookies, tokens, keys, request bodies, or provider responses in tested paths. Audit payloads recursively mask NIC-key variants; `npm run audit:privacy` inspected all 49 configured audit rows on 2026-10-12 and found zero unmasked NIC fields without printing row contents.
 - [x] **VERIFIED — Required:** API/action failures return generic messages without stack traces, SQL text, Supabase detail, credentials, or environment values in deterministic tests.
 - [x] **VERIFIED — Required:** Public search has independent HMAC-derived identifier/IP limits, production Upstash enforcement, bounded timeouts, generic 429s, and fail-closed configuration/provider behavior by default.
 - [ ] **BLOCKED — Required:** Verify rate limits with real production-mode Upstash across multiple Preview instances, including timeout/outage behavior and a safe quota/reset test. **Owner:** Technical release owner.
@@ -124,12 +124,13 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 ## 6. Testing and quality gates
 
-- [x] **VERIFIED — Required:** `npm test` — PASS on 2026-10-11; logic, validation, privacy, publication, rate-limit, header, import, error, and API contracts passed.
+- [x] **VERIFIED — Required:** `npm test` — PASS on 2026-10-12; logic, validation, privacy, publication, rate-limit, header, import, error, and API contracts passed.
 - [ ] **BLOCKED — Required:** `npm run test:integration` — NOT RUN; it failed closed because Docker/local Supabase and `.env.test` are absent. No database was contacted.
 - [x] **VERIFIED — Required:** `npm run test:integration:safety` — PASS; hosted/default URLs and unsafe transport are rejected.
 - [x] **VERIFIED — Required:** `npm run lint` — PASS.
 - [x] **VERIFIED — Required:** `npm run typecheck` — PASS.
 - [x] **VERIFIED — Required:** `npm run build` — PASS with production environment validation.
+- [x] **VERIFIED — Recommended:** Local production Edge result/navigation, responsive, print/A4-PDF, CSP/security, 404, and global-error browser smoke suites — PASS on 2026-10-12. Native Save-as-PDF dialog and deployed-environment checks remain manual.
 - [x] **VERIFIED — Required:** `npm run load:validate` — PASS offline; profiles, guards, schemas, privacy checks, thresholds, metrics, and summaries validated without HTTP traffic.
 - [ ] **BLOCKED — Required:** `npm run load:smoke` — not run; native k6, `.env.load`, approved target, and fictional published fixture are absent.
 - [ ] **BLOCKED — Required:** `npm run load:normal` — not run for the same reasons; run only after smoke passes in the approved staging/performance environment.

@@ -215,15 +215,14 @@ export function PublicationChecklist({
       </section>
 
       {result.warnings.length > 0 && (
-        <Alert variant="warning" title="Publication allowed with warnings">
+        <Alert variant="warning" title="Publication warnings">
           <ul className="space-y-1">
             {result.warnings.map((warning) => (
               <li key={warning}>{warning}</li>
             ))}
           </ul>
           <p className="mt-2 text-xs opacity-85">
-            These warnings do not block publication. Affected students will still receive their
-            available grades.
+            Review every warning before publication. Blocking checks must still be resolved.
           </p>
         </Alert>
       )}

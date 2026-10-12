@@ -42,7 +42,7 @@ Fixtures use fictional names and zero-filled format-only NIC-like strings. Each 
 - Anonymous/non-admin action denials and RLS restrictions; real admin claims/profile and access; public search needs no session.
 - Fixed-clock limiter returns 429/headers after quota, fresh provider resets deterministically; captured application logs and responses are checked for identifiers/keys; health GET/method contracts.
 
-The action's DB-backed publication validator allows incomplete grades with warnings; tests preserve that behavior. The separate pure publication report has different warning thresholds; this step does not change either policy. Imports update existing indexes by design, while duplicate rows within one submitted file are rejected. Database constraints enforce one grade per student/subject.
+Both publication validators require at least one required subject and complete required grades for every student. Integration coverage verifies that incomplete examinations remain unpublished and unavailable through public search. Imports update existing indexes by design, while duplicate rows within one submitted file are rejected. Database constraints enforce one grade per student/subject.
 
 ## Verification in this workspace
 

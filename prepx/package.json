@@ -17,6 +17,7 @@
     "env:check": "node --env-file-if-exists=.env.local scripts/check-env.cjs",
     "env:check:production": "node --env-file-if-exists=.env.local scripts/check-env.cjs --production",
     "audit:deployment": "node --env-file-if-exists=.env.local scripts/audit-deployment.cjs",
+    "audit:privacy": "node --env-file-if-exists=.env.local scripts/audit-privacy.cjs",
     "test:db": "tsx scripts/test-db.ts",
     "test:logic": "node scripts/test-import.cjs && node scripts/test-import-action.cjs && node scripts/test-import-ai-action.cjs && node scripts/test-auth-actions.cjs && node scripts/test-student-actions.cjs && node scripts/test-grade-actions.cjs && node scripts/test-examination-actions.cjs && node scripts/test-dashboard.cjs && node scripts/test-publication-validator.cjs && node scripts/test-publication-actions.cjs && node scripts/test-publication-state-actions.cjs && node scripts/test-publication-summary.cjs && node scripts/test-audit-logs.cjs && node scripts/test-public-search.cjs && node scripts/test-result-search.cjs && node scripts/test-auth-session.cjs && node scripts/test-grade-data.cjs && node scripts/test-result-display.cjs && node scripts/test-rate-limit.cjs && node scripts/test-security.cjs && npm run test:health-errors && npm run test:validators",
     "test:results": "node scripts/test-result-search.cjs",

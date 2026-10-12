@@ -81,9 +81,9 @@ const oneMissing = buildPublicationValidation({
     (row) => !(row.student_id === 'student-0' && row.subject_id === 'maths')
   ),
 });
-const completenessWarning = oneMissing.checks.find((check) => check.id === 'check_3_1');
-assert.equal(completenessWarning.status, 'warn');
-assert.equal(oneMissing.canPublish, true);
+const completenessFailure = oneMissing.checks.find((check) => check.id === 'check_3_1');
+assert.equal(completenessFailure.status, 'fail');
+assert.equal(oneMissing.canPublish, false);
 
 const twoMissing = buildPublicationValidation({
   examination,
@@ -128,5 +128,5 @@ assert.equal(archived.checks.find((check) => check.id === 'check_1_1').status, '
 assert.equal(archived.canPublish, false);
 
 console.log(
-  'PASS: publication status precedence, readiness rules, thresholds, duplicates, corruption checks, and archive blocking.'
+  'PASS: publication status precedence, strict completeness, duplicates, corruption checks, and archive blocking.'
 );

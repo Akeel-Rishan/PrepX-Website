@@ -53,14 +53,14 @@ function check(report,id) { return report.checks.find(c=>c.id===id); }
 const ready = buildPublicationValidation(base);
 assert.equal(ready.canPublish,true); assert.equal(ready.validatedAt,base.validatedAt);
 assert.deepEqual(buildPublicationValidation(base),ready);
-for(const [count,expected,canPublish] of [[0,'pass',true],[1,'warn',true],[2,'warn',true],[3,'fail',false],[20,'fail',false]]) {
+for(const [count,expected,canPublish] of [[0,'pass',true],[1,'fail',false],[2,'fail',false],[3,'fail',false],[20,'fail',false]]) {
   const report = buildPublicationValidation({...base,results:results.slice(count)});
   assert.equal(check(report,'check_3_1').status,expected); assert.equal(report.canPublish,canPublish);
   assert.equal(report.incompleteStudents,count); assert.equal(report.completeStudents,20-count);
   assert.equal(report.statusDistribution.incomplete,count);
 }
-// The existing threshold rounds UP: 3 incomplete out of 21 warn; 4 block.
-for(const [count,expected] of [[3,'warn'],[4,'fail']]) {
+// Any incomplete required grade blocks publication, regardless of cohort size.
+for(const [count,expected] of [[3,'fail'],[4,'fail']]) {
   const extra = {...students[0],id:'fake-extra',index_number:'FAKEEXTRA'};
   const report = buildPublicationValidation({...base,students:[...students,extra],results:[...results,{student_id:extra.id,subject_id:'required',grade:'B'}].slice(count)});
   assert.equal(check(report,'check_3_1').status,expected);
@@ -86,6 +86,6 @@ for(const [grade,status] of [[' a ','PASSED'],['w','NOT_PASSED'],['ab','ABSENT']
 }
 for(const [coverage,expected] of [[9,'warn'],[10,'pass']]) assert.equal(check(buildPublicationValidation({...base,results:results.slice(0,coverage)}),'check_4_3').status,expected);
 const optional = buildPublicationValidation({...base,subjects:pubSubjects.map(s=>({...s,required:false})),results:[]});
-assert.equal(check(optional,'check_1_4').status,'warn'); assert.equal(optional.canPublish,true);
+assert.equal(check(optional,'check_1_4').status,'fail'); assert.equal(optional.canPublish,false);
 assert.equal(optional.statusDistribution.incomplete,20);
-console.log('PASS: import validity/duplicates/partial summaries/header rules and publication completeness thresholds, coverage, corruption, masked duplicates and readiness states.');
+console.log('PASS: import validity/duplicates/partial summaries/header rules and strict publication completeness, coverage, corruption, masked duplicates and readiness states.');

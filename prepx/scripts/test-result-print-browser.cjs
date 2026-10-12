@@ -27,7 +27,7 @@ const artifacts = process.env.PREPX_PRINT_ARTIFACTS;
     async function search() {
       await page.emulateMedia({ media: 'screen' });
       await page.goto(base);
-      await page.locator('#indexNumber').fill(fixture.indexNumber);
+      await page.getByRole('textbox', { name: 'Candidate Index Number' }).fill(fixture.indexNumber);
       await page.getByRole('button', { name: 'Search My Results' }).click();
       await page.waitForURL(base + '/results');
       await page.getByText(fixture.studentName, { exact: true }).waitFor();

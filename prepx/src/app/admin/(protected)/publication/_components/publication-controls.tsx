@@ -88,7 +88,7 @@ export function PublicationControls({
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
           <p className="text-sm text-amber-800 dark:text-amber-200">
             <strong>{incompleteCount}</strong> student{incompleteCount === 1 ? '' : 's'} with
-            incomplete grades will show an incomplete result status. Publication is still allowed.
+            incomplete grades must be completed before publication.
           </p>
         </div>
       )}
