@@ -2,7 +2,7 @@
 const { load } = require('./test-result-search.cjs');
 const { gradeSchema, gradeOrNullSchema } = load('src/lib/validations/grade.ts');
 const { GRADES, GRADE_LABELS, isExamEditable } = load('src/lib/constants.ts');
-const { calculateResultStatus, getResultStatusStyle } = load('src/lib/result-utils.ts');
+const { calculateResultStatus } = load('src/lib/result-utils.ts');
 const { computeOverallStatus } = load('src/lib/publication-validator.ts');
 const { isValidGrade } = load('src/lib/validations/import.ts');
 
@@ -53,9 +53,5 @@ for (const [entries, required, result] of [
   [[['first', 'W'], ['first', 'A']], ['first', 'first'], P],
   [[['first', 'A'], ['first', 'W']], ['first'], F],
 ]) assert.equal(calculateResultStatus(new Map(entries), new Set(required)), result);
-for (const [status, icon] of [[P,'check'],[F,'x'],[A,'clock'],[I,'alert']]) {
-  assert.equal(getResultStatusStyle(status).label, status.toUpperCase());
-  assert.equal(getResultStatusStyle(status).icon, icon);
-}
 for (const [status, editable] of [['DRAFT',true],['READY',true],['PUBLISHED',false],['ARCHIVED',false]]) assert.equal(isExamEditable(status), editable);
 console.log('PASS: exact grade contract/meanings, 343 required/optional combinations, public/admin status parity, precedence, configurable requirements and duplicate-map semantics.');

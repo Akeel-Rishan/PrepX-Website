@@ -9,7 +9,7 @@ import { ResultPageSkeleton } from '@/components/ui/loading';
 import { PUBLIC_SUPPORT_CONTACT } from '@/lib/public-support';
 import { PrintActions } from './_components/print-actions';
 import { PrintHeader } from './_components/print-header';
-import { GradesTable, OverallStatusCard } from './_components/result-details';
+import { GradesTable } from './_components/result-details';
 
 export default function ResultsPage(): React.JSX.Element {
   const { result, ready } = usePublicResult();
@@ -133,7 +133,6 @@ export default function ResultsPage(): React.JSX.Element {
             </dl>
           </section>
           <GradesTable grades={result.grades} />
-          <OverallStatusCard status={result.overallStatus} />
           <div className="print-notice print-only">
             * Results are official as published. Contact the {PUBLIC_SUPPORT_CONTACT} for queries,
             corrections, or official certified copies.

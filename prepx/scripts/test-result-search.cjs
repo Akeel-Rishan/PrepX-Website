@@ -90,7 +90,7 @@ async function search(h, body = valid, headers = {}) {
 }
 
 async function main() {
-  const { calculateResultStatus: status, getResultStatusStyle: style } = load('src/lib/result-utils.ts');
+  const { calculateResultStatus: status } = load('src/lib/result-utils.ts');
   const required = new Set(['a', 'b']);
   for (const [grades, expected] of [
     [[], 'Incomplete'], [[['a', 'W']], 'Incomplete'],
@@ -102,11 +102,6 @@ async function main() {
   for (const grade of ['A', 'B', 'C', 'S']) {
     assert.equal(status(new Map([['a', grade], ['b', grade]]), required), 'Passed');
   }
-  for (const [value, icon] of [['Passed', 'check'], ['Not Passed', 'x'], ['Absent', 'clock'], ['Incomplete', 'alert']]) {
-    assert.equal(style(value).icon, icon);
-    assert.equal(style(value).label, value.toUpperCase());
-  }
-
   const logs = [];
   const originalLog = console.log;
   console.log = (...args) => logs.push(args.join(' '));

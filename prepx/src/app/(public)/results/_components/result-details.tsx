@@ -1,8 +1,6 @@
-﻿import { AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
-import { GRADE_LABELS, type Grade, type ResultStatus } from '@/lib/constants';
-import { getResultStatusStyle } from '@/lib/result-utils';
-import { cn } from '@/lib/utils';
+import { GRADE_LABELS, type Grade } from '@/lib/constants';
 import { PUBLIC_SUPPORT_CONTACT } from '@/lib/public-support';
+import { cn } from '@/lib/utils';
 import type { GradeEntry } from '@/types';
 
 const GRADE_BADGE_STYLES: Record<Grade, string> = {
@@ -13,43 +11,6 @@ const GRADE_BADGE_STYLES: Record<Grade, string> = {
   W: 'bg-red-100 text-red-700 border-red-300 dark:bg-red-950 dark:text-red-200',
   AB: 'bg-gray-100 text-gray-600 border-gray-300 dark:bg-slate-800 dark:text-slate-200',
 };
-const STATUS_ICONS = { check: CheckCircle2, x: XCircle, clock: Clock, alert: AlertCircle };
-const STATUS_DESCRIPTIONS: Record<ResultStatus, string> = {
-  Passed: 'Your published overall result is Passed.',
-  'Not Passed': `Your published overall result is Not Passed. Contact the ${PUBLIC_SUPPORT_CONTACT} for guidance.`,
-  Absent: `Your published overall result is Absent. Contact the ${PUBLIC_SUPPORT_CONTACT} if you have a query.`,
-  Incomplete: `Your published result is incomplete. Contact the ${PUBLIC_SUPPORT_CONTACT} for assistance.`,
-};
-
-export function OverallStatusCard({ status: resultStatus }: { status: ResultStatus }) {
-  const status = getResultStatusStyle(resultStatus);
-  const StatusIcon = STATUS_ICONS[status.icon];
-  return (
-    <section
-      aria-labelledby="overall-status-heading"
-      className={cn(
-        'print-status-banner mt-6 flex items-start gap-3 rounded-xl border px-4 py-4 sm:px-5',
-        status.bgColor,
-        status.borderColor,
-        status.textColor
-      )}
-    >
-      <StatusIcon aria-hidden="true" className="mt-1 h-6 w-6 shrink-0" />
-      <div>
-        <h2
-          id="overall-status-heading"
-          className="text-xs font-semibold uppercase tracking-[0.14em]"
-        >
-          Overall status
-        </h2>
-        <p className="mt-1 text-lg font-bold" aria-label={`Overall result: ${resultStatus}`}>
-          {status.label}
-        </p>
-        <p className="no-print mt-1 text-sm leading-6">{STATUS_DESCRIPTIONS[resultStatus]}</p>
-      </div>
-    </section>
-  );
-}
 
 export function GradeBadge({ grade }: { grade: Grade | null }) {
   if (!grade)

@@ -48,8 +48,9 @@ assert(html.includes('Your examination result is ready.'));
 assert(!html.includes('Examination center'));
 assert(render({ ...valid, examinationCenter: 'Centre A' }).includes('Centre A'));
 for (const overallStatus of ['Passed', 'Not Passed', 'Absent', 'Incomplete']) {
-  // The same grades intentionally produce different displayed server statuses.
-  assert(render({ ...valid, overallStatus }).includes(`aria-label="Overall result: ${overallStatus}"`));
+  const statusMarkup = render({ ...valid, overallStatus });
+  assert(!statusMarkup.includes('Overall status'));
+  assert(!statusMarkup.includes(`Overall result: ${overallStatus}`));
 }
 for (const grade of [null, undefined]) {
   const result = publicResultSchema.parse({ ...fixture, grades: [{ ...fixture.grades[0], grade }] });
@@ -80,4 +81,4 @@ for (const [route, title] of [['not-found', 'Result Not Found'], ['not-published
   assert(markup.includes(title));
   assert(!markup.includes('Print / Save as PDF'));
 }
-console.log('PASS: result contract, all grades/statuses, optional center, masked NIC, missing/empty/malformed results, sensitive-field exclusion, accessible table/status, loading and feedback routes.');
+console.log('PASS: result contract, all grades, hidden overall status, optional center, masked NIC, missing/empty/malformed results, sensitive-field exclusion, accessible table, loading and feedback routes.');

@@ -84,7 +84,8 @@ const artifacts = process.env.PREPX_PRINT_ARTIFACTS;
       }
       for (const label of ['Distinction', 'Very Good', 'Credit', 'Pass', 'Fail', 'Absent']) assert(await page.getByRole('cell', { name: label, exact: true }).isVisible());
       assert.equal(await page.getByLabel('Grade not available').count(), 2);
-      assert(await page.getByLabel('Overall result: Passed', { exact: true }).isVisible());
+      assert.equal(await page.getByText('Overall status', { exact: true }).count(), 0);
+      assert.equal(await page.getByLabel('Overall result: Passed', { exact: true }).count(), 0);
       assert.equal(await page.locator('thead').evaluate(el => getComputedStyle(el).display), 'table-header-group');
       assert.equal(await page.getByRole('columnheader', { name: 'Grade', exact: true }).evaluate(el => {
         const range = document.createRange();
@@ -93,7 +94,6 @@ const artifacts = process.env.PREPX_PRINT_ARTIFACTS;
       }), 1, 'Grade heading stays on one line');
       assert.equal(await page.getByLabel('Grade not available').first().evaluate(el => getComputedStyle(el).borderTopWidth), '0px');
       assert.equal(await page.locator('tbody tr').first().evaluate(el => getComputedStyle(el).breakInside), 'avoid');
-      assert.equal(await page.locator('.print-status-banner').evaluate(el => getComputedStyle(el).breakInside), 'avoid');
       assert.equal(await page.locator('.print-doc-footer').innerText(), 'PrepX Examination System');
       assert(await page.locator('.print-notice').isVisible());
       const text = await page.locator('body').innerText();
@@ -118,7 +118,8 @@ const artifacts = process.env.PREPX_PRINT_ARTIFACTS;
       result = { ...fixture, overallStatus };
       await search();
       await page.emulateMedia({ media: 'print' });
-      assert(await page.getByLabel(`Overall result: ${overallStatus}`, { exact: true }).isVisible());
+      assert.equal(await page.getByText('Overall status', { exact: true }).count(), 0);
+      assert.equal(await page.getByLabel(`Overall result: ${overallStatus}`, { exact: true }).count(), 0);
       assert.equal(await page.getByText('Examination center', { exact: true }).count(), 0);
     }
     result = {
@@ -141,6 +142,6 @@ const artifacts = process.env.PREPX_PRINT_ARTIFACTS;
     assert.equal(await staticPage.getByRole('button', { name: printName }).count(), 0);
     await noJs.close();
     assert.deepEqual(errors, []);
-    console.log('PASS: accessible print action/click/keyboard, safe print content, all grades/statuses, center/null grades, no chrome/animations, monochrome A4 PDF in both themes, multipage output, 320/375/768/1280 screens, no-JS fallback and no hydration errors. Native Save as PDF dialog still requires manual interaction.');
+    console.log('PASS: accessible print action/click/keyboard, safe print content, all grades, hidden overall status, center/null grades, no chrome/animations, monochrome A4 PDF in both themes, multipage output, 320/375/768/1280 screens, no-JS fallback and no hydration errors. Native Save as PDF dialog still requires manual interaction.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

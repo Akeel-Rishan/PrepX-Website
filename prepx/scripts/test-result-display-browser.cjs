@@ -77,8 +77,9 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
       body = { ...fixture, overallStatus, examinationCenter: 'Centre A' };
       await search();
       await page.waitForURL(base + '/results');
-      await page.getByLabel(`Overall result: ${overallStatus}`, { exact: true }).waitFor();
       assert(await page.getByText('Centre A', { exact: true }).isVisible());
+      assert.equal(await page.getByText('Overall status', { exact: true }).count(), 0);
+      assert.equal(await page.getByLabel(`Overall result: ${overallStatus}`, { exact: true }).count(), 0);
     }
     await page.reload();
     await page.getByRole('heading', { name: 'Search for your result' }).waitFor();
@@ -100,6 +101,6 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
       assert.equal(await page.getByRole('button', { name: 'Print / Save as PDF' }).count(), 0);
       assert.equal(await page.getByRole('button', { name: 'Search My Results' }).isDisabled(), false);
     }
-    console.log('PASS: search handoff without persistence, legacy cleanup, duplicate-submit guard, statuses, center, error routes, generic errors, refresh/back behavior, 320/375/768/1280 layouts, table semantics and keyboard focus.');
+    console.log('PASS: search handoff without persistence, legacy cleanup, duplicate-submit guard, hidden overall status, center, error routes, generic errors, refresh/back behavior, 320/375/768/1280 layouts, table semantics and keyboard focus.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
