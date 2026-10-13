@@ -23,9 +23,9 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [ ] **BLOCKED — Required:** Run the real integration suite against the isolated local Docker Supabase stack. **Owner:** Developer. **Needed:** Docker, `npm run test:integration:setup`, then `npm run test:integration`; do not substitute a hosted database.
 - [ ] **BLOCKED — Required:** Run k6 smoke and normal-load profiles against an explicitly approved staging/performance target with fictional published data. **Owner:** Performance tester. **Needed:** native k6, private `.env.load`, target approval, saved summaries.
 - [ ] **BLOCKED — Required:** Verify production Supabase backups and perform/document a safe restore rehearsal. **Owner:** Supabase project owner. **Needed:** backup configuration evidence and restoration record.
-- [ ] **BLOCKED — Required:** Assign production, Vercel, Supabase, DNS, incident, and examination-period contacts. **Owner:** UGSM release approver.
+- [ ] **BLOCKED — Required:** Complete and approve `docs/governance/operational-ownership.md`, including named primary/backup production, Vercel, Supabase, DNS, privacy, incident, content and examination-period contacts. The register and access-verification checklist now exist; real names and acknowledgements are still required. **Owner:** UGSM release approver.
 - [ ] **BLOCKED — Required:** Complete browser accessibility, responsive, print/PDF, multilingual, and production security-header checks. **Owner:** QA/release owner.
-- [ ] **BLOCKED — Required:** Approve data-retention/privacy wording and decide whether a public privacy notice and terms page are legally or organizationally required. **Owner:** UGSM data owner.
+- [ ] **BLOCKED — Required:** Complete and approve `docs/governance/privacy-content-policy.md`. The technical privacy baseline, retention decision table, proposed public wording, Terms decision and privacy-notice decision now exist; UGSM approval is still required. **Owner:** UGSM data owner.
 
 ## 1. Product and functionality
 
@@ -73,7 +73,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [x] **VERIFIED — Required:** No install/build/start hook runs seeds, resets, migration pushes, or destructive database commands; integration cleanup is marker-scoped and refuses hosted databases.
 - [ ] **BLOCKED — Required:** Confirm automated production Supabase backups are enabled and retention matches UGSM requirements. **Owner:** Supabase owner.
 - [ ] **BLOCKED — Required:** Rehearse a restore to a separate recovery project/branch, validate row counts/auth/configuration, record RTO/RPO and evidence, and never overwrite Production for the rehearsal. **Owner:** Supabase owner.
-- [ ] **BLOCKED — Required:** Approve and document retention periods for student records, audit logs, Vercel logs, Upstash fingerprints, backups, and deletion requests. **Owner:** UGSM data owner.
+- [ ] **BLOCKED — Required:** Fill and approve the retention schedule in `docs/governance/privacy-content-policy.md` for student records, audit logs, provider logs, limiter fingerprints, backups, test data and incident evidence. **Owner:** UGSM data owner.
 
 ## 3. Authentication and authorization
 
@@ -173,21 +173,23 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 ## 9. Privacy and content
 
-- [ ] **BLOCKED — Required:** Determine legal/UGSM privacy-notice requirements and publish approved wording if required; no dedicated privacy notice currently exists. **Owner:** UGSM data/legal owner.
+- [ ] **BLOCKED — Required:** Record and approve the public privacy-notice decision in `docs/governance/privacy-content-policy.md`; if required, publish only the approved wording. **Owner:** UGSM data/legal owner.
 - [x] **VERIFIED — Required:** Public results are minimized to the explicit allowlist and held in memory for navigation rather than persisted in browser storage.
 - [x] **VERIFIED — Required:** Full NIC is never part of the public response/display; only a masked suffix can be returned.
 - [x] **VERIFIED — Required:** Tracked development, test, seed, and load fixtures are explicitly fictional; staging must use the same rule.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm every Preview/staging record is fictional before granting testers access. **Owner:** Staging data owner.
 - [x] **VERIFIED — Required:** Application admin access requires a valid Supabase session plus an `admin_profiles` row.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm `admin_profiles` contains only currently authorized UGSM staff and establish periodic/access-termination review. **Owner:** UGSM/Supabase owner.
-- [ ] **BLOCKED — Required:** Approve production examination name/year/subjects/deadlines, result notice, and remaining release content. Public pages now identify the Undergraduate Society of Mawanella as organizer and use `ugsmaw@gmail.com` for support, as directed by the release owner. **Owner:** UGSM content owner.
-- [ ] **BLOCKED — Required:** Decide and approve terms, maintenance messaging, correction/appeal instructions, and support escalation wording. **Owner:** UGSM content/legal owner.
+- [ ] **BLOCKED — Required:** Approve the production examination name/year/subjects/deadlines and examination-specific notice. The organizer, support email and baseline result messages are documented in `docs/governance/privacy-content-policy.md`. **Owner:** UGSM content owner.
+- [ ] **BLOCKED — Required:** Approve the Terms decision, maintenance message, correction route and support escalation baseline in `docs/governance/privacy-content-policy.md`. **Owner:** UGSM content/legal owner.
 - [x] **VERIFIED — Required:** Enumeration resistance includes IP and identifier quotas, generic not-found handling, HMAC-only limiter keys, and no existence check before limiting.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm production quotas/monitoring balance enumeration resistance with legitimate shared-school traffic. **Owner:** Product/security owner.
 
 ## 10. Operational readiness and runbook
 
 ### Ownership record
+
+The authoritative sign-off form is `docs/governance/operational-ownership.md`. Keep sensitive phone numbers and recovery details in the referenced private UGSM contact roster, not in Git.
 
 | Responsibility | Required owner/contact | Status | Notes/evidence |
 | --- | --- | --- | --- |
