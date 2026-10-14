@@ -214,7 +214,7 @@ console.log(
   'PASS: offline k6 syntax, profiles/limits, target guards, schemas/privacy, preflight, 429 separation, metrics and summary. No requests sent.'
 );
 // inspect evaluates init/options only; never setup or VU code. Uses fictional local settings.
-const native = spawnSync('k6', ['inspect', 'tests/load/search.js'], {
+const native = spawnSync('k6', ['inspect', '--include-system-env-vars', 'tests/load/search.js'], {
   cwd: path.resolve(__dirname, '../..'),
   env: {
     ...Object.fromEntries(

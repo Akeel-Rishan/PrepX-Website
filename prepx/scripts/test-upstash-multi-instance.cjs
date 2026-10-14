@@ -1,0 +1,62 @@
+// Live provider verification. Uses one random, non-user key with a short TTL,
+// never prints credentials/provider responses, and removes the key on exit.
+const assert = require('node:assert/strict');
+const { randomBytes } = require('node:crypto');
+require('@next/env').loadEnvConfig(process.cwd());
+const { load } = require('./test-result-search.cjs');
+const { UpstashRateLimitStore } = load('src/lib/rate-limit/upstash-store.ts');
+
+const url = process.env.UPSTASH_REDIS_REST_URL;
+const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+const limit = 7;
+const attempts = 20;
+const windowSeconds = 30;
+const key = `prepx:provider-verification:${randomBytes(16).toString('hex')}`;
+
+function requireSafeConfiguration() {
+  assert(url && token, 'Live Upstash credentials are not configured.');
+  const endpoint = new URL(url);
+  assert.equal(endpoint.protocol, 'https:', 'Upstash endpoint must use HTTPS.');
+  assert(endpoint.hostname === 'upstash.io' || endpoint.hostname.endsWith('.upstash.io'), 'Expected an Upstash REST endpoint.');
+}
+
+async function removeVerificationKey() {
+  if (!url || !token) return;
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(['DEL', key]),
+      cache: 'no-store',
+      redirect: 'error',
+      signal: AbortSignal.timeout(2000),
+    });
+  } catch {
+    // The key still expires automatically after the bounded test window.
+  }
+}
+
+async function main() {
+  requireSafeConfiguration();
+  const stores = Array.from({ length: attempts }, () => new UpstashRateLimitStore(url, token, 2000));
+  const results = await Promise.all(stores.map(store => store.check({ key, limit, windowSeconds })));
+  assert.equal(results.filter(result => result.allowed).length, limit);
+  assert.equal(results.filter(result => !result.allowed).length, attempts - limit);
+  assert(results.every(result => result.limit === limit));
+  assert(results.every(result => result.remaining >= 0 && result.remaining < limit));
+  assert.equal(new Set(results.map(result => result.resetAt)).size, 1, 'All clients must share one reset window.');
+
+  const independentClient = new UpstashRateLimitStore(url, token, 2000);
+  const blocked = await independentClient.check({ key, limit, windowSeconds });
+  assert.equal(blocked.allowed, false);
+  assert.equal(blocked.remaining, 0);
+  assert.equal(blocked.resetAt, results[0].resetAt);
+  console.log(`PASS: ${attempts + 1} independent clients shared one atomic Upstash quota; exactly ${limit} attempts were allowed and cleanup was requested.`);
+}
+
+main()
+  .catch(() => {
+    console.error('FAIL: live Upstash shared-quota verification failed; no credentials or provider response were logged.');
+    process.exitCode = 1;
+  })
+  .finally(removeVerificationKey);

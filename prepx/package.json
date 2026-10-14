@@ -26,6 +26,7 @@
     "test:results:browser": "node scripts/test-result-display-browser.cjs && node scripts/test-result-print-browser.cjs",
     "test:rate-limit": "node scripts/test-rate-limit.cjs",
     "test:rate-limit:live": "node scripts/test-rate-limit-live.cjs",
+    "test:rate-limit:upstash": "node scripts/test-upstash-multi-instance.cjs",
     "test:security": "node scripts/test-security.cjs",
     "test:security:browser": "node scripts/test-security-browser.cjs",
     "test:health-errors": "node scripts/test-health-errors.cjs",

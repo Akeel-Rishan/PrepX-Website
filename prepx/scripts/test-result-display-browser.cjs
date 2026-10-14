@@ -77,10 +77,37 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
       body = { ...fixture, overallStatus, examinationCenter: 'Centre A' };
       await search();
       await page.waitForURL(base + '/results');
-      assert(await page.getByText('Centre A', { exact: true }).isVisible());
+      await page.getByText('Centre A', { exact: true }).waitFor();
       assert.equal(await page.getByText('Overall status', { exact: true }).count(), 0);
       assert.equal(await page.getByLabel(`Overall result: ${overallStatus}`, { exact: true }).count(), 0);
     }
+    body = {
+      ...fixture,
+      studentName: 'සිංහල නම',
+      schoolName: 'தமிழ் பள்ளி',
+      grades: fixture.grades.map((grade, index) => ({
+        ...grade,
+        subjectName: index === 0 ? 'සිංහල' : index === 1 ? 'தமிழ்' : grade.subjectName,
+      })),
+    };
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await search();
+    await page.waitForURL(base + '/results');
+    for (const text of ['සිංහල නම', 'தமிழ் பள்ளி', 'සිංහල', 'தமிழ்']) {
+      await page.getByText(text, { exact: true }).waitFor();
+    }
+    await page.evaluate(() => document.fonts.ready);
+    assert(await page.locator('.public-results-gradient, .public-results-grid, .public-results-orbit-dot').evaluateAll(elements =>
+      elements.every(element => getComputedStyle(element).animationName === 'none')
+    ));
+    if (process.env.PREPX_SCREENSHOT_DIR) {
+      await page.setViewportSize({ width: 375, height: 900 });
+      await page.screenshot({
+        path: require('node:path').join(process.env.PREPX_SCREENSHOT_DIR, 'prepx-result-multilingual-375.png'),
+        fullPage: true,
+      });
+    }
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.reload();
     await page.getByRole('heading', { name: 'Search for your result' }).waitFor();
     for (const [code, status, route, title] of [
@@ -101,6 +128,6 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
       assert.equal(await page.getByRole('button', { name: 'Print / Save as PDF' }).count(), 0);
       assert.equal(await page.getByRole('button', { name: 'Search My Results' }).isDisabled(), false);
     }
-    console.log('PASS: search handoff without persistence, legacy cleanup, duplicate-submit guard, hidden overall status, center, error routes, generic errors, refresh/back behavior, 320/375/768/1280 layouts, table semantics and keyboard focus.');
+    console.log('PASS: search handoff without persistence, legacy cleanup, duplicate-submit guard, hidden overall status, center, error routes, generic errors, refresh/back behavior, 320/375/768/1280 layouts, table semantics, keyboard focus, reduced motion, and Sinhala/Tamil result rendering.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

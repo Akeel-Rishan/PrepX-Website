@@ -1,6 +1,6 @@
 # PrepX production pre-launch checklist
 
-Checklist date: 2026-10-12
+Checklist date: 2026-10-13
 Release candidate: `0.1.0`  
 Current recommendation: **GO ONLY AFTER BLOCKERS ARE RESOLVED**
 
@@ -19,12 +19,12 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 ## Current blocking gates
 
-- [ ] **BLOCKED — Required:** Complete a Vercel Preview deployment with staging-only Supabase and Upstash resources, then run the post-deployment checklist. **Owner:** Technical release owner. **Needed:** Preview URL and dated test record.
-- [ ] **BLOCKED — Required:** Run the real integration suite against the isolated local Docker Supabase stack. **Owner:** Developer. **Needed:** Docker, `npm run test:integration:setup`, then `npm run test:integration`; do not substitute a hosted database.
+- [ ] **BLOCKED — Required:** Complete a Vercel Preview deployment with staging-only Supabase and Upstash resources, then run the post-deployment checklist. The repository has no `.vercel/project.json`, no local Vercel authentication, and no documented Preview URL, so no deployment was created during the 2026-10-13 verification. **Owner:** Technical release owner. **Needed:** Vercel login/team/project selection, separately scoped Preview resources, Preview URL, and dated test record.
+- [ ] **BLOCKED — Required:** Run the real integration suite against the isolated local Docker Supabase stack. `.env.test` is now present, but the Docker daemon was unavailable on 2026-10-13. **Owner:** Developer. **Needed:** start Docker, run `npm run test:integration:setup`, then `npm run test:integration`; do not substitute a hosted database.
 - [ ] **BLOCKED — Required:** Run k6 smoke and normal-load profiles against an explicitly approved staging/performance target with fictional published data. **Owner:** Performance tester. **Needed:** native k6, private `.env.load`, target approval, saved summaries.
-- [ ] **BLOCKED — Required:** Verify production Supabase backups and perform/document a safe restore rehearsal. **Owner:** Supabase project owner. **Needed:** backup configuration evidence and restoration record.
+- [ ] **BLOCKED — Required:** Enable/obtain a production Supabase backup and perform/document a safe restore rehearsal. The read-only CLI inventory on 2026-10-13 returned no available backups and PITR disabled; restoring Production is not an acceptable rehearsal. **Owner:** Supabase project owner. **Needed:** plan-appropriate backup/export, isolated recovery project, approved rehearsal window, and restoration record.
 - [ ] **BLOCKED — Required:** Complete and approve `docs/governance/operational-ownership.md`, including named primary/backup production, Vercel, Supabase, DNS, privacy, incident, content and examination-period contacts. The register and access-verification checklist now exist; real names and acknowledgements are still required. **Owner:** UGSM release approver.
-- [ ] **BLOCKED — Required:** Complete browser accessibility, responsive, print/PDF, multilingual, and production security-header checks. **Owner:** QA/release owner.
+- [ ] **BLOCKED — Required:** Finish the human/deployed portions of accessibility and browser QA. Optimized local Edge automation passed responsive layouts, keyboard focus, A4 PDF generation, reduced motion, and fictional Sinhala/Tamil rendering on 2026-10-13; screen-reader, 200% zoom/contrast, native Save-as-PDF review, authenticated admin workflows, and final-domain headers remain manual. **Owner:** QA/release owner.
 - [ ] **BLOCKED — Required:** Complete and approve `docs/governance/privacy-content-policy.md`. The technical privacy baseline, retention decision table, proposed public wording, Terms decision and privacy-notice decision now exist; UGSM approval is still required. **Owner:** UGSM data owner.
 
 ## 1. Product and functionality
@@ -71,7 +71,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [ ] **BLOCKED — Required:** Execute the real RLS integration group against the isolated stack and inspect hosted production RLS/policies after migration. **Owner:** Developer/Supabase owner.
 - [x] **VERIFIED — Required:** Service-role creation is confined to a `server-only` Supabase module and trusted server code; post-build browser scans found no server secret names or values.
 - [x] **VERIFIED — Required:** No install/build/start hook runs seeds, resets, migration pushes, or destructive database commands; integration cleanup is marker-scoped and refuses hosted databases.
-- [ ] **BLOCKED — Required:** Confirm automated production Supabase backups are enabled and retention matches UGSM requirements. **Owner:** Supabase owner.
+- [ ] **BLOCKED — Required:** Enable or otherwise obtain plan-appropriate production Supabase backups and make retention match UGSM requirements. **Evidence:** `supabase backups list` on 2026-10-13 reported no available backup and PITR disabled. **Owner:** Supabase owner.
 - [ ] **BLOCKED — Required:** Rehearse a restore to a separate recovery project/branch, validate row counts/auth/configuration, record RTO/RPO and evidence, and never overwrite Production for the rehearsal. **Owner:** Supabase owner.
 - [ ] **BLOCKED — Required:** Fill and approve the retention schedule in `docs/governance/privacy-content-policy.md` for student records, audit logs, provider logs, limiter fingerprints, backups, test data and incident evidence. **Owner:** UGSM data owner.
 
@@ -80,6 +80,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [ ] **MANUAL CHECK REQUIRED — Required:** Create named production administrators directly in Supabase Auth using unique accounts, strong passwords/MFA where available, and matching approved `admin_profiles`; disable public signup. **Owner:** Supabase owner.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Verify the Supabase production Site URL and any intentionally required redirect allowlist entries. Current password login has no OAuth callback. **Owner:** Supabase owner.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm secure session cookies, refresh, expiry, revocation, login, and logout on the final HTTPS domain. **Owner:** QA/security owner.
+- [x] **VERIFIED — Recommended:** The configured Supabase Auth endpoint was reachable on 2026-10-13 and safely rejected one fictional credential probe without exposing provider details. This is connectivity evidence only; it does not verify the final domain, redirect allowlist, real admin authorization, or session-cookie attributes.
 - [ ] **NOT APPLICABLE — Not applicable:** The current application has one administrator role, not multiple administrator permission tiers or tenants. Every approved admin has the same application data scope.
 - [x] **VERIFIED — Required:** Server actions call the admin authorization guard; anonymous and non-admin paths fail closed in deterministic tests.
 - [x] **VERIFIED — Required:** Public users have no supported admin API and cannot invoke protected actions successfully without a signed admin session/profile.
@@ -98,7 +99,8 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [x] **VERIFIED — Required:** Public search and limiter logs use fixed messages or provider codes and do not log raw NIC/index values, IPs, cookies, tokens, keys, request bodies, or provider responses in tested paths. Audit payloads recursively mask NIC-key variants; `npm run audit:privacy` inspected all 49 configured audit rows on 2026-10-12 and found zero unmasked NIC fields without printing row contents.
 - [x] **VERIFIED — Required:** API/action failures return generic messages without stack traces, SQL text, Supabase detail, credentials, or environment values in deterministic tests.
 - [x] **VERIFIED — Required:** Public search has independent HMAC-derived identifier/IP limits, production Upstash enforcement, bounded timeouts, generic 429s, and fail-closed configuration/provider behavior by default.
-- [ ] **BLOCKED — Required:** Verify rate limits with real production-mode Upstash across multiple Preview instances, including timeout/outage behavior and a safe quota/reset test. **Owner:** Technical release owner.
+- [x] **VERIFIED — Required:** The configured live Upstash database atomically shared one random 30-second quota across 21 independent clients on 2026-10-13; exactly seven attempts were allowed, all clients shared one reset, and cleanup was requested. **Evidence:** `npm run test:rate-limit:upstash`.
+- [ ] **BLOCKED — Required:** Verify the HTTP rate-limit path across multiple deployed Preview/Vercel instances, including trusted proxy headers, generic 429/recovery, and timeout/outage behavior. The live provider check above proves shared Redis atomicity but not Vercel routing. **Owner:** Technical release owner.
 - [x] **VERIFIED — Required:** No cross-origin client is supported; routes do not emit permissive `Access-Control-Allow-Origin` headers, so browser use remains same-origin.
 - [x] **VERIFIED — Required:** State changes use authenticated Next.js Server Actions with framework origin checks plus server-side admin authorization; no cookie-authenticated state-changing public REST endpoint exists.
 - [x] **VERIFIED — Required:** `npm audit --omit=dev --audit-level=moderate` reports zero production dependency vulnerabilities.
@@ -107,7 +109,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 ## 5. Environment and deployment
 
-- [ ] **MANUAL CHECK REQUIRED — Required:** Confirm Vercel is connected to `https://github.com/Akeel-Rishan/PrepX-Website.git`, the controlled production branch, and the intended team/project. **Owner:** Vercel owner.
+- [ ] **BLOCKED — Required:** Connect Vercel to `https://github.com/Akeel-Rishan/PrepX-Website.git`, the controlled production branch, and the intended team/project. No local Vercel authentication or `.vercel/project.json` was available on 2026-10-13. **Owner:** Vercel owner.
 - [ ] **BLOCKED — Required:** Configure and verify canonical production domain, DNS ownership, HTTPS, redirects, and certificate issuance. **Owner:** Domain/Vercel owner.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm Development, Preview, and Production use separately scoped variables/resources. **Owner:** Vercel owner.
 - [x] **VERIFIED — Required:** `.env.example` contains non-secret placeholder values only; private environment/load/test/Vercel files are ignored and deployment audit passes.
@@ -125,13 +127,13 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 ## 6. Testing and quality gates
 
-- [x] **VERIFIED — Required:** `npm test` — PASS on 2026-10-12; logic, validation, privacy, publication, rate-limit, header, import, error, and API contracts passed.
-- [ ] **BLOCKED — Required:** `npm run test:integration` — NOT RUN; it failed closed because Docker/local Supabase and `.env.test` are absent. No database was contacted.
+- [x] **VERIFIED — Required:** `npm test` — PASS on 2026-10-13; logic, validation, privacy, publication, rate-limit, header, import, error, and API contracts passed.
+- [ ] **BLOCKED — Required:** `npm run test:integration` — NOT RUN; `.env.test` exists, but the Docker daemon/local Supabase stack is unavailable. No hosted or production database was contacted.
 - [x] **VERIFIED — Required:** `npm run test:integration:safety` — PASS; hosted/default URLs and unsafe transport are rejected.
 - [x] **VERIFIED — Required:** `npm run lint` — PASS.
 - [x] **VERIFIED — Required:** `npm run typecheck` — PASS.
 - [x] **VERIFIED — Required:** `npm run build` — PASS with production environment validation.
-- [x] **VERIFIED — Recommended:** Local production Edge result/navigation, responsive, print/A4-PDF, CSP/security, 404, and global-error browser smoke suites — PASS on 2026-10-12. Native Save-as-PDF dialog and deployed-environment checks remain manual.
+- [x] **VERIFIED — Recommended:** Local optimized-production Edge result/navigation, responsive, print/A4-PDF, CSP/security, anonymous-admin redirect, 404, global-error, reduced-motion, and fictional Sinhala/Tamil browser suites — PASS on 2026-10-13. Native Save-as-PDF dialog, authenticated admin pages, screen readers, and deployed-environment checks remain manual.
 - [x] **VERIFIED — Required:** `npm run load:validate` — PASS offline; profiles, guards, schemas, privacy checks, thresholds, metrics, and summaries validated without HTTP traffic.
 - [ ] **BLOCKED — Required:** `npm run load:smoke` — not run; native k6, `.env.load`, approved target, and fictional published fixture are absent.
 - [ ] **BLOCKED — Required:** `npm run load:normal` — not run for the same reasons; run only after smoke passes in the approved staging/performance environment.
@@ -159,16 +161,17 @@ Release owners should enter names/links in the fields near the end, initial ever
 ## 8. Accessibility and responsive behavior
 
 - [x] **VERIFIED — Recommended:** Source includes form labels, semantic tables/statuses, live regions, visible focus classes, keyboard-capable controls, modal dialog semantics, reduced-motion CSS, responsive layouts, and non-color text labels.
+- [x] **VERIFIED — Recommended:** Optimized local Edge automation confirms public-result keyboard focus, no horizontal overflow at 320/375/768/1280 px in both themes, reduced-motion animation suppression, fictional Sinhala/Tamil/English rendering, semantic result tables, and single/multi-page A4 PDF generation. **Evidence:** `npm run test:results:browser` on 2026-10-13.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Complete keyboard-only navigation for public search/results and every admin workflow; confirm logical order and no traps. **Owner:** Accessibility tester.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm visible focus at 200% zoom and in light/dark themes. **Owner:** Accessibility tester.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm every deployed form field has an accessible name and every error is programmatically associated/announced. **Owner:** Accessibility tester.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Test modal initial focus, containment, Escape/close, and focus return. **Owner:** Accessibility tester.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Measure text, component, focus, and status color contrast. **Owner:** Accessibility tester.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Test screen-reader announcements for loading, validation, search, import, save, publication, and error states. **Owner:** Accessibility tester.
-- [ ] **MANUAL CHECK REQUIRED — Required:** Test supported mobile, tablet, desktop, zoom, and orientation sizes with no clipped controls or important horizontal overflow. **Owner:** QA.
-- [ ] **MANUAL CHECK REQUIRED — Required:** Approve A4 print/PDF output, including multi-page grades. **Owner:** QA/content owner.
-- [ ] **MANUAL CHECK REQUIRED — Recommended:** Test operating-system reduced-motion mode and confirm essential state changes remain understandable. **Owner:** QA.
-- [ ] **MANUAL CHECK REQUIRED — Required:** Test Sinhala, Tamil, and English names/schools/messages with approved content and fonts; never use real student information. **Owner:** UGSM content/QA owner.
+- [ ] **MANUAL CHECK REQUIRED — Required:** Visually test supported mobile, tablet, desktop, 200% zoom, and orientation sizes. Automated width/overflow checks passed, but human approval is still required. **Owner:** QA.
+- [ ] **MANUAL CHECK REQUIRED — Required:** Open the native Print dialog and visually approve saved A4 output, including multi-page grades. Automated Chromium PDF structure/layout checks passed. **Owner:** QA/content owner.
+- [ ] **MANUAL CHECK REQUIRED — Recommended:** Confirm essential state changes remain understandable with operating-system reduced motion. Automated animation suppression passed. **Owner:** QA.
+- [ ] **MANUAL CHECK REQUIRED — Required:** Have an approved Sinhala/Tamil content reviewer visually approve names, schools, and messages. Fictional multilingual browser rendering passed, but linguistic/font approval requires a human reviewer. **Owner:** UGSM content/QA owner.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm grade/status/error meaning never depends on color alone. **Owner:** Accessibility tester.
 
 ## 9. Privacy and content
@@ -238,7 +241,7 @@ Complete first on Preview, then repeat on Production immediately after promotion
 | Planned release date | ____________________ |
 | Technical verification performed by | **BLOCKED:** ____________________ |
 | Release approved by | **BLOCKED:** ____________________ |
-| Open risks | Real integration, deployed E2E/security/accessibility, Upstash, load, backup/restore, operations/content/privacy gates above |
+| Open risks | Real integration, Preview/deployed E2E/security/accessibility, Vercel HTTP multi-instance behavior, load, unavailable Supabase backup/restore evidence, operations/content/privacy gates above |
 | Deferred recommended items | Upstream ESLint/`braces` advisory monitoring; 500-user stress only after baseline/approval |
 | Rollback decision/owner | **BLOCKED:** ____________________ |
 | Final go/no-go decision | **GO ONLY AFTER BLOCKERS ARE RESOLVED** |

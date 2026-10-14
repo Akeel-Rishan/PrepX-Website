@@ -93,3 +93,11 @@ npm.cmd run test:rate-limit:live
 The check covers index/NIC success, identifier/IP thresholds, invalid JSON, generic 429s, response headers, reset after Retry-After, masked result display and retryable browser feedback. It verifies the print action remains visible; it does not open the browser print dialog. Restart the isolated server for a fresh run and close the test terminals to discard short-window overrides.
 
 Before deployment, configure real Upstash credentials and verify two application instances share quotas, real provider outage behavior, and the deployment's proxy headers. See [Step 13.1 verification](STEP-13.1-VERIFICATION.md) for what was actually exercised locally.
+
+To verify that the configured Upstash database atomically shares one short-lived quota across independent clients without using student data, run:
+
+```powershell
+npm.cmd run test:rate-limit:upstash
+```
+
+This live provider check uses a random key, sends 21 bounded requests, requests cleanup, and otherwise relies on a 30-second TTL. It proves shared Redis atomicity, but it does not replace the deployed Preview test across separate Vercel instances or proxy-header verification.
