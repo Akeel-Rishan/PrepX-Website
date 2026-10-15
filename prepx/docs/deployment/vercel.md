@@ -72,7 +72,7 @@ No analytics, email, object-storage, payment, or separate health-check credentia
 ## Supabase production setup
 
 1. Create or select the intended Production project and a separate Preview/staging project.
-2. Apply migrations `001` through `006` in order. Migration `006` is required before deploying the examination delete control. Do not run repository seed scripts against Preview or Production; they are synthetic local-development fixtures only.
+2. Apply migrations `001` through `007` in order. Migration `006` is required before deploying the examination delete control, and migration `007` sets the canonical UGSM organization name. Do not run repository seed scripts against Preview or Production; they are synthetic local-development fixtures only.
 3. Create Supabase Auth users deliberately and add only approved user UUIDs to `admin_profiles`.
 4. Disable public Auth sign-up in the hosted Production project unless a reviewed enrollment workflow is intentionally introduced.
 5. In Authentication > URL Configuration, set Site URL to the exact canonical production HTTPS origin.

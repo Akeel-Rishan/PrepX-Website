@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { saveExaminationAction } from '@/lib/actions/examinations';
+import { PUBLIC_ORGANIZATION_NAME } from '@/lib/public-support';
 import type { Examination } from '@/types';
 import { ArchiveButton } from './archive-button';
 import { DeleteExaminationButton } from './delete-examination-button';
@@ -76,8 +77,8 @@ export function ExaminationForm({
               id="organization_name"
               name="organization_name"
               label="Organization Name"
-              placeholder="e.g. PrepX Institute"
-              defaultValue={examination?.organization_name ?? 'PrepX'}
+              placeholder={`e.g. ${PUBLIC_ORGANIZATION_NAME}`}
+              defaultValue={examination?.organization_name ?? PUBLIC_ORGANIZATION_NAME}
               error={state.fieldErrors?.organization_name?.[0]}
               maxLength={200}
               required

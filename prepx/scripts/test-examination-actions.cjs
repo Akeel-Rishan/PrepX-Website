@@ -29,7 +29,7 @@ const examinationId = '3a320000-0000-4000-8000-000000002026';
 const valid = {
   name: 'PrepX Mock Examination',
   year: '2028',
-  organization_name: 'PrepX Institute',
+  organization_name: 'Undergraduate Society of Mawanella',
   result_notice: '',
 };
 
@@ -45,7 +45,7 @@ function harness({ user = true, profile = true, status = 'DRAFT', exists = true,
     id: examinationId,
     name: 'Existing Examination',
     year: 2026,
-    organization_name: 'PrepX',
+    organization_name: 'Undergraduate Society of Mawanella',
     result_notice: null,
     status,
     publication_date: null,
@@ -251,7 +251,19 @@ async function main() {
   assert.match(deletionUi, /confirmation\.trim\(\) === confirmationText/);
   assert.match(deletionUi, /Delete Permanently/);
 
-  console.log('PASS: examination validation, authorization, UUID and typed-confirmation checks, create/edit auditing, archive, restore, atomic deletion, migration security, and redirects.');
+  const organizationMigration = fs.readFileSync(
+    'supabase/migrations/007_canonical_organization_name.sql',
+    'utf8'
+  );
+  assert.match(organizationMigration, /SET DEFAULT 'Undergraduate Society of Mawanella'/);
+  assert.match(organizationMigration, /WHERE organization_name IN \('PrepX', 'PrepX Institute'\)/);
+  const examinationForm = fs.readFileSync(
+    'src/app/admin/(protected)/examinations/[id]/_components/examination-form.tsx',
+    'utf8'
+  );
+  assert.match(examinationForm, /PUBLIC_ORGANIZATION_NAME/);
+
+  console.log('PASS: examination validation, authorization, UUID and typed-confirmation checks, create/edit auditing, archive, restore, atomic deletion, canonical organization defaults, migration security, and redirects.');
 }
 
 main().catch(error => {

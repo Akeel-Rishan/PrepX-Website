@@ -38,7 +38,7 @@ function harness({ status = 'DRAFT', subjects, students, grades, examination = t
           id: examId,
           name: 'PrepX Model Exam',
           year: 2027,
-          organization_name: 'PrepX',
+          organization_name: 'Undergraduate Society of Mawanella',
           status,
           publication_date: null,
           result_notice: null,

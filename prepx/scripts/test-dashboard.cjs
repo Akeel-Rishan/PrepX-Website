@@ -27,9 +27,9 @@ function load(file, overrides = {}) {
 
 const studentCounts = { 'exam-2025': 10, 'exam-2026': 20, 'exam-2027': 30 };
 const examinations = [
-  { id: 'exam-2025', name: 'Exam 2025', year: 2025, organization_name: 'PrepX', status: 'ARCHIVED', publication_date: null, created_at: '2025-01-01', students: [{ count: studentCounts['exam-2025'] }] },
-  { id: 'exam-2026', name: 'Exam 2026', year: 2026, organization_name: 'PrepX', status: 'PUBLISHED', publication_date: '2026-01-01', created_at: '2026-01-01', students: [{ count: studentCounts['exam-2026'] }] },
-  { id: 'exam-2027', name: 'Exam 2027', year: 2027, organization_name: 'PrepX', status: 'DRAFT', publication_date: null, created_at: '2027-01-01', students: [{ count: studentCounts['exam-2027'] }] },
+  { id: 'exam-2025', name: 'Exam 2025', year: 2025, organization_name: 'Undergraduate Society of Mawanella', status: 'ARCHIVED', publication_date: null, created_at: '2025-01-01', students: [{ count: studentCounts['exam-2025'] }] },
+  { id: 'exam-2026', name: 'Exam 2026', year: 2026, organization_name: 'Undergraduate Society of Mawanella', status: 'PUBLISHED', publication_date: '2026-01-01', created_at: '2026-01-01', students: [{ count: studentCounts['exam-2026'] }] },
+  { id: 'exam-2027', name: 'Exam 2027', year: 2027, organization_name: 'Undergraduate Society of Mawanella', status: 'DRAFT', publication_date: null, created_at: '2027-01-01', students: [{ count: studentCounts['exam-2027'] }] },
 ];
 
 function createAdminClient() {

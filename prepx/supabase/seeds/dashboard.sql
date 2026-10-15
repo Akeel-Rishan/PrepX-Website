@@ -6,9 +6,9 @@ BEGIN;
 
 INSERT INTO public.examinations (id, name, year, organization_name, status)
 VALUES
-  ('3a320000-0000-4000-8000-000000002026', 'PrepX O/L Model Exam', 2026, 'PrepX Institute', 'PUBLISHED'),
-  ('3a320000-0000-4000-8000-000000002025', 'PrepX O/L Model Exam', 2025, 'PrepX Institute', 'ARCHIVED'),
-  ('3a320000-0000-4000-8000-000000002027', 'PrepX O/L Model Exam', 2027, 'PrepX Institute', 'DRAFT')
+  ('3a320000-0000-4000-8000-000000002026', 'PrepX O/L Model Exam', 2026, 'Undergraduate Society of Mawanella', 'PUBLISHED'),
+  ('3a320000-0000-4000-8000-000000002025', 'PrepX O/L Model Exam', 2025, 'Undergraduate Society of Mawanella', 'ARCHIVED'),
+  ('3a320000-0000-4000-8000-000000002027', 'PrepX O/L Model Exam', 2027, 'Undergraduate Society of Mawanella', 'DRAFT')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.students (examination_id, full_name, index_number, nic_number, school_name)
