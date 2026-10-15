@@ -39,7 +39,7 @@ function form(values) {
   return data;
 }
 
-function harness({ user = true, profile = true, status = 'DRAFT', exists = true, auditFailure = false, rollbackFailure = false } = {}) {
+function harness({ user = true, profile = true, status = 'DRAFT', exists = true, auditFailure = false, rollbackFailure = false, deleteErrorCode = null } = {}) {
   let version = 1;
   let examination = exists ? {
     id: examinationId,
@@ -71,6 +71,24 @@ function harness({ user = true, profile = true, status = 'DRAFT', exists = true,
   };
 
   const admin = {
+    async rpc(name, args) {
+      assert.equal(name, 'delete_examination');
+      if (deleteErrorCode) return { data: null, error: { code: deleteErrorCode } };
+      if (!examination) return { data: null, error: { code: 'P0002' } };
+      if (args.p_confirmation !== `${examination.name} ${examination.year}`) {
+        return { data: null, error: { code: '22023' } };
+      }
+      audits.push({
+        action: 'EXAMINATION_DELETED',
+        entity_type: 'examination',
+        entity_id: examination.id,
+      });
+      examination = null;
+      return {
+        data: { students_deleted: 5, subjects_deleted: 9, results_deleted: 45 },
+        error: null,
+      };
+    },
     from(table) {
       let operation = 'select';
       let payload;
@@ -150,6 +168,10 @@ async function main() {
     const actions = harness(options);
     assert.equal((await actions.saveExaminationAction({}, form(valid))).error, 'Authentication required.');
     assert.equal((await actions.archiveExaminationAction(examinationId)).error, 'Authentication required.');
+    assert.equal(
+      (await actions.deleteExaminationAction(examinationId, 'Existing Examination 2026')).error,
+      'Authentication required.'
+    );
   }
 
   const invalid = harness();
@@ -158,6 +180,10 @@ async function main() {
     'Invalid examination ID.'
   );
   assert.equal((await invalid.archiveExaminationAction('invalid')).error, 'Invalid examination ID.');
+  assert.equal(
+    (await invalid.deleteExaminationAction('invalid', 'Existing Examination 2026')).error,
+    'Invalid examination ID.'
+  );
 
   const create = harness({ exists: false });
   await assert.rejects(
@@ -187,7 +213,45 @@ async function main() {
   assert.equal(archive.examination().status, 'DRAFT');
   assert.equal(archive.audits[1].action, 'EXAMINATION_UNARCHIVED');
 
-  console.log('PASS: examination validation, authorization, UUID checks, create/edit auditing, published archive protection, archive, restore, and redirects.');
+  const mismatch = harness();
+  assert.match(
+    (await mismatch.deleteExaminationAction(examinationId, 'wrong confirmation')).error,
+    /does not match/i
+  );
+  assert(mismatch.examination());
+
+  const deletion = harness({ status: 'PUBLISHED' });
+  await assert.rejects(
+    deletion.deleteExaminationAction(examinationId, 'Existing Examination 2026'),
+    error => error.destination === '/admin/examinations?deleted=1'
+  );
+  assert.equal(deletion.examination(), null);
+  assert.equal(deletion.audits[0].action, 'EXAMINATION_DELETED');
+
+  const failedDeletion = harness({ deleteErrorCode: 'XX000' });
+  assert.match(
+    (await failedDeletion.deleteExaminationAction(examinationId, 'Existing Examination 2026')).error,
+    /No data was removed/
+  );
+  assert(failedDeletion.examination());
+
+  const deletionMigration = fs.readFileSync(
+    'supabase/migrations/006_atomic_examination_deletion.sql',
+    'utf8'
+  );
+  assert.match(deletionMigration, /SECURITY DEFINER/);
+  assert.match(deletionMigration, /FOR UPDATE/);
+  assert.match(deletionMigration, /EXAMINATION_DELETED/);
+  assert.match(deletionMigration, /DELETE FROM public\.examinations/);
+  assert.match(deletionMigration, /GRANT EXECUTE.*service_role/);
+  const deletionUi = fs.readFileSync(
+    'src/app/admin/(protected)/examinations/[id]/_components/delete-examination-button.tsx',
+    'utf8'
+  );
+  assert.match(deletionUi, /confirmation\.trim\(\) === confirmationText/);
+  assert.match(deletionUi, /Delete Permanently/);
+
+  console.log('PASS: examination validation, authorization, UUID and typed-confirmation checks, create/edit auditing, archive, restore, atomic deletion, migration security, and redirects.');
 }
 
 main().catch(error => {

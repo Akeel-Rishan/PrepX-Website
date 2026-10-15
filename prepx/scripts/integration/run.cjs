@@ -343,6 +343,57 @@ async function adminFlow(c) {
   assert((await c.action(students.deleteStudentAction(student.id))).redirect);
   assert.equal(c.data(await c.db.from('students').select('id').eq('id', student.id)).length, 0);
   success(await subjects.deleteSubjectAction(second.id));
+
+  const deletionExam = await c.exam('Fake Delete Exam');
+  const deletionSubject = await c.subject(deletionExam, 'Fake Delete Subject');
+  const deletionStudent = await c.student(deletionExam, 'DELETE1', '000000000001');
+  assert.equal(
+    (
+      await gradeAction.saveGradesAction(deletionExam.id, [
+        {
+          studentId: deletionStudent.id,
+          subjectId: deletionSubject.id,
+          grade: 'A',
+        },
+      ])
+    ).savedCount,
+    1
+  );
+  c.data(
+    await c.db.from('examinations').update({ status: 'PUBLISHED' }).eq('id', deletionExam.id)
+  );
+  assert(
+    (await examinations.deleteExaminationAction(deletionExam.id, 'wrong confirmation')).error
+  );
+  assert.equal(
+    c.data(await c.db.from('examinations').select('id').eq('id', deletionExam.id)).length,
+    1
+  );
+  const deletionResult = await c.action(
+    examinations.deleteExaminationAction(
+      deletionExam.id,
+      `${deletionExam.name} ${deletionExam.year}`
+    )
+  );
+  assert(deletionResult.redirect, deletionResult.error);
+  assert.equal(
+    c.data(await c.db.from('examinations').select('id').eq('id', deletionExam.id)).length,
+    0
+  );
+  assert.equal(
+    c.data(await c.db.from('students').select('id').eq('id', deletionStudent.id)).length,
+    0
+  );
+  assert.equal(
+    c.data(await c.db.from('subjects').select('id').eq('id', deletionSubject.id)).length,
+    0
+  );
+  assert.equal(
+    c.data(
+      await c.db.from('student_results').select('id').eq('student_id', deletionStudent.id)
+    ).length,
+    0
+  );
   for (const event of [
     'EXAMINATION_CREATED',
     'EXAMINATION_UPDATED',
@@ -354,6 +405,7 @@ async function adminFlow(c) {
     'SUBJECT_REORDERED',
     'SUBJECT_DELETED',
     'GRADES_UPDATED',
+    'EXAMINATION_DELETED',
   ])
     assert((await c.audit(event)).length, event);
   const audits = c.data(await c.db.from('audit_logs').select('*').eq('admin_id', c.adminId));
@@ -372,6 +424,10 @@ async function authorizationFlow(c) {
         c.form({ name: 'Denied', year: 2026, organization_name: c.marker })
       ),
       await app('src/lib/actions/examinations.ts').archiveExaminationAction(exam.id),
+      await app('src/lib/actions/examinations.ts').deleteExaminationAction(
+        exam.id,
+        `${exam.name} ${exam.year}`
+      ),
       await app('src/lib/actions/students.ts').deleteStudentAction(student.id),
       await app('src/lib/actions/subjects.ts').toggleSubjectActiveAction(subject.id),
       await app('src/lib/actions/grades.ts').saveGradesAction(exam.id, [

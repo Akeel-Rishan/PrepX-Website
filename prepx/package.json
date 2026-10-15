@@ -24,6 +24,7 @@
     "test:results:live": "node scripts/test-result-search-live.cjs",
     "test:results:display": "node scripts/test-result-display.cjs",
     "test:results:browser": "node scripts/test-result-display-browser.cjs && node scripts/test-result-print-browser.cjs",
+    "test:examinations:browser": "node scripts/test-examination-delete-browser.cjs",
     "test:rate-limit": "node scripts/test-rate-limit.cjs",
     "test:rate-limit:live": "node scripts/test-rate-limit-live.cjs",
     "test:rate-limit:upstash": "node scripts/test-upstash-multi-instance.cjs",

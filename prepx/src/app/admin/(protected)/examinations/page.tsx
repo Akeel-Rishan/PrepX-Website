@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
+import { Alert } from '@/components/ui/alert';
 import { getExaminationsWithCounts } from '@/lib/data/examinations';
 import { normalizeExamStatus, normalizeExamSort, sortExaminations } from '@/lib/examination-list';
 import { StatusFilter } from './_components/status-filter';
@@ -14,6 +15,7 @@ interface ExaminationsPageProps {
     status?: string | string[];
     sort?: string | string[];
     direction?: string | string[];
+    deleted?: string | string[];
   }>;
 }
 
@@ -24,6 +26,7 @@ export default async function ExaminationsPage({
   const activeStatus = normalizeExamStatus(params.status);
   const sort = normalizeExamSort(params.sort);
   const direction = params.direction === 'asc' ? 'asc' : 'desc';
+  const deletionSucceeded = params.deleted === '1';
   const examinations = sortExaminations(
     await getExaminationsWithCounts(activeStatus ? { status: activeStatus } : undefined),
     sort,
@@ -44,6 +47,9 @@ export default async function ExaminationsPage({
           New Examination
         </Link>
       </div>
+      {deletionSucceeded && (
+        <Alert variant="success">Examination and all associated data were deleted.</Alert>
+      )}
       <StatusFilter currentStatus={activeStatus} />
       <ExaminationsTable
         examinations={examinations}

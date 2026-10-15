@@ -59,16 +59,17 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 ## 2. Data integrity and database
 
-- [ ] **BLOCKED — Required:** Apply migrations `001`–`005` to a fresh isolated local test database and complete the real integration suite. Linked-project history matches, but that does not replace a clean-database test. **Owner:** Developer.
-- [x] **VERIFIED — Required:** Linked local/remote migration history is exactly `001`–`005`, and all six configured tables plus `import_exam_results` are reachable. **Evidence:** `npx supabase migration list --linked`, `npm run test:db` on 2026-10-12.
+- [ ] **BLOCKED — Required:** Apply migrations `001`–`006` to a fresh isolated local test database. The existing isolated stack passes the complete real integration suite after applying `006`, but that does not replace a clean-database migration test. **Owner:** Developer.
+- [x] **VERIFIED — Required:** Linked staging migration history is exactly `001`–`006`. All six configured tables and the atomic import/deletion functions are covered by the isolated real-database integration suite. **Evidence:** `npx supabase migration list --linked`, `npm run test:integration` on 2026-10-15.
 - [x] **VERIFIED — Required:** Migrations define primary keys, foreign keys, status/year/grade checks, result/examination consistency trigger, unique student index/NIC, unique subject name/code, unique student/subject grade, and query indexes.
-- [ ] **BLOCKED — Required:** Prove foreign-key, uniqueness, grade checks, cross-exam trigger, and RLS against real PostgreSQL through `npm run test:integration`. Deterministic tests alone are not sufficient. **Owner:** Developer.
+- [x] **VERIFIED — Required:** Foreign-key cascades, uniqueness, grade checks, cross-exam trigger, atomic examination deletion, audit retention, authorization, and RLS pass against the isolated real PostgreSQL stack through `npm run test:integration`.
 - [x] **VERIFIED — Required:** Publication eligibility is calculated server-side and checked again in the publish action.
 - [x] **VERIFIED — Required:** Duplicate index numbers, NICs, subject headers, and grade records are rejected or intentionally upserted only according to the documented import contract.
 - [x] **VERIFIED — Required:** Import confirmation is one PostgreSQL function transaction; student/grade writes and audit insertion commit or roll back together. Execute is revoked from public/anon/authenticated and granted to `service_role`.
 - [x] **VERIFIED — Required:** Required administrative mutations attempt audit creation; publication/examination/review paths include compensating rollback/concurrency handling where needed.
 - [x] **VERIFIED — Required:** RLS is enabled for all six tables and policies restrict public reads to published examinations/active subjects while admin access requires `is_admin()`.
-- [ ] **BLOCKED — Required:** Execute the real RLS integration group against the isolated stack and inspect hosted production RLS/policies after migration. **Owner:** Developer/Supabase owner.
+- [x] **VERIFIED — Required:** The real RLS integration group passes against the isolated stack.
+- [ ] **MANUAL CHECK REQUIRED — Required:** Inspect hosted production RLS/policies after applying migration `006`. **Owner:** Supabase owner.
 - [x] **VERIFIED — Required:** Service-role creation is confined to a `server-only` Supabase module and trusted server code; post-build browser scans found no server secret names or values.
 - [x] **VERIFIED — Required:** No install/build/start hook runs seeds, resets, migration pushes, or destructive database commands; integration cleanup is marker-scoped and refuses hosted databases.
 - [ ] **BLOCKED — Required:** Enable or otherwise obtain plan-appropriate production Supabase backups and make retention match UGSM requirements. **Evidence:** `supabase backups list` on 2026-10-13 reported no available backup and PITR disabled. **Owner:** Supabase owner.
@@ -115,7 +116,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm Development, Preview, and Production use separately scoped variables. Preview and Production use separate Supabase projects. By explicit owner decision on 2026-10-15, they share the one available free Upstash database but use different HMAC secrets; do not run staging load/abuse tests while Production is serving traffic. **Owner:** Vercel owner.
 - [x] **VERIFIED — Required:** `.env.example` contains non-secret placeholder values only; private environment/load/test/Vercel files are ignored and deployment audit passes.
 - [x] **VERIFIED — Required:** Public variables are limited to Supabase public URL/publishable key and application name/URL; secret/provider/HMAC/AI variables are server-only.
-- [x] **VERIFIED — Required:** Separate healthy staging (`Prepx website`) and Production (`PrepX Production`) Supabase projects exist in the UGSM organization and Tokyo region. Production migrations `001`–`005` were applied and confirmed on 2026-10-15.
+- [x] **VERIFIED — Required:** Separate healthy staging (`Prepx website`) and Production (`PrepX Production`) Supabase projects exist in the UGSM organization and Tokyo region. Staging migrations `001`–`006` were applied and confirmed on 2026-10-15.
 - [x] **VERIFIED — Required:** Global public signup is disabled on both hosted Supabase projects while the email/password provider remains enabled for existing administrators. A minimal hosted hardening configuration preserves unrelated MFA, email, storage, and pooler settings.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Compare the Vercel Production Supabase project reference and keys with the approved production project. **Owner:** Supabase/Vercel owners.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Configure the approved shared Upstash URL/token in both Vercel scopes and use the distinct private Preview and Production `RATE_LIMIT_HASH_SECRET` values generated on 2026-10-15. Both configurations returned `PONG`; the secrets are 64 and 96 characters and were not recorded in this checklist. **Owner:** Vercel owner.
@@ -123,14 +124,14 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [x] **VERIFIED — Required:** Runtime persistence uses Supabase/Upstash only; there are no workers, cron jobs, WebSockets, long-running processes, or local-filesystem persistence requirements.
 - [x] **VERIFIED — Required:** Repository settings specify Root Directory `prepx`, Next.js defaults, Node `22.x`, npm `10.9.4`, `npm ci`, `npm run build`, and default output; no `vercel.json` is necessary.
 - [x] **VERIFIED — Required:** Production build completes with 20 expected app/API routes and middleware.
-- [x] **VERIFIED — Required:** Production migrations `001`–`005` were applied without seeds and the remote migration list exactly matched on 2026-10-15. Reconfirm before enabling traffic if any migration is added. **Owner:** Supabase owner.
+- [ ] **ACTION REQUIRED — Required:** Production migrations `001`–`005` were previously applied without seeds. Apply migration `006_atomic_examination_deletion.sql`, then confirm the production remote migration list is exactly `001`–`006` before deploying this feature. **Owner:** Supabase owner.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Inspect Preview and Production build/function logs for secrets, student identifiers, provider bodies, and unexpected errors. **Owner:** Technical release owner.
 - [ ] **BLOCKED — Required:** Establish a known-good Vercel deployment and assign an operator who understands Instant Rollback and its database/environment limitations. **Owner:** Vercel/release owner.
 
 ## 6. Testing and quality gates
 
 - [x] **VERIFIED — Required:** `npm test` — PASS on 2026-10-13; logic, validation, privacy, publication, rate-limit, header, import, error, and API contracts passed.
-- [ ] **BLOCKED — Required:** `npm run test:integration` — NOT RUN; `.env.test` exists, but the Docker daemon/local Supabase stack is unavailable. No hosted or production database was contacted.
+- [x] **VERIFIED — Required:** `npm run test:integration` — PASS on 2026-10-15; public, admin, authorization, import, and security groups passed against the isolated local Supabase stack, including atomic examination deletion and cascade cleanup.
 - [x] **VERIFIED — Required:** `npm run test:integration:safety` — PASS; hosted/default URLs and unsafe transport are rejected.
 - [x] **VERIFIED — Required:** `npm run lint` — PASS.
 - [x] **VERIFIED — Required:** `npm run typecheck` — PASS.

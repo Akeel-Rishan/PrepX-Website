@@ -226,6 +226,14 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      delete_examination: {
+        Args: {
+          p_admin_id: string;
+          p_confirmation: string;
+          p_examination_id: string;
+        };
+        Returns: Json;
+      };
       import_exam_results: {
         Args: {
           p_admin_id: string;

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { saveExaminationAction } from '@/lib/actions/examinations';
 import type { Examination } from '@/types';
 import { ArchiveButton } from './archive-button';
+import { DeleteExaminationButton } from './delete-examination-button';
 
 interface ExaminationFormProps {
   mode: 'create' | 'edit';
@@ -107,9 +108,16 @@ export function ExaminationForm({
       </fieldset>
 
       <div className="flex flex-col justify-between gap-4 pt-2 sm:flex-row sm:items-start">
-        <div>
+        <div className="flex flex-wrap items-start gap-2">
           {mode === 'edit' && examination && (
-            <ArchiveButton examinationId={examination.id} currentStatus={examination.status} />
+            <>
+              <ArchiveButton examinationId={examination.id} currentStatus={examination.status} />
+              <DeleteExaminationButton
+                examinationId={examination.id}
+                examinationName={examination.name}
+                examinationYear={examination.year}
+              />
+            </>
           )}
         </div>
         <div className="flex items-center justify-end gap-3">

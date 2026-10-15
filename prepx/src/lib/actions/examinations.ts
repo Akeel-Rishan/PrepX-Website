@@ -222,3 +222,34 @@ export async function unarchiveExaminationAction(id: string): Promise<{ error?: 
   refreshExamination(id);
   return {};
 }
+
+export async function deleteExaminationAction(
+  id: string,
+  confirmation: string
+): Promise<{ error?: string }> {
+  const adminId = await getAdminUserId();
+  if (!adminId) return { error: 'Authentication required.' };
+  if (!z.uuid().safeParse(id).success) return { error: 'Invalid examination ID.' };
+  if (typeof confirmation !== 'string' || confirmation.length > 205) {
+    return { error: 'Invalid deletion confirmation.' };
+  }
+
+  const { error } = await createAdminClient().rpc('delete_examination', {
+    p_admin_id: adminId,
+    p_confirmation: confirmation.trim(),
+    p_examination_id: id,
+  });
+
+  if (error) {
+    if (error.code === 'P0002') return { error: 'Examination not found.' };
+    if (error.code === '22023') {
+      return { error: 'The confirmation text does not match the examination name and year.' };
+    }
+    if (error.code === '42501') return { error: 'Authentication required.' };
+    console.error('[Examination Delete Error]', { code: error.code });
+    return { error: 'Failed to delete examination. No data was removed.' };
+  }
+
+  refreshExamination(id);
+  redirect('/admin/examinations?deleted=1');
+}
