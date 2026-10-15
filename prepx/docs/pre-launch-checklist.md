@@ -1,6 +1,6 @@
 # PrepX production pre-launch checklist
 
-Checklist date: 2026-10-13
+Checklist date: 2026-10-15
 Release candidate: `0.1.0`  
 Current recommendation: **GO ONLY AFTER BLOCKERS ARE RESOLVED**
 
@@ -19,7 +19,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 ## Current blocking gates
 
-- [ ] **BLOCKED — Required:** Complete a Vercel Preview deployment with staging-only Supabase and Upstash resources, then run the post-deployment checklist. The repository has no `.vercel/project.json`, no local Vercel authentication, and no documented Preview URL, so no deployment was created during the 2026-10-13 verification. **Owner:** Technical release owner. **Needed:** Vercel login/team/project selection, separately scoped Preview resources, Preview URL, and dated test record.
+- [ ] **BLOCKED — Required:** Complete a Vercel Preview deployment with the dedicated staging Supabase project and the approved shared-free-tier Upstash configuration, then run the post-deployment checklist. The repository has no `.vercel/project.json`, no local Vercel authentication, and no documented Preview URL. **Owner:** Technical release owner. **Needed:** Vercel login/team/project selection, separately scoped Preview variables, Preview URL, and dated test record. The shared Upstash database must use the distinct Preview and Production HMAC secrets generated on 2026-10-15.
 - [ ] **BLOCKED — Required:** Run the real integration suite against the isolated local Docker Supabase stack. `.env.test` is now present, but the Docker daemon was unavailable on 2026-10-13. **Owner:** Developer. **Needed:** start Docker, run `npm run test:integration:setup`, then `npm run test:integration`; do not substitute a hosted database.
 - [ ] **BLOCKED — Required:** Run k6 smoke and normal-load profiles against an explicitly approved staging/performance target with fictional published data. **Owner:** Performance tester. **Needed:** native k6, private `.env.load`, target approval, saved summaries.
 - [ ] **BLOCKED — Required:** Enable/obtain a production Supabase backup and perform/document a safe restore rehearsal. The read-only CLI inventory on 2026-10-13 returned no available backups and PITR disabled; restoring Production is not an acceptable rehearsal. **Owner:** Supabase project owner. **Needed:** plan-appropriate backup/export, isolated recovery project, approved rehearsal window, and restoration record.
@@ -77,7 +77,8 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 ## 3. Authentication and authorization
 
-- [ ] **MANUAL CHECK REQUIRED — Required:** Create named production administrators directly in Supabase Auth using unique accounts, strong passwords/MFA where available, and matching approved `admin_profiles`; disable public signup. **Owner:** Supabase owner.
+- [x] **VERIFIED — Required:** The named administrator exists independently in staging and Production Supabase Auth with matching `admin_profiles`. Real password login, RLS-backed own-profile access, and global `signup_disabled` rejection passed in both projects on 2026-10-15.
+- [ ] **MANUAL CHECK REQUIRED — Required:** Before Production, rotate the existing administrator credential to a strong password stored in the approved password manager and enroll MFA when the supported admin flow is approved. All generated/transitional password fields were removed from the ignored infrastructure file on 2026-10-15. **Owner:** Named administrator/Supabase owner.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Verify the Supabase production Site URL and any intentionally required redirect allowlist entries. Current password login has no OAuth callback. **Owner:** Supabase owner.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Confirm secure session cookies, refresh, expiry, revocation, login, and logout on the final HTTPS domain. **Owner:** QA/security owner.
 - [x] **VERIFIED — Recommended:** The configured Supabase Auth endpoint was reachable on 2026-10-13 and safely rejected one fictional credential probe without exposing provider details. This is connectivity evidence only; it does not verify the final domain, redirect allowlist, real admin authorization, or session-cookie attributes.
@@ -111,17 +112,18 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 - [ ] **BLOCKED — Required:** Connect Vercel to `https://github.com/Akeel-Rishan/PrepX-Website.git`, the controlled production branch, and the intended team/project. No local Vercel authentication or `.vercel/project.json` was available on 2026-10-13. **Owner:** Vercel owner.
 - [ ] **BLOCKED — Required:** Configure and verify canonical production domain, DNS ownership, HTTPS, redirects, and certificate issuance. **Owner:** Domain/Vercel owner.
-- [ ] **MANUAL CHECK REQUIRED — Required:** Confirm Development, Preview, and Production use separately scoped variables/resources. **Owner:** Vercel owner.
+- [ ] **MANUAL CHECK REQUIRED — Required:** Confirm Development, Preview, and Production use separately scoped variables. Preview and Production use separate Supabase projects. By explicit owner decision on 2026-10-15, they share the one available free Upstash database but use different HMAC secrets; do not run staging load/abuse tests while Production is serving traffic. **Owner:** Vercel owner.
 - [x] **VERIFIED — Required:** `.env.example` contains non-secret placeholder values only; private environment/load/test/Vercel files are ignored and deployment audit passes.
 - [x] **VERIFIED — Required:** Public variables are limited to Supabase public URL/publishable key and application name/URL; secret/provider/HMAC/AI variables are server-only.
-- [x] **VERIFIED — Required:** Local configured Supabase URL matches the currently linked project without printing identifiers, and linked migrations match. This does not prove the Vercel Production scope is correct.
+- [x] **VERIFIED — Required:** Separate healthy staging (`Prepx website`) and Production (`PrepX Production`) Supabase projects exist in the UGSM organization and Tokyo region. Production migrations `001`–`005` were applied and confirmed on 2026-10-15.
+- [x] **VERIFIED — Required:** Global public signup is disabled on both hosted Supabase projects while the email/password provider remains enabled for existing administrators. A minimal hosted hardening configuration preserves unrelated MFA, email, storage, and pooler settings.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Compare the Vercel Production Supabase project reference and keys with the approved production project. **Owner:** Supabase/Vercel owners.
-- [ ] **MANUAL CHECK REQUIRED — Required:** Configure production Upstash URL/token and a distinct 32+ character `RATE_LIMIT_HASH_SECRET`; never reuse Preview values. **Owner:** Vercel owner.
+- [ ] **MANUAL CHECK REQUIRED — Required:** Configure the approved shared Upstash URL/token in both Vercel scopes and use the distinct private Preview and Production `RATE_LIMIT_HASH_SECRET` values generated on 2026-10-15. Both configurations returned `PONG`; the secrets are 64 and 96 characters and were not recorded in this checklist. **Owner:** Vercel owner.
 - [x] **VERIFIED — Required:** Missing/placeholder/insecure production variables, memory limiting, fail-open mode, and invalid Vercel proxy/HTTPS overrides fail production validation without printing values.
 - [x] **VERIFIED — Required:** Runtime persistence uses Supabase/Upstash only; there are no workers, cron jobs, WebSockets, long-running processes, or local-filesystem persistence requirements.
 - [x] **VERIFIED — Required:** Repository settings specify Root Directory `prepx`, Next.js defaults, Node `22.x`, npm `10.9.4`, `npm ci`, `npm run build`, and default output; no `vercel.json` is necessary.
 - [x] **VERIFIED — Required:** Production build completes with 20 expected app/API routes and middleware.
-- [ ] **MANUAL CHECK REQUIRED — Required:** Apply/confirm migrations before enabling Production traffic and record the production migration output. **Owner:** Supabase owner.
+- [x] **VERIFIED — Required:** Production migrations `001`–`005` were applied without seeds and the remote migration list exactly matched on 2026-10-15. Reconfirm before enabling traffic if any migration is added. **Owner:** Supabase owner.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Inspect Preview and Production build/function logs for secrets, student identifiers, provider bodies, and unexpected errors. **Owner:** Technical release owner.
 - [ ] **BLOCKED — Required:** Establish a known-good Vercel deployment and assign an operator who understands Instant Rollback and its database/environment limitations. **Owner:** Vercel/release owner.
 

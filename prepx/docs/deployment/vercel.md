@@ -58,6 +58,8 @@ Vercel provides `VERCEL`, `VERCEL_ENV`, and deployment URL variables. Do not add
 
 Use separate Supabase projects and Upstash databases for Preview and Production whenever possible. At minimum, use separate HMAC secrets so identifiers cannot be correlated across environments.
 
+Current cost exception (approved 2026-10-15): PrepX uses separate staging and Production Supabase projects but shares one free Upstash database. Preview and Production have distinct private `RATE_LIMIT_HASH_SECRET` values, so their identifier/IP limiter keys do not overlap. Keep the secrets in their respective Vercel scopes, monitor the combined free quota, and never run staging load or abuse tests while Production is serving traffic. Move Production to a separate Upstash database when budget permits.
+
 No analytics, email, object-storage, payment, or separate health-check credential is read by the application. Supabase Auth email/SMTP settings, if enabled later, are configured in the Supabase dashboard rather than as PrepX/Vercel variables.
 
 ### Development and test-only variables

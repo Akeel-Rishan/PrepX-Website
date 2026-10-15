@@ -1,0 +1,15 @@
+# Minimal hosted-project hardening configuration.
+# Keep this file intentionally narrow: pushing the main local-development
+# config would overwrite unrelated hosted Auth and platform settings.
+project_id = "prepx-auth-closed"
+
+[auth]
+enable_signup = false
+enable_anonymous_sign_ins = false
+
+[auth.email]
+# Email/password login must remain enabled; global signup stays disabled.
+enable_signup = true
+
+[auth.sms]
+enable_signup = false
