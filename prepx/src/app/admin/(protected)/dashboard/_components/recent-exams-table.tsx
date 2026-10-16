@@ -62,64 +62,102 @@ export function RecentExamsTable({ examinations, year }: RecentExamsTableProps):
           </Link>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
-            <caption className="sr-only">
-              Five most recently created examinations for {year}
-            </caption>
-            <thead className="bg-slate-50/70 dark:bg-slate-800/50">
-              <tr className="border-b border-slate-100 dark:border-slate-800">
-                {['Examination', 'Status', 'Published', 'Action'].map((heading) => (
-                  <th
-                    key={heading}
-                    scope="col"
-                    className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 ${heading === 'Action' ? 'text-right' : 'text-left'}`}
-                  >
-                    {heading}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {examinations.map((exam) => (
-                <tr
-                  key={exam.id}
-                  className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/40"
-                >
-                  <td className="px-5 py-4">
-                    <div className="min-w-32 wrap-break-word font-semibold text-slate-900 dark:text-slate-100">
+        <>
+          <div className="divide-y divide-slate-100 md:hidden dark:divide-slate-800">
+            {examinations.map((exam) => (
+              <article key={exam.id} className="space-y-3 px-4 py-4 min-[380px]:px-5">
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="wrap-break-word text-sm font-semibold text-slate-900 dark:text-slate-100">
                       {exam.name}
-                    </div>
-                    <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       {exam.organization_name}
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <Badge variant={getExamStatusBadgeVariant(exam.status)}>
-                      {getExamStatusLabel(exam.status)}
-                    </Badge>
-                  </td>
-                  <td className="whitespace-nowrap px-5 py-4 text-xs text-slate-500 dark:text-slate-400">
-                    {exam.publication_date ? (
-                      formatDate(exam.publication_date)
-                    ) : (
-                      <span className="text-slate-300 dark:text-slate-600">Not published</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    <Link
-                      href={`/admin/examinations/${exam.id}`}
-                      aria-label={`Manage ${exam.name} (${exam.year})`}
-                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-300"
+                    </p>
+                  </div>
+                  <Badge variant={getExamStatusBadgeVariant(exam.status)}>
+                    {getExamStatusLabel(exam.status)}
+                  </Badge>
+                </div>
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                      Published
+                    </p>
+                    <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+                      {exam.publication_date ? formatDate(exam.publication_date) : 'Not published'}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/admin/examinations/${exam.id}`}
+                    aria-label={`Manage ${exam.name} (${exam.year})`}
+                    className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                  >
+                    Manage <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full min-w-[640px] text-sm">
+              <caption className="sr-only">
+                Five most recently created examinations for {year}
+              </caption>
+              <thead className="bg-slate-50/70 dark:bg-slate-800/50">
+                <tr className="border-b border-slate-100 dark:border-slate-800">
+                  {['Examination', 'Status', 'Published', 'Action'].map((heading) => (
+                    <th
+                      key={heading}
+                      scope="col"
+                      className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 ${heading === 'Action' ? 'text-right' : 'text-left'}`}
                     >
-                      Manage <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
-                    </Link>
-                  </td>
+                      {heading}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {examinations.map((exam) => (
+                  <tr
+                    key={exam.id}
+                    className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/40"
+                  >
+                    <td className="px-5 py-4">
+                      <div className="min-w-32 wrap-break-word font-semibold text-slate-900 dark:text-slate-100">
+                        {exam.name}
+                      </div>
+                      <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        {exam.organization_name}
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <Badge variant={getExamStatusBadgeVariant(exam.status)}>
+                        {getExamStatusLabel(exam.status)}
+                      </Badge>
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4 text-xs text-slate-500 dark:text-slate-400">
+                      {exam.publication_date ? (
+                        formatDate(exam.publication_date)
+                      ) : (
+                        <span className="text-slate-300 dark:text-slate-600">Not published</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <Link
+                        href={`/admin/examinations/${exam.id}`}
+                        aria-label={`Manage ${exam.name} (${exam.year})`}
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-300"
+                      >
+                        Manage <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </section>
   );

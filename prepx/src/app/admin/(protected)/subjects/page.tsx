@@ -43,8 +43,8 @@ export default async function SubjectsPage({
       : examinations;
   return (
     <div className="mx-auto max-w-4xl space-y-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
           <h2 className="text-2xl font-bold text-gray-900">Subjects</h2>
           <p className="mt-1 text-sm text-gray-500">
             {selectedExam
@@ -62,7 +62,7 @@ export default async function SubjectsPage({
       </div>
       <ExamSelectorBar examinations={options} selectedExamId={examId} basePath="/admin/subjects" />
       {!examId && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white p-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white px-5 py-12 text-center sm:p-16">
           <BookOpen aria-hidden="true" className="mb-3 h-10 w-10 text-gray-300" />
           <p className="text-sm text-gray-400">
             Select an examination above to manage its subjects.

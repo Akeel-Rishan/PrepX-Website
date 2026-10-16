@@ -128,7 +128,15 @@ export function PreviewTable({
         </label>
       </div>
 
-      <div className="overflow-x-auto">
+      <p className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-xs text-gray-500 sm:hidden">
+        Swipe sideways to inspect every imported column and issue.
+      </p>
+      <div
+        className="overflow-x-auto focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+        role="region"
+        aria-label="Import preview table"
+        tabIndex={0}
+      >
         <table className="min-w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">

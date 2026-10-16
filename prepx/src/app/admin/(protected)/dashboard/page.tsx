@@ -24,15 +24,15 @@ export default async function DashboardPage({
   const pendingExaminations = stats.draftExaminations + stats.readyExaminations;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-7">
-      <section className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0b172a] px-6 py-7 text-white shadow-(--app-shadow) sm:px-8 sm:py-9">
+    <div className="mx-auto max-w-7xl space-y-5 sm:space-y-7">
+      <section className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0b172a] px-4 py-6 text-white shadow-(--app-shadow) min-[380px]:px-5 sm:px-8 sm:py-9">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-blue-300">
               <Activity aria-hidden="true" className="h-4 w-4" />
               <p className="text-sm font-medium">Year overview</p>
             </div>
-            <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+            <h1 className="mt-3 text-xl font-bold tracking-tight min-[380px]:text-2xl sm:text-3xl">
               {selectedYear} examination overview
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">

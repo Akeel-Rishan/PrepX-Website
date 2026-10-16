@@ -27,7 +27,57 @@ export function StudentsTable({ students }: { students: StudentWithExam[] }): Re
     );
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="overflow-x-auto">
+      <div className="divide-y divide-gray-100 md:hidden">
+        {students.map((student) => (
+          <article key={student.id} className="space-y-4 p-4 min-[380px]:p-5">
+            <div className="min-w-0">
+              <h3 className="wrap-break-word font-semibold text-gray-900">{student.full_name}</h3>
+              <p className="mt-1 font-mono text-xs text-gray-500">{student.index_number}</p>
+            </div>
+            <dl className="grid gap-3 rounded-lg bg-gray-50 p-3 min-[380px]:grid-cols-2">
+              <div className="min-w-0">
+                <dt className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  School
+                </dt>
+                <dd className="mt-1 wrap-break-word text-sm text-gray-700">
+                  {student.school_name}
+                </dd>
+                {student.examination_center && (
+                  <dd className="mt-0.5 wrap-break-word text-xs text-gray-500">
+                    {student.examination_center}
+                  </dd>
+                )}
+              </div>
+              <div className="min-w-0">
+                <dt className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  Examination
+                </dt>
+                <dd className="mt-1 wrap-break-word text-sm text-gray-700">
+                  {student.examination
+                    ? `${student.examination.name} ${student.examination.year}`
+                    : 'Not provided'}
+                </dd>
+              </div>
+              <div className="min-w-0 min-[380px]:col-span-2">
+                <dt className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  NIC number
+                </dt>
+                <dd className="mt-1 font-mono text-xs text-gray-600">
+                  {student.nic_number ? maskNIC(student.nic_number) : 'Not provided'}
+                </dd>
+              </div>
+            </dl>
+            <Link
+              href={'/admin/students/' + student.id}
+              aria-label={'Manage ' + student.full_name}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-gray-300 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            >
+              Manage student
+            </Link>
+          </article>
+        ))}
+      </div>
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <caption className="sr-only">Students and their examination details</caption>
           <thead className="border-b border-gray-200 bg-gray-50">

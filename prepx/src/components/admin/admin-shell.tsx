@@ -65,7 +65,7 @@ export function AdminShell({ userEmail, children }: AdminShellProps): React.JSX.
   }
 
   return (
-    <div className="min-h-dvh bg-(--app-canvas) transition-colors">
+    <div className="min-h-dvh overflow-x-clip bg-(--app-canvas) transition-colors">
       <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-68 lg:flex-col">
         <Sidebar userEmail={userEmail} onLogout={handleLogout} isLoggingOut={isLoggingOut} />
       </div>
@@ -84,7 +84,7 @@ export function AdminShell({ userEmail, children }: AdminShellProps): React.JSX.
           isLoggingOut={isLoggingOut}
           drawerOpen={drawerOpen}
         />
-        <main className="min-w-0 flex-1 wrap-anywhere p-4 sm:p-6 xl:p-8">
+        <main className="min-w-0 flex-1 wrap-anywhere px-3 py-4 min-[380px]:px-4 sm:p-6 xl:p-8">
           {logoutError && (
             <Alert variant="error" className="mb-6" onClose={() => setLogoutError(undefined)}>
               {logoutError}
