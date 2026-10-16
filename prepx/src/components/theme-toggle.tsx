@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,14 +13,6 @@ export function ThemeToggle({
   className,
   appearance = 'default',
 }: ThemeToggleProps): React.JSX.Element {
-  const [mounted, setMounted] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-    setMounted(true);
-  }, []);
-
   function toggleTheme(): void {
     const nextDark = !document.documentElement.classList.contains('dark');
     document.documentElement.classList.toggle('dark', nextDark);
@@ -31,10 +22,9 @@ export function ThemeToggle({
     } catch {
       // The visual theme still works when browser storage is unavailable.
     }
-    setIsDark(nextDark);
   }
 
-  const label = mounted && isDark ? 'Switch to light mode' : 'Switch to dark mode';
+  const label = 'Toggle color theme';
 
   return (
     <button
@@ -50,11 +40,8 @@ export function ThemeToggle({
         className
       )}
     >
-      {mounted && isDark ? (
-        <Sun aria-hidden="true" className="h-4 w-4" />
-      ) : (
-        <Moon aria-hidden="true" className="h-4 w-4" />
-      )}
+      <Moon aria-hidden="true" className="h-4 w-4 dark:hidden" />
+      <Sun aria-hidden="true" className="hidden h-4 w-4 dark:block" />
     </button>
   );
 }

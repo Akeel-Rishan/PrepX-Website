@@ -27,9 +27,9 @@ function load(file, overrides = {}) {
 }
 
 const { publicResultSchema } = load('src/lib/validations/public-result.ts');
-function render(result, ready = true) {
+function render(result) {
   const Page = load('src/app/(public)/results/page.tsx', {
-    '@/components/public/result-provider': { usePublicResult: () => ({ result, ready }) },
+    '@/components/public/result-provider': { usePublicResult: () => ({ result }) },
   }).default;
   return renderToStaticMarkup(React.createElement(Page));
 }
@@ -58,10 +58,7 @@ for (const grade of [null, undefined]) {
 }
 assert(render({ ...valid, grades: [] }).includes('Subject grades are not available'));
 assert(render(null).includes('Search for your result'));
-assert(render(null, false).includes('Loading result'));
 assert(!render(null).includes('Print / Save as PDF'));
-assert(!render(null, false).includes('Print / Save as PDF'));
-assert(render(null, false).includes('JavaScript is needed to view your result'));
 for (const maskedNic of ['200312345678', '991234567V', '********12345']) {
   assert.equal(publicResultSchema.safeParse({ ...fixture, maskedNic }).success, false);
 }
@@ -81,4 +78,4 @@ for (const [route, title] of [['not-found', 'Result Not Found'], ['not-published
   assert(markup.includes(title));
   assert(!markup.includes('Print / Save as PDF'));
 }
-console.log('PASS: result contract, all grades, hidden overall status, optional center, masked NIC, missing/empty/malformed results, sensitive-field exclusion, accessible table, loading and feedback routes.');
+console.log('PASS: result contract, all grades, hidden overall status, optional center, masked NIC, missing/empty/malformed results, sensitive-field exclusion, accessible table, and feedback routes.');
