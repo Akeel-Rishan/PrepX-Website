@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
+import { createHmac } from 'node:crypto';
 import { buildPublicStudentResult } from '@/lib/public-result';
+import { coalescePublicResultLookup } from '@/lib/public-result-inflight';
 import { checkResultSearchRateLimit } from '@/lib/rate-limit';
 import { readSearchBody } from '@/lib/rate-limit/request-body';
 import { createAdminClient } from '@/lib/supabase/server';
@@ -18,6 +20,14 @@ const errorMessages: Record<ErrorCode, string> = {
   NOT_FOUND: 'The provided information does not match an available result.',
   SERVER_ERROR: 'Something went wrong. Please try again.',
 };
+
+function lookupKey(examinationId: string, identifier: string): string {
+  const secret = process.env.RATE_LIMIT_HASH_SECRET ?? 'prepx-local-result-lookup-v1';
+  const digest = createHmac('sha256', secret)
+    .update(`${examinationId}\0${identifier}`)
+    .digest('hex');
+  return `result:${digest}`;
+}
 
 function jsonResponse(
   body: unknown,
@@ -90,63 +100,79 @@ export async function POST(request: Request): Promise<NextResponse> {
   const { examinationId, indexNumber, nicNumber } = validation.data;
 
   try {
-    const admin = createAdminClient();
-    const { data: examination, error: examinationError } = await admin
-      .from('examinations')
-      .select('id, name, year, status')
-      .eq('id', examinationId)
-      .maybeSingle();
+    const { examination, examinationError } = await coalescePublicResultLookup(
+      lookupKey(examinationId, indexNumber ?? nicNumber!),
+      async () => {
+        const admin = createAdminClient();
+        let searchQuery = admin
+          .from('examinations')
+          .select(
+            `
+              id,
+              name,
+              year,
+              status,
+              subjects!subjects_examination_id_fkey (
+                id,
+                subject_name,
+                subject_code,
+                display_order,
+                required
+              ),
+              students!students_examination_id_fkey (
+                id,
+                full_name,
+                index_number,
+                nic_number,
+                school_name,
+                examination_center,
+                student_results!student_results_student_id_fkey (
+                  subject_id,
+                  grade
+                )
+              )
+            `
+          )
+          .eq('id', examinationId)
+          .eq('status', 'PUBLISHED')
+          .eq('subjects.active', true)
+          .order('display_order', { referencedTable: 'subjects', ascending: true });
+
+        searchQuery = indexNumber
+          ? searchQuery.eq('students.index_number', indexNumber)
+          : searchQuery.eq('students.nic_number', nicNumber!);
+
+        // PostgREST embeds the matching student, grades, and active subjects in one
+        // database request. This preserves publication gating while avoiding the
+        // three sequential network round trips used by the previous implementation.
+        const { data, error } = await searchQuery.maybeSingle();
+        return { examination: data, examinationError: error };
+      }
+    );
 
     if (examinationError) {
       console.error('[Public Result Search]', {
-        stage: 'examination',
+        stage: 'result',
         code: examinationError.code,
       });
       return limitedError('SERVER_ERROR', 500);
     }
-    if (!examination || examination.status !== 'PUBLISHED') {
+    if (!examination) {
       return limitedError('NOT_PUBLISHED', 403);
     }
 
-    let studentQuery = admin
-      .from('students')
-      .select('id, full_name, index_number, nic_number, school_name, examination_center')
-      .eq('examination_id', examination.id);
-    studentQuery = indexNumber
-      ? studentQuery.eq('index_number', indexNumber)
-      : studentQuery.eq('nic_number', nicNumber!);
-
-    const { data: student, error: studentError } = await studentQuery.maybeSingle();
-    if (studentError) {
-      console.error('[Public Result Search]', { stage: 'student', code: studentError.code });
-      return limitedError('SERVER_ERROR', 500);
-    }
+    const [student, duplicateStudent] = examination.students;
     if (!student) return limitedError('NOT_FOUND', 404);
-
-    const [subjectsResult, gradesResult] = await Promise.all([
-      admin
-        .from('subjects')
-        .select('id, subject_name, subject_code, display_order, required')
-        .eq('examination_id', examination.id)
-        .eq('active', true)
-        .order('display_order', { ascending: true }),
-      admin.from('student_results').select('subject_id, grade').eq('student_id', student.id),
-    ]);
-
-    if (subjectsResult.error || gradesResult.error) {
-      console.error('[Public Result Search]', {
-        stage: 'result',
-        subjects: subjectsResult.error?.code,
-        grades: gradesResult.error?.code,
-      });
+    if (duplicateStudent) {
+      console.error('[Public Result Search]', { stage: 'ambiguous-student' });
       return limitedError('SERVER_ERROR', 500);
     }
 
     const publicResult = buildPublicStudentResult({
       examination,
       student,
-      subjects: subjectsResult.data ?? [],
-      results: gradesResult.data ?? [],
+      subjects: examination.subjects,
+      results: student.student_results,
     });
     return jsonResponse(publicResult, 200, rateLimit.headers);
   } catch {

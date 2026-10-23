@@ -16,6 +16,7 @@ interface ExaminationsPageProps {
     sort?: string | string[];
     direction?: string | string[];
     deleted?: string | string[];
+    updated?: string | string[];
   }>;
 }
 
@@ -27,6 +28,7 @@ export default async function ExaminationsPage({
   const sort = normalizeExamSort(params.sort);
   const direction = params.direction === 'asc' ? 'asc' : 'desc';
   const deletionSucceeded = params.deleted === '1';
+  const updatedSucceeded = params.updated === '1';
   const examinations = sortExaminations(
     await getExaminationsWithCounts(activeStatus ? { status: activeStatus } : undefined),
     sort,
@@ -49,6 +51,9 @@ export default async function ExaminationsPage({
       </div>
       {deletionSucceeded && (
         <Alert variant="success">Examination and all associated data were deleted.</Alert>
+      )}
+      {updatedSucceeded && (
+        <Alert variant="success">Examination updated successfully.</Alert>
       )}
       <StatusFilter currentStatus={activeStatus} />
       <ExaminationsTable

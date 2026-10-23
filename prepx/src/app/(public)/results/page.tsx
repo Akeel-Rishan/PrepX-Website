@@ -9,11 +9,13 @@ import { PrintActions } from './_components/print-actions';
 import { PrintHeader } from './_components/print-header';
 import { GradesTable } from './_components/result-details';
 
+const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME?.trim() || 'PrepX';
+
 export default function ResultsPage(): React.JSX.Element {
   const { result } = usePublicResult();
 
   useEffect(() => {
-    document.title = 'Examination Result | PrepX';
+    document.title = `Examination Result | ${APP_NAME}`;
   }, []);
 
   useEffect(() => {

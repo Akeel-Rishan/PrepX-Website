@@ -24,11 +24,11 @@ async function main() {
     for(const overallStatus of ['PASSED','unknown',null]) assert.equal(publicResultSchema.safeParse({...response.body,overallStatus}).success,false);
   }
   for(const input of [{indexNumber:' fake001 '},{nicNumber:nic},{nicNumber:' 000000000v '}]) {
-    const h = fake({nic:input.nicNumber?.trim().toUpperCase() ?? nic});
+    const h = fake({index: input.indexNumber?.trim().toUpperCase(), nic:input.nicNumber?.trim().toUpperCase() ?? nic});
     const result = await search(h,{examinationId:valid.examinationId,...input});
     assert.equal(result.status,200);
-    const field = input.indexNumber ? 'index_number' : 'nic_number';
-    assert.equal(h.calls.find(c=>c.table==='students').filters[field],(input.indexNumber ?? input.nicNumber).trim().toUpperCase());
+    const field = input.indexNumber ? 'students.index_number' : 'students.nic_number';
+    assert.equal(h.calls[0].filters[field],(input.indexNumber ?? input.nicNumber).trim().toUpperCase());
     if(input.nicNumber) assert(!JSON.stringify(result.body).includes(input.nicNumber.trim().toUpperCase()));
   }
   for(const status of ['DRAFT','READY','ARCHIVED']) {

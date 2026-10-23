@@ -67,9 +67,9 @@ export function GradesTable({ grades }: { grades: GradeEntry[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-            {grades.map((entry, index) => (
+            {grades.map((entry) => (
               <tr
-                key={index}
+                key={entry.subjectName}
                 className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/50"
               >
                 <th
