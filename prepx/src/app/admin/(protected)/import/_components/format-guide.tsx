@@ -137,9 +137,7 @@ export function FormatGuide({ subjects }: FormatGuideProps): React.JSX.Element {
               key={grade}
             >
               {grade}{' '}
-              <span className="font-sans font-normal text-gray-500">
-                {GRADE_LABELS[grade]}
-              </span>
+              <span className="font-sans font-normal text-gray-500">{GRADE_LABELS[grade]}</span>
             </span>
           ))}
         </div>
@@ -156,7 +154,12 @@ export function FormatGuide({ subjects }: FormatGuideProps): React.JSX.Element {
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
               Example row
             </p>
-            <div className="overflow-x-auto">
+            <div
+              className="overflow-x-auto focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500"
+              role="region"
+              aria-label="Example import row"
+              tabIndex={0}
+            >
               <table className="w-full border-collapse text-xs">
                 <thead>
                   <tr className="bg-gray-50">

@@ -88,19 +88,19 @@ export async function saveGradesAction(
     }
   }
 
-  let deleted = 0;
-  for (const item of toDelete) {
+  if (toDelete.length) {
+    const orConditions = toDelete
+      .map((item) => `and(student_id.eq.${item.studentId},subject_id.eq.${item.subjectId})`)
+      .join(',');
     const { error } = await adminClient
       .from('student_results')
       .delete()
-      .eq('student_id', item.studentId)
-      .eq('subject_id', item.subjectId);
-    if (error) console.error('[Grade Delete Error]', { code: error.code });
-    else deleted += 1;
-  }
-  if (deleted !== toDelete.length) {
-    refreshGradeViews();
-    return { error: 'Some grades were saved, but one or more removals failed. Refresh and try again.' };
+      .or(orConditions);
+    if (error) {
+      console.error('[Grade Delete Error]', { code: error.code });
+      refreshGradeViews();
+      return { error: 'Some grades were saved, but one or more removals failed. Refresh and try again.' };
+    }
   }
 
   try {

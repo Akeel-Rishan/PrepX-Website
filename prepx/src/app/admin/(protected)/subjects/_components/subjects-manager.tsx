@@ -124,7 +124,15 @@ export function SubjectsManager({
           className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900"
           aria-busy={busy}
         >
-          <div className="overflow-x-auto">
+          <p className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-xs text-gray-500 sm:hidden dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
+            Swipe sideways to manage subject order and actions.
+          </p>
+          <div
+            className="overflow-x-auto focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+            role="region"
+            aria-label="Subject management table"
+            tabIndex={0}
+          >
             <table className="w-full min-w-[580px] text-sm">
               <caption className="sr-only">Subjects in display order</caption>
               <thead className="border-b border-gray-100 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">

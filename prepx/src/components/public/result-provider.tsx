@@ -15,7 +15,6 @@ import type { PublicStudentResult } from '@/types';
 
 interface ResultContextValue {
   result: PublicStudentResult | null;
-  ready: boolean;
   acceptResult: (value: unknown) => boolean;
   clearResult: () => void;
 }
@@ -25,7 +24,6 @@ const ResultContext = createContext<ResultContextValue | null>(null);
 /** A tab-local handoff across public client navigation. Nothing is persisted. */
 export function ResultProvider({ children }: { children: ReactNode }) {
   const [result, setResult] = useState<PublicStudentResult | null>(null);
-  const [ready, setReady] = useState(false);
   const pathname = usePathname();
   const clearResult = useCallback(() => setResult(null), []);
   const acceptResult = useCallback((value: unknown) => {
@@ -46,7 +44,6 @@ export function ResultProvider({ children }: { children: ReactNode }) {
     } catch {
       /* Storage may be disabled. */
     }
-    setReady(true);
     window.addEventListener('pagehide', clearResult);
     return () => window.removeEventListener('pagehide', clearResult);
   }, [clearResult]);
@@ -56,8 +53,8 @@ export function ResultProvider({ children }: { children: ReactNode }) {
   }, [pathname, clearResult]);
 
   const value = useMemo(
-    () => ({ result, ready, acceptResult, clearResult }),
-    [result, ready, acceptResult, clearResult]
+    () => ({ result, acceptResult, clearResult }),
+    [result, acceptResult, clearResult]
   );
   return <ResultContext.Provider value={value}>{children}</ResultContext.Provider>;
 }

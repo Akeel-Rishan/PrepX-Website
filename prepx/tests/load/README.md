@@ -93,4 +93,4 @@ Each npm run writes ignored `tests/load/results/summary.json` and numeric aggreg
 
 ## Verification for this change
 
-Offline validation passed without HTTP traffic. k6 is not installed in this workspace, so native inspect and actual smoke/load execution remain pending. Install k6, provision the fictional published fixture on an approved target, configure `.env.load`, validate, and run smoke before considering a larger run. No real stress test was executed and no production service was contacted.
+Offline validation and native `k6 inspect` pass. On 2026-11-01, the guarded smoke profile ran against the optimized localhost build using the configured confirmed-fictional fixture: 3/3 searches succeeded, all 12 checks passed, zero errors or throttling occurred, and search p95/p99 were approximately 346/347 ms. A deployed staging smoke/normal baseline and any approved stress test remain pending; no production load test was executed.

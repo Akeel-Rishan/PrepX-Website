@@ -2,7 +2,7 @@
 const { createHmac } = require('node:crypto');
 const { load, harness, search, valid } = require('./test-result-search.cjs');
 const { MemoryRateLimitStore } = load('src/lib/rate-limit/memory-store.ts');
-const { UpstashRateLimitStore, RATE_LIMIT_SCRIPT } = load('src/lib/rate-limit/upstash-store.ts');
+const { UpstashRateLimitStore, RATE_LIMIT_SCRIPT, RATE_LIMIT_PAIR_SCRIPT } = load('src/lib/rate-limit/upstash-store.ts');
 const { readRateLimitConfig } = load('src/lib/rate-limit/config.ts');
 const { createResultSearchLimiter } = load('src/lib/rate-limit/result-search.ts');
 const { identifierRateLimitKey, ipRateLimitKey, normalizeClientIp, resolveClientIp } = load('src/lib/rate-limit/keys.ts');
@@ -131,7 +131,7 @@ async function main() {
   assert.equal((await search(instance1, valid, { 'x-real-ip': ip })).status, 200);
   assert.equal((await search(instance2, { ...valid, indexNumber: ' ol2026001 ' }, { 'x-real-ip': '192.0.2.11' })).status, 200);
   assert.equal((await search(instance1, valid, { 'x-real-ip': '192.0.2.12' })).status, 429);
-  assert.equal((await search(instance1, { ...valid, indexNumber: 'OTHER' }, { 'x-real-ip': '192.0.2.12' })).status, 200);
+  assert.equal((await search(instance1, { ...valid, indexNumber: 'OTHER' }, { 'x-real-ip': '192.0.2.12' })).status, 404);
   const ipv6 = route({}, { ipLimit: 1, proxy: 'forwarded' });
   assert.equal((await search(ipv6, {}, { 'x-real-ip': '2001:0db8:0:0:0:0:0:1' })).status, 400);
   assert.equal((await search(ipv6, valid, { 'x-real-ip': '2001:DB8::1' })).status, 429);
@@ -155,12 +155,45 @@ async function main() {
   }
   const deniedStore = new UpstashRateLimitStore('https://test.upstash.io', 'PRIVATE_TOKEN', 100, async () => Response.json({ result: [3, 1700000999] }));
   assert.equal((await deniedStore.check(input)).allowed, false);
+  const pairCalls = [];
+  const pairStore = new UpstashRateLimitStore('https://test.upstash.io', 'PRIVATE_TOKEN', 100, async (url, options) => {
+    pairCalls.push({ url, options });
+    return Response.json({ result: [2, 1700000999, 1, 1700000999] });
+  });
+  assert.deepEqual(await pairStore.checkPair(
+    { key: 'ip-digest', limit: 2, windowSeconds: 5 },
+    { key: nicKey, limit: 3, windowSeconds: 10 },
+  ), [
+    { allowed: true, limit: 2, remaining: 0, resetAt: 1700000999 },
+    { allowed: true, limit: 3, remaining: 2, resetAt: 1700000999 },
+  ]);
+  assert.deepEqual(JSON.parse(pairCalls[0].options.body), [
+    'EVAL', RATE_LIMIT_PAIR_SCRIPT, 2, 'ip-digest', nicKey, 2, 5, 3, 10,
+  ]);
+  const pairBlocked = new UpstashRateLimitStore('https://test.upstash.io', 'PRIVATE_TOKEN', 100, async () => Response.json({ result: [3, 1700000999, 0, 0] }));
+  assert.deepEqual(await pairBlocked.checkPair(
+    { key: 'ip-digest', limit: 2, windowSeconds: 5 },
+    { key: nicKey, limit: 3, windowSeconds: 10 },
+  ), [{ allowed: false, limit: 2, remaining: 0, resetAt: 1700000999 }, null]);
+  const invalidPair = new UpstashRateLimitStore('https://test.upstash.io', 'PRIVATE_TOKEN', 100, async () => Response.json({ result: [3, 1700000999, 1, 1700000999] }));
+  await assert.rejects(() => invalidPair.checkPair(
+    { key: 'ip-digest', limit: 2, windowSeconds: 5 },
+    { key: nicKey, limit: 3, windowSeconds: 10 },
+  ), /Rate-limit store unavailable/);
   let attempts = 0;
   const unavailable = new UpstashRateLimitStore('https://test.upstash.io', 'PRIVATE_TOKEN', 100, async () => { attempts++; return new Response('PRIVATE_PROVIDER_ERROR', { status: 503 }); });
   await assert.rejects(() => unavailable.check(input)); assert.equal(attempts, 1);
   const timeout = new UpstashRateLimitStore('https://test.upstash.io', 'PRIVATE_TOKEN', 5, (_url, options) => new Promise((_resolve, reject) => options.signal.addEventListener('abort', () => reject(new Error('PRIVATE_TIMEOUT')))));
   await assert.rejects(() => timeout.check(input), /Rate-limit store unavailable/);
-  console.log('PASS 7: Upstash atomic EVAL transport, secret-only Authorization, digest-only payloads, response validation, no retries and bounded timeout.');
+  const pairFastPath = {
+    check: async () => { throw new Error('sequential path must not run'); },
+    checkPair: async (first, second) => [
+      { allowed: true, limit: first.limit, remaining: first.limit - 1, resetAt: 1700000999 },
+      { allowed: true, limit: second.limit, remaining: second.limit - 1, resetAt: 1700000999 },
+    ],
+  };
+  assert.equal((await search(route({}, {}, pairFastPath))).status, 200);
+  console.log('PASS 7: atomic single/pair Upstash transport, ordered dual quotas, secret-only Authorization, response validation, no retries and bounded timeout.');
 
   const logs = [];
   const oldError = console.error; const oldWarn = console.warn; const oldLog = console.log;

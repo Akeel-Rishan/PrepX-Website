@@ -14,6 +14,11 @@ export interface RateLimitResult {
 
 export interface RateLimitStore {
   check(input: RateLimitInput): Promise<RateLimitResult>;
+  /** Optional atomic fast path for the ordered IP + identifier checks. */
+  checkPair?(
+    first: RateLimitInput,
+    second: RateLimitInput
+  ): Promise<[RateLimitResult, RateLimitResult | null]>;
 }
 
 export type RateLimitDecision =

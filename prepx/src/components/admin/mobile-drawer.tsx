@@ -73,7 +73,7 @@ export function MobileDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Admin menu"
-        className="absolute left-0 top-0 flex h-full w-68 max-w-[calc(100vw-2rem)] flex-col bg-[#0a1220] shadow-2xl"
+        className="absolute left-0 top-0 flex h-dvh w-72 max-w-[calc(100vw-1rem)] flex-col bg-[#0a1220] shadow-2xl"
       >
         <button
           ref={closeRef}

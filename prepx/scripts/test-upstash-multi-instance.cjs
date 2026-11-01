@@ -12,6 +12,8 @@ const limit = 7;
 const attempts = 20;
 const windowSeconds = 30;
 const key = `prepx:provider-verification:${randomBytes(16).toString('hex')}`;
+const pairKey = `prepx:provider-verification:${randomBytes(16).toString('hex')}`;
+const pairIdentifierKey = `prepx:provider-verification:${randomBytes(16).toString('hex')}`;
 
 function requireSafeConfiguration() {
   assert(url && token, 'Live Upstash credentials are not configured.');
@@ -26,7 +28,7 @@ async function removeVerificationKey() {
     await fetch(url, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(['DEL', key]),
+      body: JSON.stringify(['DEL', key, pairKey, pairIdentifierKey]),
       cache: 'no-store',
       redirect: 'error',
       signal: AbortSignal.timeout(2000),
@@ -51,7 +53,29 @@ async function main() {
   assert.equal(blocked.allowed, false);
   assert.equal(blocked.remaining, 0);
   assert.equal(blocked.resetAt, results[0].resetAt);
-  console.log(`PASS: ${attempts + 1} independent clients shared one atomic Upstash quota; exactly ${limit} attempts were allowed and cleanup was requested.`);
+
+  const pairLimit = 4;
+  const pairIdentifierLimit = 6;
+  const pairResults = await Promise.all(
+    Array.from({ length: attempts }, () =>
+      new UpstashRateLimitStore(url, token, 2000).checkPair(
+        { key: pairKey, limit: pairLimit, windowSeconds },
+        { key: pairIdentifierKey, limit: pairIdentifierLimit, windowSeconds }
+      )
+    )
+  );
+  const firstResults = pairResults.map(([first]) => first);
+  const secondResults = pairResults.map(([, second]) => second);
+  assert.equal(firstResults.filter((result) => result.allowed).length, pairLimit);
+  assert.equal(firstResults.filter((result) => !result.allowed).length, attempts - pairLimit);
+  assert.equal(secondResults.filter(Boolean).length, pairLimit);
+  assert(secondResults.filter(Boolean).every((result) => result.allowed));
+  assert.equal(
+    new Set(firstResults.map((result) => result.resetAt)).size,
+    1,
+    'Paired clients must share one first-bucket reset window.'
+  );
+  console.log(`PASS: ${attempts + 1} single and ${attempts} paired clients shared atomic Upstash quotas; cleanup was requested.`);
 }
 
 main()

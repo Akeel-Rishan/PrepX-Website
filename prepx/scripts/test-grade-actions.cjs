@@ -41,7 +41,7 @@ function harness({ status = 'DRAFT', subjectActive = true } = {}) {
       let deleting = false;
       const filters = {};
       const q = {
-        select() { return q; }, eq(column, value) { filters[column] = value; return q; }, in() { return q; },
+        select() { return q; }, eq(column, value) { filters[column] = value; return q; }, in() { return q; }, or() { return q; },
         async maybeSingle() {
           if (table === 'examinations') return { data: { status }, error: null };
           return { data: null, error: null };

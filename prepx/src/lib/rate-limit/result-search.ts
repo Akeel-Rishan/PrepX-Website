@@ -30,19 +30,27 @@ export function createResultSearchLimiter(
 
   return async (headers: Headers, body: unknown): Promise<RateLimitDecision> => {
     try {
-      const ip = await store.check({
+      const ipInput = {
         key: `${ipRateLimitKey(resolveClientIp(headers, config), config.secret)}:${config.ipLimit}:${config.ipWindowSeconds}`,
         limit: config.ipLimit,
         windowSeconds: config.ipWindowSeconds,
-      });
-      if (!ip.allowed) return blocked(ip);
+      };
       const identifierKey = identifierRateLimitKey(body, config.secret);
-      if (!identifierKey) return { allowed: true, headers: rateLimitHeaders(ip) };
-      const identifier = await store.check({
-        key: `${identifierKey}:${config.identifierLimit}:${config.identifierWindowSeconds}`,
-        limit: config.identifierLimit,
-        windowSeconds: config.identifierWindowSeconds,
-      });
+      const identifierInput = identifierKey
+        ? {
+            key: `${identifierKey}:${config.identifierLimit}:${config.identifierWindowSeconds}`,
+            limit: config.identifierLimit,
+            windowSeconds: config.identifierWindowSeconds,
+          }
+        : null;
+
+      const [ip, pairedIdentifier] =
+        identifierInput && store.checkPair
+          ? await store.checkPair(ipInput, identifierInput)
+          : [await store.check(ipInput), null];
+      if (!ip.allowed) return blocked(ip);
+      if (!identifierInput) return { allowed: true, headers: rateLimitHeaders(ip) };
+      const identifier = pairedIdentifier ?? (await store.check(identifierInput));
       if (!identifier.allowed) return blocked(identifier);
       // Describe whichever bucket has fewer attempts left; a 429 always
       // describes the bucket which actually blocked the request.

@@ -17,13 +17,16 @@ interface ResultsPageProps {
   searchParams: Promise<{ examId?: string; page?: string; search?: string }>;
 }
 
-export default async function ResultsPage({ searchParams }: ResultsPageProps): Promise<React.JSX.Element> {
+export default async function ResultsPage({
+  searchParams,
+}: ResultsPageProps): Promise<React.JSX.Element> {
   const params = await searchParams;
   const examId = params.examId ?? '';
   const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1);
   const search = params.search?.trim() ?? '';
-  const validExamId =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(examId);
+  const validExamId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    examId
+  );
   const [examinations, selectedExam, loadedGradeData] = await Promise.all([
     getExaminationOptions(),
     validExamId ? getExaminationById(examId) : Promise.resolve<Examination | null>(null),
@@ -46,18 +49,22 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps): P
 
   return (
     <div className="max-w-full space-y-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
           <h2 className="text-2xl font-bold text-gray-900">Grade Entry</h2>
           <p className="mt-1 text-sm text-gray-500">
-            {selectedExam ? `${selectedExam.name} ${selectedExam.year}` : 'Select an examination to enter grades.'}
+            {selectedExam
+              ? `${selectedExam.name} ${selectedExam.year}`
+              : 'Select an examination to enter grades.'}
           </p>
         </div>
         {selectedExam && (
-          <Badge variant={getExamStatusBadgeVariant(selectedExam.status)}>
-            {isReadOnly && <Lock aria-hidden="true" className="mr-1 h-3 w-3" />}
-            {getExamStatusLabel(selectedExam.status)}
-          </Badge>
+          <div className="shrink-0">
+            <Badge variant={getExamStatusBadgeVariant(selectedExam.status)}>
+              {isReadOnly && <Lock aria-hidden="true" className="mr-1 h-3 w-3" />}
+              {getExamStatusLabel(selectedExam.status)}
+            </Badge>
+          </div>
         )}
       </div>
 
@@ -89,9 +96,11 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps): P
       )}
 
       {!examId && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white p-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white px-5 py-12 text-center sm:p-16">
           <PenLine aria-hidden="true" className="mb-3 h-10 w-10 text-gray-300" />
-          <p className="text-sm text-gray-400">Select an examination above to begin entering grades.</p>
+          <p className="text-sm text-gray-400">
+            Select an examination above to begin entering grades.
+          </p>
         </div>
       )}
       {examId && !selectedExam && <Alert variant="error">Examination not found.</Alert>}

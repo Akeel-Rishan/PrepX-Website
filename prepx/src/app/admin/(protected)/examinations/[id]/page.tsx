@@ -51,9 +51,9 @@ export default async function ExaminationDetailPage({
         <span className="truncate font-medium text-gray-900">{pageTitle}</span>
       </div>
 
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="truncate text-2xl font-bold text-gray-900">{pageTitle}</h2>
+          <h2 className="wrap-break-word text-2xl font-bold text-gray-900">{pageTitle}</h2>
           <p className="mt-1 text-sm text-gray-500">
             {isNew
               ? 'Fill in the details to create a new examination.'

@@ -23,7 +23,7 @@ export function AdminHeader({
 }: AdminHeaderProps): React.JSX.Element {
   const pageTitle = getAdminPageTitle(usePathname());
   return (
-    <header className="sticky top-0 z-30 flex h-18 shrink-0 items-center justify-between gap-3 border-b border-slate-200/90 bg-white px-4 shadow-[0_1px_0_rgba(15,23,42,0.02)] transition-colors dark:border-slate-800 dark:bg-slate-900 sm:px-6 xl:px-8">
+    <header className="sticky top-0 z-30 flex min-h-16 shrink-0 items-center justify-between gap-2 border-b border-slate-200/90 bg-white px-3 py-2 shadow-[0_1px_0_rgba(15,23,42,0.02)] transition-colors dark:border-slate-800 dark:bg-slate-900 min-[380px]:px-4 sm:min-h-18 sm:gap-3 sm:px-6 xl:px-8">
       <div className="flex min-w-0 items-center">
         <button
           type="button"
@@ -35,18 +35,16 @@ export function AdminHeader({
           <Menu aria-hidden="true" className="h-5 w-5" />
           <span className="sr-only">Open menu</span>
         </button>
-        <h1 className="ml-3 truncate text-lg font-semibold text-gray-900 lg:ml-0 dark:text-slate-100">
-          <span className="lg:hidden">
-            PrepX<span className="sr-only">: {pageTitle}</span>
-          </span>
-          <span className="hidden lg:inline">{pageTitle}</span>
+        <h1 className="ml-2 truncate text-base font-semibold text-gray-900 min-[380px]:ml-3 sm:text-lg lg:ml-0 dark:text-slate-100">
+          {pageTitle}
+          <span className="sr-only"> | PrepX</span>
         </h1>
       </div>
       <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <ThemeToggle />
         <span
           title={userEmail}
-          className="hidden max-w-[220px] truncate rounded-lg bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 sm:block dark:bg-slate-800 dark:text-slate-300"
+          className="hidden max-w-[220px] truncate rounded-lg bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 md:block dark:bg-slate-800 dark:text-slate-300"
         >
           {userEmail}
         </span>

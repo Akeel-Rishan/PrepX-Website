@@ -57,7 +57,80 @@ export function ExaminationsTable({
   }
   return (
     <div className="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="overflow-x-auto">
+      <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 md:hidden">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Sort by</p>
+        <div className="flex flex-wrap gap-2">
+          {columns.map((column) => {
+            const active = sort === column.value;
+            const nextDirection = active && direction === 'asc' ? 'desc' : 'asc';
+            const Icon = active ? (direction === 'asc' ? ArrowUp : ArrowDown) : ArrowUpDown;
+            return (
+              <Link
+                key={column.value}
+                href={getExaminationListHref(currentStatus, column.value, nextDirection)}
+                aria-current={active ? 'true' : undefined}
+                className={
+                  'inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 ' +
+                  (active
+                    ? 'border-blue-600 bg-blue-600 text-white'
+                    : 'border-gray-300 bg-white text-gray-600')
+                }
+              >
+                {column.label}
+                <Icon aria-hidden="true" className="h-3.5 w-3.5" />
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+      <div className="divide-y divide-gray-100 md:hidden">
+        {examinations.map((exam) => (
+          <article key={exam.id} className="space-y-4 p-4 min-[380px]:p-5">
+            <div className="flex min-w-0 items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="wrap-break-word font-semibold text-gray-900">{exam.name}</h3>
+                <p className="mt-1 text-xs text-gray-500">{exam.organization_name}</p>
+              </div>
+              <Badge variant={getExamStatusBadgeVariant(exam.status)}>
+                {getExamStatusLabel(exam.status)}
+              </Badge>
+            </div>
+            <dl className="grid grid-cols-3 gap-3 rounded-lg bg-gray-50 p-3">
+              <div>
+                <dt className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  Year
+                </dt>
+                <dd className="mt-1 text-sm font-semibold text-gray-700">{exam.year}</dd>
+              </div>
+              <div>
+                <dt className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  Students
+                </dt>
+                <dd className="mt-1 flex items-center gap-1 text-sm font-semibold text-gray-700">
+                  <Users aria-hidden="true" className="h-3.5 w-3.5 text-gray-400" />
+                  {exam.studentCount}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  Created
+                </dt>
+                <dd className="mt-1 text-xs font-medium text-gray-600">
+                  {formatDate(exam.created_at)}
+                </dd>
+              </div>
+            </dl>
+            <Link
+              href={`/admin/examinations/${exam.id}`}
+              aria-label={`Manage ${exam.name} (${exam.year})`}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-gray-300 px-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            >
+              Manage examination
+            </Link>
+          </article>
+        ))}
+      </div>
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <caption className="sr-only">
             Examinations and student counts. Select a column heading to sort.
@@ -132,7 +205,7 @@ export function ExaminationsTable({
           </tbody>
         </table>
       </div>
-      <div className="border-t border-gray-100 bg-gray-50 px-6 py-3 text-xs text-gray-400">
+      <div className="border-t border-gray-100 bg-gray-50 px-4 py-3 text-xs text-gray-400 sm:px-6">
         {examinations.length} examination{examinations.length !== 1 ? 's' : ''} shown
       </div>
     </div>

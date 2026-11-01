@@ -123,7 +123,46 @@ export function AuditLogTable({
   return (
     <>
       <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-(--app-shadow) dark:border-slate-800 dark:bg-slate-900">
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-slate-100 md:hidden dark:divide-slate-800">
+          {logs.map((log) => {
+            const meta = AUDIT_ACTION_META[log.action];
+            const summary = getAuditSummary(log.action, log.new_value, log.old_value);
+            return (
+              <article key={log.id} className="space-y-4 p-4 min-[380px]:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {formatDate(log.created_at)}
+                    </p>
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      {formatTime(log.created_at)}
+                    </p>
+                  </div>
+                  <Badge variant={meta?.badgeVariant ?? 'default'}>
+                    {meta?.label ?? log.action}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
+                  <div className="min-w-0">
+                    <EntityDisplay log={log} />
+                    <p className="mt-2 wrap-break-word text-xs leading-5 text-slate-600 dark:text-slate-300">
+                      {summary}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedLog(log)}
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-blue-950/50 dark:hover:text-blue-300"
+                    aria-label={`View details for ${meta?.label ?? log.action}`}
+                  >
+                    <ExternalLink aria-hidden="true" className="h-4 w-4" />
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[760px] text-sm">
             <thead className="border-b border-slate-200 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-950/50">
               <tr>
@@ -196,12 +235,12 @@ export function AuditLogTable({
             </tbody>
           </table>
         </div>
-        <div className="border-t border-slate-100 bg-slate-50/60 px-5 py-2.5 dark:border-slate-800 dark:bg-slate-950/30">
+        <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-2.5 min-[380px]:px-5 dark:border-slate-800 dark:bg-slate-950/30">
           <p className="text-xs text-slate-400 dark:text-slate-500">
             {totalCount.toLocaleString()} total event{totalCount === 1 ? '' : 's'}
           </p>
         </div>
-        <div className="px-5">
+        <div className="px-3 min-[380px]:px-5">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

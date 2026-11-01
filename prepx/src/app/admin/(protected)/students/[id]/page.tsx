@@ -38,7 +38,10 @@ export default async function StudentDetailPage({
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex min-w-0 items-center gap-2 text-sm text-gray-500">
-        <Link href="/admin/students" className="flex shrink-0 items-center gap-1 hover:text-gray-700">
+        <Link
+          href="/admin/students"
+          className="flex shrink-0 items-center gap-1 hover:text-gray-700"
+        >
           <ChevronLeft aria-hidden="true" className="h-4 w-4" />
           Students
         </Link>
@@ -46,9 +49,9 @@ export default async function StudentDetailPage({
         <span className="min-w-0 flex-1 truncate font-medium text-gray-900">{pageTitle}</span>
       </div>
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">{pageTitle}</h2>
-          <p className="mt-1 text-sm text-gray-500">
+        <div className="min-w-0 flex-1">
+          <h2 className="wrap-break-word text-2xl font-bold text-gray-900">{pageTitle}</h2>
+          <p className="mt-1 wrap-break-word text-sm text-gray-500">
             {isNew
               ? 'Enter the student details below.'
               : 'Index: ' + student!.index_number + ', School: ' + student!.school_name}

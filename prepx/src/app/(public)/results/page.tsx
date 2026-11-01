@@ -1,21 +1,21 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
 import { FileSearch, ShieldCheck } from 'lucide-react';
 import { usePublicResult } from '@/components/public/result-provider';
 import { PublicStatusPage } from '@/components/public/public-status-page';
-import { ResultPageSkeleton } from '@/components/ui/loading';
 import { PUBLIC_SUPPORT_CONTACT } from '@/lib/public-support';
 import { PrintActions } from './_components/print-actions';
 import { PrintHeader } from './_components/print-header';
 import { GradesTable } from './_components/result-details';
 
+const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME?.trim() || 'PrepX';
+
 export default function ResultsPage(): React.JSX.Element {
-  const { result, ready } = usePublicResult();
+  const { result } = usePublicResult();
 
   useEffect(() => {
-    document.title = 'Examination Result | PrepX';
+    document.title = `Examination Result | ${APP_NAME}`;
   }, []);
 
   useEffect(() => {
@@ -37,29 +37,6 @@ export default function ResultsPage(): React.JSX.Element {
     window.addEventListener('beforeprint', updatePrintDate);
     return () => window.removeEventListener('beforeprint', updatePrintDate);
   }, [result]);
-
-  if (!ready) {
-    return (
-      <>
-        <ResultPageSkeleton />
-        <noscript>
-          <style>{'.result-loading { display: none; }'}</style>
-          <div className="px-4 py-12 text-center">
-            <h1 className="text-xl font-bold">JavaScript is needed to view your result</h1>
-            <p className="mt-3 text-sm">
-              Enable JavaScript, then search again to view and print your result.
-            </p>
-            <Link
-              href="/"
-              className="mt-4 inline-block rounded-lg px-4 py-3 font-semibold text-blue-600 underline focus-visible:outline-solid focus-visible:outline-2"
-            >
-              Back to Search
-            </Link>
-          </div>
-        </noscript>
-      </>
-    );
-  }
 
   if (!result) {
     return (

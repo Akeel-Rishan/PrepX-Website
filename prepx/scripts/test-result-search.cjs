@@ -27,7 +27,6 @@ const nic = '200312345678';
 const valid = { examinationId: examId, indexNumber: 'OL2026001' };
 function harness(options = {}) {
   const calls = [];
-  const pending = [];
   let clientCount = 0;
   const subjects = options.subjects ?? [
     { id: 's1', subject_name: 'Maths', subject_code: 'MAT', display_order: 1, required: true, active: true },
@@ -37,7 +36,7 @@ function harness(options = {}) {
   const db = {
     examinations: options.missingExam ? null : { id: examId, name: 'Exam', year: 2026, status: options.status ?? 'PUBLISHED' },
     students: options.missingStudent ? null : {
-      id: 'student-id', full_name: 'Test Student', index_number: valid.indexNumber,
+      id: 'student-id', full_name: 'Test Student', index_number: options.index ?? valid.indexNumber,
       nic_number: options.nic === undefined ? nic : options.nic, school_name: 'School', examination_center: null,
       ...options.studentFields,
     },
@@ -55,9 +54,20 @@ function harness(options = {}) {
         const result = () => {
           if (options.throwTable === table) throw new Error(nic);
           if (options.errorTable === table) return { data: null, error: { message: nic } };
-          const data = table === 'subjects'
-            ? subjects.filter(s => call.filters.active !== true || s.active)
-            : db[table];
+          const published = db.examinations && db.examinations.status === call.filters.status;
+          if (!published) return { data: null, error: null };
+          const studentMatches = db.students &&
+            (call.filters['students.index_number'] === undefined || db.students.index_number === call.filters['students.index_number']) &&
+            (call.filters['students.nic_number'] === undefined || db.students.nic_number === call.filters['students.nic_number']);
+          const matchingStudents = studentMatches
+            ? [{ ...db.students, student_results: db.student_results }]
+            : [];
+          if (options.duplicateStudent && matchingStudents.length) matchingStudents.push({ ...matchingStudents[0], id: 'duplicate-student' });
+          const data = {
+            ...db.examinations,
+            subjects: subjects.filter(s => call.filters['subjects.active'] !== true || s.active),
+            students: matchingStudents,
+          };
           return { data, error: null };
         };
         const query = {
@@ -65,11 +75,6 @@ function harness(options = {}) {
           eq(column, value) { call.filters[column] = value; return query; },
           order(column, config) { call.order = { column, ...config }; return query; },
           async maybeSingle() { return result(); },
-          then(resolve, reject) {
-            // Both queries must start before either resolves; a sequential implementation fails.
-            pending.push(() => { try { resolve(result()); } catch (e) { reject(e); } });
-            if (pending.length === 2) pending.splice(0, 2).forEach(finish => finish());
-          },
         };
         return query;
       } };
@@ -121,19 +126,20 @@ async function main() {
     }
     assert.ok(!JSON.stringify(response.body).includes('student-id'));
     assert.ok(!JSON.stringify(response.body).includes(nic));
-    assert.deepEqual(h.calls.map(c => c.table), ['examinations', 'students', 'subjects', 'student_results']);
-    assert.equal(h.calls[1].filters.examination_id, examId);
-    assert.equal(h.calls[2].filters.examination_id, examId);
-    assert.equal(h.calls[2].filters.active, true);
-    assert.deepEqual(h.calls[2].order, { column: 'display_order', ascending: true });
-    assert.equal(h.calls[3].filters.student_id, 'student-id');
-    originalLog('PASS 1: index lookup, response allowlist, active subjects and parallel queries');
+    assert.deepEqual(h.calls.map(c => c.table), ['examinations']);
+    assert.equal(h.calls[0].filters.id, examId);
+    assert.equal(h.calls[0].filters.status, 'PUBLISHED');
+    assert.equal(h.calls[0].filters['students.index_number'], valid.indexNumber);
+    assert.equal(h.calls[0].filters['subjects.active'], true);
+    assert.deepEqual(h.calls[0].order, { column: 'display_order', referencedTable: 'subjects', ascending: true });
+    assert.match(h.calls[0].columns, /student_results!student_results_student_id_fkey/);
+    originalLog('PASS 1: one-request index lookup, response allowlist, active subjects and grades');
 
     for (const input of [nic, '991234567v']) {
       const byNic = harness({ nic: input.toUpperCase() });
       const found = await search(byNic, { examinationId: examId, nicNumber: input });
       assert.equal(found.status, 200);
-      assert.equal(byNic.calls[1].filters.nic_number, input.toUpperCase());
+      assert.equal(byNic.calls[0].filters['students.nic_number'], input.toUpperCase());
       assert.ok(!JSON.stringify(found.body).includes(input.toUpperCase()));
     }
     assert.equal((await search(harness({ nic: null }))).body.maskedNic, null);
@@ -170,18 +176,17 @@ async function main() {
     originalLog('PASS 6: GET/PUT/DELETE blocked');
     const normalized = harness();
     await search(normalized, { ...valid, indexNumber: ' ol2026001 ' });
-    assert.equal(normalized.calls[1].filters.index_number, valid.indexNumber);
-    assert.ok(!Object.hasOwn(normalized.calls[1].filters, 'nic_number'));
+    assert.equal(normalized.calls[0].filters['students.index_number'], valid.indexNumber);
+    assert.ok(!Object.hasOwn(normalized.calls[0].filters, 'students.nic_number'));
     originalLog('PASS 7: whitespace/case normalization and unambiguous lookup');
     originalLog('PASS 8: status precedence, optional subjects and empty-required edge cases');
     originalLog('PASS 9: no-cache headers on success and errors');
-    for (const table of ['examinations', 'students', 'subjects', 'student_results']) {
-      for (const kind of ['errorTable', 'throwTable']) {
-        const failed = await search(harness({ [kind]: table }));
-        assert.equal(failed.status, 500);
-        assert.deepEqual(failed.body, { error: 'SERVER_ERROR', message: 'Something went wrong. Please try again.' });
-      }
+    for (const kind of ['errorTable', 'throwTable']) {
+      const failed = await search(harness({ [kind]: 'examinations' }));
+      assert.equal(failed.status, 500);
+      assert.deepEqual(failed.body, { error: 'SERVER_ERROR', message: 'Something went wrong. Please try again.' });
     }
+    assert.equal((await search(harness({ duplicateStudent: true }))).status, 500);
     assert.equal((await search(harness({ throwClient: true }))).status, 500);
     assert.ok(logs.every(log => !log.includes(nic) && !log.includes('991234567V') && !log.includes(valid.indexNumber)));
     originalLog('PASS 11: no raw NIC in response/logs; database failures fail closed');

@@ -166,7 +166,52 @@ export function ReviewManager({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-          <div className="overflow-x-auto">
+          <div className="divide-y divide-gray-100 md:hidden">
+            {data.students.map((student) => (
+              <article
+                key={student.id}
+                className={cn(
+                  'space-y-4 p-4 min-[380px]:p-5',
+                  student.status === 'empty' && 'bg-orange-50/30',
+                  student.status === 'incomplete' && 'bg-amber-50/20'
+                )}
+              >
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="wrap-break-word font-semibold text-gray-900">
+                      {student.full_name}
+                    </h3>
+                    <p className="mt-1 font-mono text-xs text-gray-500">{student.index_number}</p>
+                    <p className="mt-1 wrap-break-word text-xs text-gray-500">
+                      {student.school_name}
+                    </p>
+                  </div>
+                  <Status status={student.status} />
+                </div>
+                <div className="rounded-lg bg-gray-50 p-3">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                    Missing required subjects
+                  </p>
+                  <MissingList student={student} />
+                </div>
+                {isReadOnly ? (
+                  <Button variant="secondary" size="sm" disabled className="min-h-11 w-full">
+                    Locked
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingStudent(student)}
+                    className="min-h-11 w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+                  >
+                    Edit Grades
+                  </Button>
+                )}
+              </article>
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">

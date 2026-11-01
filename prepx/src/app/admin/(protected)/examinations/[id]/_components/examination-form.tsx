@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,25 +22,20 @@ export function ExaminationForm({
   mode,
   examination,
 }: ExaminationFormProps): React.JSX.Element {
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(saveExaminationAction, {});
-  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
-    setShowSuccess(Boolean(state.success));
-    if (!state.success) return;
-    const timer = setTimeout(() => setShowSuccess(false), 5000);
-    return () => clearTimeout(timer);
-  }, [state]);
+    if (state.success) {
+      router.push('/admin/examinations?updated=1');
+      router.refresh();
+    }
+  }, [state.success, router]);
 
   return (
     <form action={formAction} noValidate className="space-y-5">
       {mode === 'edit' && examination && (
         <input type="hidden" name="id" value={examination.id} />
-      )}
-      {showSuccess && state.success && (
-        <Alert variant="success" onClose={() => setShowSuccess(false)}>
-          {state.message}
-        </Alert>
       )}
       {state.error && !state.fieldErrors && <Alert variant="error">{state.error}</Alert>}
 

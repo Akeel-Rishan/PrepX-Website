@@ -11,7 +11,7 @@ import {
   Search,
   ShieldCheck,
 } from 'lucide-react';
-import { createPublicClient } from '@/lib/supabase/server';
+import { getPublicHomeData } from '@/lib/data/public-home';
 import { PUBLIC_ORGANIZATION_NAME, PUBLIC_SUPPORT_EMAIL } from '@/lib/public-support';
 import { SearchForm } from './_components/search-form';
 
@@ -20,45 +20,8 @@ export const metadata: Metadata = {
   description: 'Search for your published O/L examination results.',
 };
 
-// Publication state must always be read at request time, never captured during a production build.
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-interface PublishedExamination {
-  id: string;
-  name: string;
-  year: number;
-  result_notice: string | null;
-}
-
 export default async function PublicHomePage(): Promise<React.JSX.Element> {
-  let currentExam: PublishedExamination | null = null;
-  let queryFailed = false;
-
-  try {
-    const supabase = createPublicClient();
-    const { data, error } = await supabase
-      .from('examinations')
-      .select('id, name, year, result_notice')
-      .eq('status', 'PUBLISHED')
-      .order('year', { ascending: false })
-      .order('publication_date', { ascending: false })
-      .limit(1);
-
-    if (error) {
-      queryFailed = true;
-      console.warn('[Public Examination Query]', { code: error.code || 'NETWORK_ERROR' });
-    } else {
-      currentExam = data?.[0] ?? null;
-    }
-  } catch {
-    queryFailed = true;
-    console.warn('[Public Examination Query]', { code: 'NETWORK_ERROR' });
-  }
-
-  // Only a row with PUBLISHED status can reach this value because public RLS and the query both
-  // enforce that state. The newest published examination year becomes the public search target.
-  const publishedExam = currentExam;
+  const { publishedExam, queryFailed } = await getPublicHomeData();
 
   return (
     <div className="flex flex-1 px-5 py-10 sm:px-8 lg:px-10 lg:py-14">
@@ -103,11 +66,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
                 value={String(publishedExam.year)}
               />
               <ExamFact icon={BadgeCheck} label="Status" value="Published" />
-              <ExamFact
-                icon={Building2}
-                label="Organized by"
-                value={PUBLIC_ORGANIZATION_NAME}
-              />
+              <ExamFact icon={Building2} label="Organized by" value={PUBLIC_ORGANIZATION_NAME} />
             </div>
           )}
 
@@ -223,7 +182,10 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
 
           <p className="mt-5 text-center text-xs text-slate-500 dark:text-slate-400">
             Need assistance? Contact the {PUBLIC_ORGANIZATION_NAME} at{' '}
-            <a className="underline underline-offset-2 hover:text-blue-600" href={`mailto:${PUBLIC_SUPPORT_EMAIL}`}>
+            <a
+              className="underline underline-offset-2 hover:text-blue-600"
+              href={`mailto:${PUBLIC_SUPPORT_EMAIL}`}
+            >
               {PUBLIC_SUPPORT_EMAIL}
             </a>
             .

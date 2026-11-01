@@ -3,14 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  AlertTriangle,
-  BookOpen,
-  CheckCircle2,
-  CircleDashed,
-  Lock,
-  Users,
-} from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle2, CircleDashed, Lock, Users } from 'lucide-react';
 import { Pagination } from '@/components/admin/pagination';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -174,7 +167,10 @@ export function GradeGrid({
         <div className="rounded-xl border border-dashed border-gray-200 bg-white p-12 text-center">
           <BookOpen aria-hidden="true" className="mx-auto mb-3 h-10 w-10 text-gray-300" />
           <p className="text-sm text-gray-400">No active subjects found for this examination.</p>
-          <Link href={`/admin/subjects?examId=${examinationId}`} className="mt-2 inline-block text-sm font-medium text-blue-600 hover:text-blue-700">
+          <Link
+            href={`/admin/subjects?examId=${examinationId}`}
+            className="mt-2 inline-block text-sm font-medium text-blue-600 hover:text-blue-700"
+          >
             Add subjects in the Subjects page
           </Link>
         </div>
@@ -189,7 +185,15 @@ export function GradeGrid({
 
       {data.subjects.length > 0 && data.students.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-          <div className="overflow-x-auto">
+          <p className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-xs text-gray-500 sm:hidden">
+            Swipe sideways to view subjects and status. Student names stay visible.
+          </p>
+          <div
+            className="overflow-x-auto focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+            role="region"
+            aria-label="Student grade entry table"
+            tabIndex={0}
+          >
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
@@ -197,24 +201,37 @@ export function GradeGrid({
                     Student
                   </th>
                   {data.subjects.map((subject) => (
-                    <th key={subject.id} className="min-w-[80px] px-2 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <th
+                      key={subject.id}
+                      className="min-w-[80px] px-2 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500"
+                    >
                       <div className="flex flex-col items-center gap-0.5">
                         <span className="max-w-[70px] truncate" title={subject.subject_name}>
                           {subject.subject_code ?? subject.subject_name.slice(0, 4)}
                         </span>
-                        {subject.required && <span className="text-[10px] font-normal normal-case text-blue-400">req</span>}
+                        {subject.required && (
+                          <span className="text-[10px] font-normal normal-case text-blue-400">
+                            req
+                          </span>
+                        )}
                       </div>
                     </th>
                   ))}
-                  <th className="min-w-[110px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
+                  <th className="min-w-[110px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {data.students.map((student) => (
                   <tr key={student.id} className="transition-colors hover:bg-slate-50/50">
                     <td className="sticky left-0 z-10 max-w-36 wrap-break-word border-r border-gray-100 bg-white px-3 py-3 sm:max-w-[200px] sm:px-4">
-                      <div className="text-sm font-medium leading-tight text-gray-900">{student.full_name}</div>
-                      <div className="mt-0.5 font-mono text-xs text-gray-400">{student.index_number}</div>
+                      <div className="text-sm font-medium leading-tight text-gray-900">
+                        {student.full_name}
+                      </div>
+                      <div className="mt-0.5 font-mono text-xs text-gray-400">
+                        {student.index_number}
+                      </div>
                     </td>
                     {data.subjects.map((subject) => (
                       <td key={subject.id} className="px-2 py-2.5 text-center">
@@ -228,7 +245,9 @@ export function GradeGrid({
                         />
                       </td>
                     ))}
-                    <td className="px-4 py-2.5"><StatusBadge status={getStudentStatus(student.id)} /></td>
+                    <td className="px-4 py-2.5">
+                      <StatusBadge status={getStudentStatus(student.id)} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
