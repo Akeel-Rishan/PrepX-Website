@@ -1,6 +1,6 @@
 # PrepX Pre-Deployment Audit
 
-Audit date: 2026-10-11; deep-audit update: 2026-10-12
+Audit date: 2026-10-11; deep-audit update: 2026-10-12; technical refresh: 2026-11-01
 
 ## Status
 
@@ -16,7 +16,7 @@ This is not yet approval for a public production launch. A Vercel preview deploy
 
 - [x] Required local Supabase, Upstash, rate-limit secret, application, and optional Gemini settings are present; values remain hidden.
 - [x] `.env.local`, `.env.test`, `.env.load`, and `.vercel` are ignored; no real environment file appears in Git history.
-- [x] Linked Supabase migrations `001` through `005` exactly match the repository.
+- [x] Linked Supabase migrations `001` through `007` exactly match the repository.
 - [x] All six tables are reachable; `import_exam_results` is installed and rejects unknown administrators.
 - [x] Production dependencies report 0 vulnerabilities.
 - [x] Node.js is pinned to `22.x`, matching the verified local build and an available Vercel runtime.
@@ -38,14 +38,14 @@ This is not yet approval for a public production launch. A Vercel preview deploy
 
 - [ ] Verify HTTPS, domain redirects, HSTS, CSP nonces, `noindex` on admin/error pages, and trusted-proxy settings on the deployed host.
 - [ ] Verify Upstash quotas across multiple application instances and confirm provider outages fail closed without exposing whether an identifier exists.
-- [ ] Run smoke and stress load profiles against isolated staging. The load definitions pass offline validation, but native `k6` is not installed locally.
+- [ ] Run normal and stress load profiles against isolated staging. Native `k6` validation passes and the guarded local smoke profile passes, but localhost does not replace deployed multi-instance evidence.
 - [ ] Test database backup and restore, monitoring, alerting, log retention/redaction, admin account recovery, and incident ownership.
 - [ ] Manually verify the browser's native Print / Save as PDF output, including multi-page result tables.
 
 ## Recommended follow-up (P2)
 
 - [x] Tailwind CSS 3 was migrated to Tailwind CSS 4.3.3 with the dedicated PostCSS plugin. The original nine-item Tailwind 3 audit chain is removed; production dependencies still report 0 vulnerabilities.
-- [ ] Monitor the upstream `braces` advisory now reported through Next.js's development-only ESLint stack. Full `npm audit` reports five entries derived from this single transitive dependency; no patched `braces` release exists as of 2026-10-12. Do not accept npm's incompatible Next.js 14 downgrade suggestion or force a major framework change solely to silence the report.
+- [x] Full and production-only `npm audit` report zero vulnerabilities after patched framework/validation releases and Node-22-compatible archive/glob overrides were verified by the XLSX and security suites.
 - [ ] Run capacity tests with the largest expected examination, student, subject, and audit-log volumes.
 - [ ] Configure the optional Gemini import assistant only if that feature will be enabled in production, and document its data-handling policy.
 
@@ -65,20 +65,24 @@ This is not yet approval for a public production launch. A Vercel preview deploy
 - Hardened recursive audit-payload NIC masking and added a read-only historical audit that reports counts only.
 - Replaced the brittle native-CDP error browser harness with the existing Playwright/Edge test path and made result browser selectors accessibility-based and transition-safe.
 - Updated vulnerable production dependencies (`next`, `sharp`, and `source-map-js`) and added the missing `playwright-core` test dependency.
+- Updated Next.js to `15.5.28` and Zod to `4.6.6`, then replaced ExcelJS's vulnerable legacy ZIP-writer dependency chain with compatible Archiver 8/Readdir-Glob 3/Minimatch 11 overrides. XLSX read/write, import, and archive-safety coverage passes.
+- Reconciled the no-JavaScript result browser assertion with the current search-again fallback so the optimized-production print suite is green.
 - Migrated Tailwind CSS 3 to 4.3.3, moved theme configuration into CSS, updated the PostCSS plugin and utility syntax, and corrected an upgrade-tool rewrite that changed the public `Button` variant API.
 
 ## Verification completed
 
 - `npm run lint` — pass
 - `npm run type-check` — pass
-- `npm run test:logic` — pass
+- `npm test` — pass
+- `npm run test:integration` — pass against a freshly created disposable Supabase database; public, admin, authorization, import, and security groups cleaned their owned fixtures
 - `npm run test:integration:safety` — pass
-- `npm run load:validate` — pass (native k6 check skipped because k6 is not installed)
+- `npm run load:validate` — pass, including native `k6 inspect`
+- `npm run load:smoke` — pass against the optimized localhost build and confirmed fictional fixture on 2026-11-01; 3/3 searches succeeded with zero errors/throttling, search p95 346 ms and p99 347 ms
 - `npm run test:db` — pass against the currently linked project
-- `npm run audit:privacy` — pass; 49 configured audit rows checked and 0 unmasked NIC fields found
-- `npx supabase migration list --linked` — pass; local and remote are `001` through `005`
+- `npm run audit:privacy` — pass; 76 configured audit rows checked and 0 unmasked NIC fields found
+- `npx supabase migration list --linked` — pass; local and remote are `001` through `007`
 - `npm audit --omit=dev --audit-level=moderate` — 0 vulnerabilities
-- Full `npm audit` — 5 development-only findings derived from one unpatched `braces` advisory in the Next.js ESLint toolchain; no production dependency is affected
-- `npm run build` — pass with Next.js 15.5.27
+- Full `npm audit` — 0 vulnerabilities
+- `npm run build` — pass with Next.js 15.5.28
 - Production HTTP/header/error-path smoke tests — pass with live configured Supabase and Upstash credentials
-- Local production browser suites — result navigation/responsive behavior, print/A4 PDF, CSP/security, 404, and global-error recovery pass in Edge
+- Local production browser suites — initial rendering, result navigation/responsive behavior, print/A4 PDF, no-JavaScript fallback, CSP/security, anonymous admin protection, 404, and global-error recovery pass in Edge on 2026-11-01

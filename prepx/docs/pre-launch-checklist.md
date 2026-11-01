@@ -1,6 +1,6 @@
 # PrepX production pre-launch checklist
 
-Checklist date: 2026-10-15
+Checklist date: 2026-10-15; technical refresh: 2026-11-01
 Release candidate: `0.1.0`  
 Current recommendation: **GO ONLY AFTER BLOCKERS ARE RESOLVED**
 
@@ -20,8 +20,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 ## Current blocking gates
 
 - [ ] **BLOCKED — Required:** Complete a Vercel Preview deployment with the dedicated staging Supabase project and the approved shared-free-tier Upstash configuration, then run the post-deployment checklist. The repository has no `.vercel/project.json`, no local Vercel authentication, and no documented Preview URL. **Owner:** Technical release owner. **Needed:** Vercel login/team/project selection, separately scoped Preview variables, Preview URL, and dated test record. The shared Upstash database must use the distinct Preview and Production HMAC secrets generated on 2026-10-15.
-- [ ] **BLOCKED — Required:** Run the real integration suite against the isolated local Docker Supabase stack. `.env.test` is now present, but the Docker daemon was unavailable on 2026-10-13. **Owner:** Developer. **Needed:** start Docker, run `npm run test:integration:setup`, then `npm run test:integration`; do not substitute a hosted database.
-- [ ] **BLOCKED — Required:** Pass k6 smoke and normal-load profiles against an explicitly approved staging/performance target with fictional published data. Native k6 and the guarded fixture configuration are available. Two local optimized-build smoke runs on 2026-10-15 had zero functional errors and zero 429s but failed the 1000 ms p95 budget; normal load was correctly withheld. **Owner:** Performance tester. **Needed:** deployed staging target, investigation/tuning, passing smoke, then normal load and saved summaries.
+- [ ] **BLOCKED — Required:** Pass k6 smoke and normal-load profiles against an explicitly approved staging/performance target with fictional published data. Native k6 and the guarded fixture configuration are available. The optimized localhost smoke run passed on 2026-11-01 with zero errors/throttling, search p95 346 ms and p99 347 ms, but deployed multi-instance evidence and the normal profile remain required. **Owner:** Performance tester. **Needed:** deployed staging target, passing smoke and normal runs, and saved summaries.
 - [ ] **BLOCKED — Required:** Enable/obtain a production Supabase backup and perform/document a safe restore rehearsal. The read-only CLI inventory on 2026-10-13 returned no available backups and PITR disabled; restoring Production is not an acceptable rehearsal. **Owner:** Supabase project owner. **Needed:** plan-appropriate backup/export, isolated recovery project, approved rehearsal window, and restoration record.
 - [ ] **BLOCKED — Required:** Complete and approve `docs/governance/operational-ownership.md`, including named primary/backup production, Vercel, Supabase, DNS, privacy, incident, content and examination-period contacts. The register and access-verification checklist now exist; real names and acknowledgements are still required. **Owner:** UGSM release approver.
 - [ ] **BLOCKED — Required:** Finish the human/deployed portions of accessibility and browser QA. Optimized local Edge automation passed responsive layouts, keyboard focus, A4 PDF generation, reduced motion, and fictional Sinhala/Tamil rendering on 2026-10-13; screen-reader, 200% zoom/contrast, native Save-as-PDF review, authenticated admin workflows, and final-domain headers remain manual. **Owner:** QA/release owner.
@@ -59,7 +58,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 ## 2. Data integrity and database
 
-- [ ] **BLOCKED — Required:** Apply migrations `001`–`007` to a fresh isolated local test database. The existing isolated stack passes the complete real integration suite, but that does not replace a clean-database migration test. **Owner:** Developer.
+- [x] **VERIFIED — Required:** Migrations `001`–`007` apply to a fresh disposable local Supabase database. After deleting the dedicated integration volume, setup applied the repository migrations and all five real integration groups passed on 2026-11-01; the test volume was removed afterward.
 - [x] **VERIFIED — Required:** Linked staging migration history is exactly `001`–`007`. Migration `007` set the canonical organization default and a read-only verification found zero examinations using the legacy `PrepX` or `PrepX Institute` values. All six configured tables and the atomic import/deletion functions were covered by the isolated real-database integration suite before this data-default migration. **Evidence:** `npx supabase migration list --linked` and a scoped staging verification query on 2026-10-16.
 - [x] **VERIFIED — Required:** Migrations define primary keys, foreign keys, status/year/grade checks, result/examination consistency trigger, unique student index/NIC, unique subject name/code, unique student/subject grade, and query indexes.
 - [x] **VERIFIED — Required:** Foreign-key cascades, uniqueness, grade checks, cross-exam trigger, atomic examination deletion, audit retention, authorization, and RLS pass against the isolated real PostgreSQL stack through `npm run test:integration`.
@@ -98,7 +97,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [x] **VERIFIED — Required:** Admin, auth, health, and result/search responses use private/no-store policies; admin/error/result routes use `X-Robots-Tag` where intended.
 - [x] **VERIFIED — Required:** Search, action, import, UUID, text, identifier, and grade inputs are contextually validated; control characters, markup, formula/hyperlink payloads, unsafe archives, and ambiguous searches are rejected.
 - [x] **VERIFIED — Required:** Database access uses Supabase query builders/RPC parameters rather than string-built SQL from request input.
-- [x] **VERIFIED — Required:** Public search and limiter logs use fixed messages or provider codes and do not log raw NIC/index values, IPs, cookies, tokens, keys, request bodies, or provider responses in tested paths. Audit payloads recursively mask NIC-key variants; `npm run audit:privacy` inspected all 49 configured audit rows on 2026-10-12 and found zero unmasked NIC fields without printing row contents.
+- [x] **VERIFIED — Required:** Public search and limiter logs use fixed messages or provider codes and do not log raw NIC/index values, IPs, cookies, tokens, keys, request bodies, or provider responses in tested paths. Audit payloads recursively mask NIC-key variants; `npm run audit:privacy` inspected all 76 configured audit rows on 2026-11-01 and found zero unmasked NIC fields without printing row contents.
 - [x] **VERIFIED — Required:** API/action failures return generic messages without stack traces, SQL text, Supabase detail, credentials, or environment values in deterministic tests.
 - [x] **VERIFIED — Required:** Public search has independent HMAC-derived identifier/IP limits, production Upstash enforcement, bounded timeouts, generic 429s, and fail-closed configuration/provider behavior by default.
 - [x] **VERIFIED — Required:** The configured live Upstash database atomically shared one random 30-second quota across 21 independent clients on 2026-10-13; exactly seven attempts were allowed, all clients shared one reset, and cleanup was requested. **Evidence:** `npm run test:rate-limit:upstash`.
@@ -107,7 +106,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 - [x] **VERIFIED — Required:** State changes use authenticated Next.js Server Actions with framework origin checks plus server-side admin authorization; no cookie-authenticated state-changing public REST endpoint exists.
 - [x] **VERIFIED — Required:** `npm audit --omit=dev --audit-level=moderate` reports zero production dependency vulnerabilities.
 - [x] **VERIFIED — Recommended:** Tailwind CSS 3 was migrated to 4.3.3 and the original nine-item Tailwind development-toolchain audit chain was removed. Type-check, lint, unit/security tests, production build, responsive result browser tests, CSP tests, and A4 print tests pass after migration.
-- [ ] **DEFERRED — Recommended:** Monitor the new upstream `braces` advisory in Next.js's development-only ESLint stack. Full `npm audit` reports five entries derived from this one transitive package, but `npm audit --omit=dev` remains clean and no patched `braces` release exists as of 2026-10-12. Do not use npm's suggested incompatible Next.js 14 downgrade or a forced audit fix.
+- [x] **VERIFIED — Recommended:** Full `npm audit` and `npm audit --omit=dev --audit-level=moderate` report zero vulnerabilities after updating Next.js to `15.5.28`, Zod to `4.6.6`, and the ExcelJS ZIP-writer chain to compatible patched transitive releases. XLSX and security tests pass with the resolved tree.
 
 ## 5. Environment and deployment
 
@@ -130,16 +129,16 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 ## 6. Testing and quality gates
 
-- [x] **VERIFIED — Required:** `npm test` — PASS on 2026-10-13; logic, validation, privacy, publication, rate-limit, header, import, error, and API contracts passed.
-- [x] **VERIFIED — Required:** `npm run test:integration` — PASS on 2026-10-15; public, admin, authorization, import, and security groups passed against the isolated local Supabase stack, including atomic examination deletion and cascade cleanup.
+- [x] **VERIFIED — Required:** `npm test` — PASS on 2026-11-01; logic, validation, privacy, publication, rate-limit, header, import, error, and API contracts passed.
+- [x] **VERIFIED — Required:** `npm run test:integration` — PASS on 2026-11-01 after applying migrations to a fresh disposable local Supabase database; public, admin, authorization, import, and security groups passed, including atomic examination deletion and cascade cleanup.
 - [x] **VERIFIED — Required:** `npm run test:integration:safety` — PASS; hosted/default URLs and unsafe transport are rejected.
 - [x] **VERIFIED — Required:** `npm run lint` — PASS.
 - [x] **VERIFIED — Required:** `npm run typecheck` — PASS.
 - [x] **VERIFIED — Required:** `npm run build` — PASS with production environment validation.
-- [x] **VERIFIED — Recommended:** Local optimized-production Edge result/navigation, responsive, print/A4-PDF, CSP/security, anonymous-admin redirect, 404, global-error, reduced-motion, and fictional Sinhala/Tamil browser suites — PASS on 2026-10-13. Native Save-as-PDF dialog, authenticated admin pages, screen readers, and deployed-environment checks remain manual.
+- [x] **VERIFIED — Recommended:** Local optimized-production Edge initial-render, result/navigation, responsive, print/A4-PDF, no-JavaScript fallback, CSP/security, anonymous-admin redirect, 404, global-error, reduced-motion, and fictional Sinhala/Tamil browser suites — PASS on 2026-11-01. Native Save-as-PDF dialog, authenticated admin pages, screen readers, and deployed-environment checks remain manual.
 - [x] **VERIFIED — Required:** `npm run load:validate` — PASS offline; profiles, guards, schemas, privacy checks, thresholds, metrics, and summaries validated without HTTP traffic.
-- [ ] **BLOCKED — Required:** `npm run load:smoke` — RUN TWICE against the local optimized build on 2026-10-15 with one VU for five seconds. Both runs returned valid results with zero errors, zero check failures, and zero rate limiting; search p99 passed at approximately 1.27–1.37 seconds, but p95 failed at approximately 1.26–1.36 seconds against the 1.0-second budget. Aggregate output is saved privately under `tests/load/results/`.
-- [ ] **BLOCKED — Required:** `npm run load:normal` — NOT RUN because the required smoke threshold failed twice. Run only after smoke passes on the approved staging/performance target; the current private local override is a reduced one-VU/five-second profile and is not release-quality normal load.
+- [x] **VERIFIED — Required:** `npm run load:smoke` — PASS against the optimized localhost build on 2026-11-01 with one VU for five seconds and a confirmed fictional fixture: 3/3 searches succeeded, all 12 checks passed, zero errors/throttling, search p95 346 ms and p99 347 ms.
+- [ ] **BLOCKED — Required:** `npm run load:normal` — NOT RUN because a localhost smoke test is not an approved staging/performance baseline. Run guarded smoke again on deployed staging, then the normal profile, and retain the summaries.
 - [x] **VERIFIED — Required:** No critical/high production dependency vulnerability or known failing deterministic test remains.
 - [x] **VERIFIED — Required:** No ignored/skipped flaky application test was found; external/browser/load prerequisites are documented rather than silently skipped.
 - [x] **VERIFIED — Required:** Repository test/seed/load fixtures are clearly fictional and use zero-filled format-only identifiers.
@@ -150,7 +149,7 @@ Release owners should enter names/links in the fields near the end, initial ever
 
 - [x] **VERIFIED — Recommended:** Production build reports approximately 142 kB first-load JS for `/` and 153 kB for `/results`; public reads are dynamic and the homepage uses a cookie-free client.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Measure production-like public home Core Web Vitals and establish an accepted baseline. **Owner:** Performance/QA owner.
-- [ ] **BLOCKED — Required:** Demonstrate result-search p95 under 1000 ms and p99 under 2000 ms in approved staging. Local smoke on 2026-10-15 passed p99 and correctness/error thresholds but repeatedly missed p95 at approximately 1.26–1.36 seconds. These remain initial experiment budgets, not an agreed production SLO. **Owner:** Product/technical owners.
+- [ ] **BLOCKED — Required:** Demonstrate result-search p95 under 1000 ms and p99 under 2000 ms in approved staging. The optimized localhost smoke run passed both budgets on 2026-11-01 (p95 346 ms, p99 347 ms), but these remain initial experiment budgets rather than an agreed production SLO. **Owner:** Product/technical owners.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Review Vercel function duration/logs under smoke and normal load and confirm no timeout or platform-limit breach. **Owner:** Technical owner.
 - [ ] **MANUAL CHECK REQUIRED — Required:** Inspect Supabase query performance/index usage with production-like fictional volume. **Owner:** Supabase owner.
 - [x] **VERIFIED — Required:** Lookup, status, ordering, pagination, subject, result, and audit indexes required by current query paths are present in migrations.

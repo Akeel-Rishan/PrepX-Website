@@ -133,11 +133,11 @@ const artifacts = process.env.PREPX_PRINT_ARTIFACTS;
     if (artifacts) fs.writeFileSync(path.join(artifacts, 'result-multipage.pdf'), longPdf);
 
     // Disabling JS before navigation cannot recover the existing memory-only handoff.
-    // It must show a useful fallback rather than a permanent loading indicator.
+    // It must show the same useful search-again fallback rather than a permanent loader.
     const noJs = await browser.newContext({ javaScriptEnabled: false });
     const staticPage = await noJs.newPage();
     await staticPage.goto(base + '/results');
-    assert(await staticPage.getByRole('heading', { name: 'JavaScript is needed to view your result' }).isVisible());
+    assert(await staticPage.getByRole('heading', { name: 'Search for your result' }).isVisible());
     assert.equal(await staticPage.locator('.result-loading').isVisible(), false);
     assert.equal(await staticPage.getByRole('button', { name: printName }).count(), 0);
     await noJs.close();
