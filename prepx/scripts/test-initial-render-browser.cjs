@@ -50,9 +50,14 @@ async function auditPage(browser, { width, height, colorScheme }) {
   const homeAudit = await page.evaluate(() => ({
     ...window.__prepxInitialRenderAudit,
     overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+    dark: document.documentElement.classList.contains('dark'),
+    colorScheme: getComputedStyle(document.documentElement).colorScheme,
   }));
   assert.equal(homeAudit.skeletonSeen, false, 'Homepage must never mount a skeleton');
   assert.equal(homeAudit.overflow, false, 'Homepage must fit the viewport');
+  assert.equal(homeAudit.dark, true, 'Public homepage must stay dark even with a saved light preference');
+  assert.equal(homeAudit.colorScheme, 'dark', 'Public homepage must use dark browser controls');
+  assert.equal(await page.getByRole('button', { name: 'Toggle color theme' }).count(), 0);
   assert(
     homeAudit.layoutShift < 0.1,
     `Homepage CLS must stay below 0.1, got ${homeAudit.layoutShift}`
@@ -60,6 +65,8 @@ async function auditPage(browser, { width, height, colorScheme }) {
 
   await page.goto(`${base}/results`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('heading', { name: 'Search for your result' }).waitFor();
+  assert.equal(await page.locator('html.dark').count(), 1, 'Result route must stay dark');
+  assert.equal(await page.getByRole('button', { name: 'Toggle color theme' }).count(), 0);
   await page.waitForTimeout(100);
   const resultAudit = await page.evaluate(() => window.__prepxInitialRenderAudit);
   assert.equal(resultAudit.skeletonSeen, false, 'Direct result route must not mount a skeleton');

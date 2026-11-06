@@ -4,14 +4,12 @@ import { useLayoutEffect } from 'react';
 
 function shouldUseDarkMode(): boolean {
   const isAdminPage = /^\/admin(?:\/|$)/.test(window.location.pathname);
+  if (!isAdminPage) return true;
   try {
     const savedTheme = localStorage.getItem('prepx-theme');
-    return (
-      savedTheme === 'dark' ||
-      (!savedTheme && !isAdminPage && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    );
+    return savedTheme === 'dark';
   } catch {
-    return !isAdminPage && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return false;
   }
 }
 

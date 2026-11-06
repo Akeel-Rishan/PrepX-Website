@@ -32,6 +32,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
     await page.evaluate(() => sessionStorage.setItem('prepx_result', 'legacy-result'));
     await page.reload();
     await page.getByRole('heading', { name: 'Search for your result' }).waitFor();
+    await page.waitForFunction(() => sessionStorage.getItem('prepx_result') === null);
     assert.equal(await page.evaluate(() => sessionStorage.getItem('prepx_result')), null);
     delay = true;
     await search();
@@ -53,15 +54,13 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
     assert.equal(await page.locator('tbody tr').count(), 8);
     assert.equal(await page.getByRole('columnheader').count(), 3);
     assert.equal(await page.getByRole('rowheader').count(), 8);
-    for (const dark of [false, true]) {
-      await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), dark);
-      for (const width of [320, 375, 768, 1280]) {
-        await page.setViewportSize({ width, height: 900 });
-        assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `No overflow at ${width}`);
-        assert(await page.getByRole('button', { name: 'Print / Save as PDF' }).isVisible());
-        if (process.env.PREPX_SCREENSHOT_DIR && [375, 1280].includes(width)) {
-          await page.screenshot({ path: require('node:path').join(process.env.PREPX_SCREENSHOT_DIR, `prepx-result-${dark ? 'dark' : 'light'}-${width}.png`), fullPage: true });
-        }
+    assert.equal(await page.locator('html.dark').count(), 1, 'Public result stays dark');
+    for (const width of [320, 375, 768, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `No overflow at ${width}`);
+      assert(await page.getByRole('button', { name: 'Print / Save as PDF' }).isVisible());
+      if (process.env.PREPX_SCREENSHOT_DIR && [375, 1280].includes(width)) {
+        await page.screenshot({ path: require('node:path').join(process.env.PREPX_SCREENSHOT_DIR, `prepx-result-dark-${width}.png`), fullPage: true });
       }
     }
     await page.getByRole('button', { name: 'Print / Save as PDF' }).focus();

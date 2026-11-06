@@ -8,11 +8,12 @@ import './globals.css';
 
 const themeScript = `
   try {
-    var savedTheme = localStorage.getItem('prepx-theme');
+    var savedTheme = null;
+    try { savedTheme = localStorage.getItem('prepx-theme'); } catch (_) {}
     var pathname = window.location.pathname;
     var isAdminPage = /^\\/admin(?:\\/|$)/.test(pathname);
     var isLoginPage = /^\\/admin\\/login\\/?$/.test(pathname);
-    var useDark = !isLoginPage && (savedTheme === 'dark' || (!savedTheme && !isAdminPage && window.matchMedia('(prefers-color-scheme: dark)').matches));
+    var useDark = !isAdminPage || (!isLoginPage && savedTheme === 'dark');
     document.documentElement.classList.toggle('dark', useDark);
     document.documentElement.style.colorScheme = useDark ? 'dark' : 'light';
   } catch (_) {}
