@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
+import { PublicDarkTheme } from '@/components/public/public-dark-theme';
 import { ResultProvider } from '@/components/public/result-provider';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { PUBLIC_ORGANIZATION_NAME, PUBLIC_SUPPORT_EMAIL } from '@/lib/public-support';
 
 export const metadata: Metadata = {
@@ -19,7 +19,8 @@ export default function PublicLayout({
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="public-portal-background theme-content flex min-h-dvh flex-col text-slate-900 transition-colors dark:text-slate-100">
+    <div className="dark public-portal-background theme-content flex min-h-dvh flex-col text-slate-900 transition-colors dark:text-slate-100">
+      <PublicDarkTheme />
       <div aria-hidden="true" className="h-1 shrink-0 bg-blue-600" />
 
       <header className="public-portal-surface relative z-10 border-b border-white/80 bg-white/75 backdrop-blur-xl dark:border-white/[0.07] dark:bg-[#050a14]/80">
@@ -50,8 +51,6 @@ export default function PublicLayout({
               </p>
             </div>
           </div>
-
-          <ThemeToggle className="ml-4" />
         </div>
       </header>
 

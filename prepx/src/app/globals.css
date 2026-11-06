@@ -299,17 +299,20 @@
     pointer-events: none;
   }
 
-  .dark .public-portal-background {
+  .dark .public-portal-background,
+  .public-portal-background.dark {
     background-color: #050a14;
   }
 
-  .dark .public-portal-background::before {
+  .dark .public-portal-background::before,
+  .public-portal-background.dark::before {
     background-image:
       linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
       linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
   }
 
-  .dark .public-portal-background::after {
+  .dark .public-portal-background::after,
+  .public-portal-background.dark::after {
     background:
       radial-gradient(circle at 4% 5%, rgb(37 99 235 / 0.2), transparent 34rem),
       radial-gradient(

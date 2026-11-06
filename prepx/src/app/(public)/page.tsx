@@ -47,9 +47,9 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
             className="mt-4 max-w-[680px] text-[38px] font-bold leading-[1.08] tracking-[-0.04em] text-slate-950 dark:text-white sm:text-[50px] lg:text-[56px]"
           >
             <span className="block">{publishedExam?.name ?? 'Examination Results Portal'}</span>
-            {publishedExam && (
+            {publishedExam && !/\bresults?\b/i.test(publishedExam.name) && (
               <span className="block bg-linear-to-r from-blue-700 to-slate-600 bg-clip-text text-transparent dark:from-white dark:to-slate-400">
-                {publishedExam.year} Results
+                Results
               </span>
             )}
           </h1>
@@ -154,7 +154,7 @@ export default async function PublicHomePage(): Promise<React.JSX.Element> {
               ) : publishedExam ? (
                 <SearchForm
                   examinationId={publishedExam.id}
-                  examName={`${publishedExam.name} ${publishedExam.year}`}
+                  examName={publishedExam.name}
                 />
               ) : (
                 <StatusMessage
